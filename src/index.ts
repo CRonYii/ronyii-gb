@@ -2,6 +2,7 @@ import { Memory } from "./memory/Memory";
 import { MEMORY_SIZE, SCREEN_RESOLUTION } from "./constants/index";
 import MemorySegmentDefinitions from "./memory/MemorySegmentDefinitions";
 import loadROM from "./memory/ROM";
+import CPU from "./cpu/CPU";
 
 function initDisplay() {
     const WINDOW_SCALE = 2;
@@ -62,6 +63,7 @@ function debug() {
         size: MEMORY_SIZE,
         controllers: MemorySegmentDefinitions
     });
+    const cpu = new CPU();
 }
 
 initDisplay();

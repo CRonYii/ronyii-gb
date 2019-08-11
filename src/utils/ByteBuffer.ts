@@ -1,8 +1,10 @@
+import { Register } from "../cpu/Register";
+
 export type BinaryDigit = 0 | 1;
 
 export type ByteBuffer = Uint8Array;
 
-export type ByteBufferable = ByteBuffer | string | number;
+export type ByteBufferable = ByteBuffer | Register | string | number;
 
 const SupportedBase = {
     2: '0b',
