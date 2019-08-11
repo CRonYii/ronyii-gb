@@ -103,6 +103,9 @@ export default class CPU {
                         this.updateClock(def.clock_cycles[0]);
                     }
 
+                    // increment PC
+                    this.updatePC(def.opcode_length);
+
                     // Update the Flag Register
                     const setFlag = (flag: 'zero' | 'subtract' | 'halfCarry' | 'carry', affection: FlagAffection, value?: boolean): void => {
                         if (affection === false) {
@@ -166,7 +169,12 @@ export default class CPU {
     }
 
     private updateClock(cycles: number) {
+        // TODO
+    }
 
+    private updatePC(length: number) {
+        const result = byteBuffer.value(this.PC.data()) + length;
+        this.PC.set(result);
     }
 
     private static toOperator(reg: Register): Operator<number> {
