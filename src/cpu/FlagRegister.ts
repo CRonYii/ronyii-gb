@@ -62,7 +62,7 @@ export default class FlagRegister {
     }
 
     public toString() {
-        return `zero: ${this.zero}, operation: ${this.subtract}, half-carry: ${this.halfCarry}, carry: ${this.carry}`;
+        return `zero: ${this.zero}, subtract: ${this.subtract}, half-carry: ${this.halfCarry}, carry: ${this.carry}`;
     }
 
 }
