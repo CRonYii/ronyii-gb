@@ -9,6 +9,7 @@ export interface MemoryController {
     start: number,
     end: number,
     set: (mem: Memory, address: number, byte: number) => void,
+    defaultValues?: Uint8Array
 }
 
 export class Memory {
@@ -51,8 +52,16 @@ export class Memory {
     }
 
     private addController(controller: MemoryController) {
-        if (!this.accepts(controller.start) || !this.accepts(controller.end)) {
-            throw new Error(`Unacceptable memory controller range ${controller.start} ~ ${controller.end}`);
+        const { start, end, defaultValues } = controller;
+        if (!this.accepts(start) || !this.accepts(end)) {
+            throw new Error(`Unacceptable memory controller range ${start} ~ ${end}`);
+        }
+        if (defaultValues) {
+            const size = end - start + 1;
+            if (defaultValues.length !== size) {
+                throw new Error(`Incompatiable default value size, expect ${size} but got ${defaultValues.length}`);
+            }
+            this._data.set(defaultValues, start);
         }
         this.memoryControllers.push(controller);
     }
