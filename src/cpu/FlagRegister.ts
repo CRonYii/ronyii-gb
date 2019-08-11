@@ -1,4 +1,4 @@
-import { CARRY_FLAG, HALF_CARRY_FLFG, OPERATION_FLAG, ZERO_FLAG } from "../constants/index";
+import { CARRY_FLAG, HALF_CARRY_FLFG, OPERATION_FLAG as SUBTRACT_FLAG, ZERO_FLAG } from "../constants/index";
 import { InnerRegister8 } from "./CombinedRegister";
 
 export default class FlagRegister {
@@ -28,15 +28,15 @@ export default class FlagRegister {
         return (this.byte() & ZERO_FLAG) !== 0;
     }
 
-    set operation(flag: boolean) {
+    set subtract(flag: boolean) {
         const byte = flag
-            ? OPERATION_FLAG | this.byte()
-            : ~OPERATION_FLAG & this.byte();
+            ? SUBTRACT_FLAG | this.byte()
+            : ~SUBTRACT_FLAG & this.byte();
         this.set(byte);
     }
 
-    get operation(): boolean {
-        return (this.byte() & OPERATION_FLAG) !== 0;
+    get subtract(): boolean {
+        return (this.byte() & SUBTRACT_FLAG) !== 0;
     }
 
     set halfCarry(flag: boolean) {
@@ -62,7 +62,7 @@ export default class FlagRegister {
     }
 
     public toString() {
-        return `zero: ${this.zero}, operation: ${this.operation}, half-carry: ${this.halfCarry}, carry: ${this.carry}`;
+        return `zero: ${this.zero}, operation: ${this.subtract}, half-carry: ${this.halfCarry}, carry: ${this.carry}`;
     }
 
 }
