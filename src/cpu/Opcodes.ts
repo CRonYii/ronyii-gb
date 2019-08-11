@@ -1,6 +1,6 @@
-interface Opcode {
+export interface Opcode {
     label: string,
-    operation: string,
+    operation: Operation,
     operands?: string[],
     opcode_length: number,
     clock_cycles: number[],
@@ -10,7 +10,16 @@ interface Opcode {
     setCarry: FlagAffection,
 }
 
-type FlagAffection = boolean | 1 | 0;
+// 45 operations
+export type Operation =
+    "NOP" | "LD" | "INC" | "DEC" | "RLCA" | "ADD" | "RRCA" | "STOP" |
+    "RLA" | "JR" | "RRA" | "DAA" | "CPL" | "SCF" | "CCF" | "HALT" |
+    "ADC" | "SUB" | "SBC" | "AND" | "XOR" | "OR" | "CP" | "RET" |
+    "POP" | "JP" | "CALL" | "PUSH" | "RST" | "PREFIX" | "RETI" | "LDH" |
+    "DI" | "EI" | "RLC" | "RRC" | "RL" | "RR" | "SLA" | "SRA" |
+    "SWAP" | "SRL" | "BIT" | "RES" | "SET";
+
+export type FlagAffection = boolean | 1 | 0;
 
 export const OPCODES: Array<Opcode | null> = [
     {

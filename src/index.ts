@@ -1,8 +1,8 @@
-import { Memory } from "./memory/Memory";
-import { MEMORY_SIZE, SCREEN_RESOLUTION } from "./constants/index";
-import MemorySegmentDefinitions from "./memory/MemorySegmentDefinitions";
-import loadROM from "./memory/ROM";
+import { SCREEN_RESOLUTION } from "./constants/index";
 import CPU from "./cpu/CPU";
+import MMU from "./memory/MMU";
+import loadROM from "./memory/ROM";
+import { OPCODES, CB_OPCODES } from "./cpu/Opcodes";
 
 function initDisplay() {
     const WINDOW_SCALE = 2;
@@ -59,11 +59,14 @@ function initROMLoader() {
 }
 
 function debug() {
-    const mem = new Memory({
-        size: MEMORY_SIZE,
-        controllers: MemorySegmentDefinitions
+    const mmu = new MMU();
+    mmu.setWord(0x0100, 0x81);
+    const cpu = new CPU({
+        mmu,
+        instructionSetDefinition: OPCODES,
+        cbInstructionSetDefinition: CB_OPCODES
     });
-    const cpu = new CPU();
+    cpu.run();
 }
 
 initDisplay();

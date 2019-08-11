@@ -1,4 +1,4 @@
-import { ByteBuffer, byteBuffer } from "../utils/ByteBuffer";
+import { ByteBuffer, byteBuffer, ByteBufferable } from "../utils/ByteBuffer";
 
 export interface MemoryOptions {
     size: number,
@@ -31,7 +31,7 @@ export class Memory {
         }
     }
 
-    public set(address: number, data: number) {
+    public setByte(address: number, data: number) {
         const controller = this.getController(address);
         if (controller) {
             controller.set(this, address, data);
@@ -39,8 +39,19 @@ export class Memory {
         this._data[address] = data;
     }
 
-    public get(address: number) {
+    public getByte(address: number): number {
         return this._data[address];
+    }
+
+    public set(address: number, numBytes: number, data: ByteBufferable) {
+        const values = byteBuffer.from(data, numBytes);
+        for (let i = 0; i < numBytes; i++) {
+            this.setByte(address + i, values[i]);
+        }
+    }
+
+    public get(address: number, numBytes: number) {
+        return this._data.slice(address, address + numBytes);
     }
 
     private getController(address: number): MemoryController | undefined {
