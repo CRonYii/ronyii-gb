@@ -1,10 +1,20 @@
-import Register8 from "./Register8";
-import { ZERO_FLAG, OPERATION_FLAG, HALF_CARRY_FLFG, CARRY_FLAG } from "../constants/index";
+import { CARRY_FLAG, HALF_CARRY_FLFG, OPERATION_FLAG, ZERO_FLAG } from "../constants/index";
+import { InnerRegister8 } from "./CombinedRegister";
 
-export default class FlagRegister extends Register8 {
+export default class FlagRegister {
 
-    constructor() {
-        super();
+    private readonly reg: InnerRegister8;
+
+    constructor(reg: InnerRegister8) {
+        this.reg = reg;
+    }
+
+    byte(): number {
+        return this.reg.data()[0];
+    }
+
+    set(byte: number) {
+        this.reg.set(byte);
     }
 
     set zero(flag: boolean) {

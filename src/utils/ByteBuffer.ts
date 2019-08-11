@@ -113,7 +113,9 @@ export const byteBuffer = {
             return fromBase10(data, size);
         } else if (data instanceof Uint8Array) {
             return data;
-        }
+        } else if (data instanceof Register) {
+            return data.data();
+        } 
         return new Uint8Array(size);
     },
     value: function (buffer: ByteBuffer): number {
