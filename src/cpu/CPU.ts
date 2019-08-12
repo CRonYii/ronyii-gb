@@ -86,14 +86,11 @@ export default class CPU {
         console.log(this.toString());
     }
 
-    run() {
+    exec() {
         // fetch-decode-excute
-        {
-            const code = this.fetchCode(); // fetch
-            const op = this.decodeToOp(code); // decode
-            op(); // execute
-            console.log(this.toString());
-        }
+        const code = this.fetchCode(); // fetch
+        const op = this.decodeToOp(code); // decode
+        op(); // execute
     }
 
     private fetchCode(): number {

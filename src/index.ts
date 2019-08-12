@@ -70,7 +70,8 @@ function debug() {
         instructionSetDefinition: OPCODES,
         cbInstructionSetDefinition: CB_OPCODES
     });
-    cpu.run();
+    cpu.exec();
+    console.log(cpu.toString());
 }
 
 initDisplay();
