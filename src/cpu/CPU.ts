@@ -32,6 +32,12 @@ function isRegisterType(arg: string): arg is RegisterType {
     return registerTypes.includes(arg);
 }
 
+type FlagMode = 'Z' | 'NZ' | 'C' | 'NC';
+
+function isFlagMode(arg: string): arg is FlagMode {
+    return arg === 'Z' || arg === 'NZ' || arg === 'C' || arg === 'NC';
+}
+
 function parseByteIndex(operand: string): number {
     const val = Number(operand);
     if (val >= 0 && val <= 7) {
@@ -115,11 +121,11 @@ export default class CPU {
     }
 
     private readImmediateByte(): number {
-        return this.mmu.getByte(this.read('PC') + 1);
+        return this.mmu.getByte(this.read('PC') - 1);
     }
 
     private readImmediateWord(): number {
-        return this.mmu.getWord(this.read('PC') + 1);
+        return this.mmu.getWord(this.read('PC') - 2);
     }
 
     private updateClock(cycles: number) {
@@ -163,6 +169,8 @@ export default class CPU {
             if (builder) {
                 const executor = builder(def);
                 return () => {
+                    this.updatePC(def.opcode_length);
+
                     const { cycles, zero, subtract, halfCarry, carry } = executor();
 
                     // Update the CPU clock
@@ -173,7 +181,6 @@ export default class CPU {
                     }
 
                     // increment PC
-                    this.updatePC(def.opcode_length);
 
                     // Update the Flag Register
                     const setFlag = (flag: 'zero' | 'subtract' | 'halfCarry' | 'carry', affection: FlagAffection, value?: boolean): void => {
@@ -644,6 +651,54 @@ export default class CPU {
         };
     }
 
+    private buildJPInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JP] Insturction:\n' + JSON.stringify(def, null, 4));
+
+        let shouldExec = () => true;
+        let target: Operator<number>;
+        if (def.operands.length === 1) {
+            target = this.parseOperator(def.operands[0]);
+        } else if (def.operands.length === 2) {
+            const mode = def.operands[0];
+            shouldExec = () => this.parseFlagMode(mode);
+            target = this.parseOperator(def.operands[1]);
+        } else {
+            throw new Error('Expected 1 ~ 2 operands');
+        }
+
+        return () => {
+            if (!shouldExec()) {
+                return { cycles: def.clock_cycles[1] };
+            }
+            this.PC.set(target.get());
+            return { cycles: def.clock_cycles[0] };
+        };
+    }
+
+    private buildJRInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JP] Insturction:\n' + JSON.stringify(def, null, 4));
+
+        let shouldExec = () => true;
+        let target: Operator<number>;
+        if (def.operands.length === 1) {
+            target = this.parseOperator(def.operands[0]);
+        } else if (def.operands.length === 2) {
+            const mode = def.operands[0];
+            shouldExec = () => this.parseFlagMode(mode);
+            target = this.parseOperator(def.operands[1]);
+        } else {
+            throw new Error('Expected 1 ~ 2 operands');
+        }
+
+        return () => {
+            if (!shouldExec()) {
+                return { cycles: def.clock_cycles[1] };
+            }
+            this.PC.set(this.read('PC') + target.get());
+            return { cycles: def.clock_cycles[0] };
+        };
+    }
+
     private readonly instructionBuilderMap: InstructionBuilderMap = {
         'NOP': this.buildNOPInstruction,
         'LD': this.buildLDInstruction,
@@ -683,7 +738,21 @@ export default class CPU {
         'BIT': this.buildBITInstruction,
         'SET': this.buildSETInstruction,
         'RES': this.buildRESInstruction,
+        'JP': this.buildJPInstruction,
+        'JR': this.buildJRInstruction,
     };
+
+    parseFlagMode(flagMode: string): boolean {
+        if (!isFlagMode(flagMode)) {
+            throw new Error(`Invalid flag mode value [${flagMode}]`);
+        }
+        switch (flagMode) {
+            case 'NZ': return !this.F.zero;
+            case 'Z': return this.F.zero;
+            case 'NC': return !this.F.carry;
+            case 'C': return this.F.carry;
+        }
+    }
 
     // returns a getter setter operation object of that operand
     private parseOperator(operand: string): Operator<number> {
@@ -770,9 +839,9 @@ export default class CPU {
                 };
             case 'a16':
                 return {
-                    size: 1,
-                    set: (byte: number) => { this.mmu.setByte(this.readImmediateByte(), byte) },
-                    get: () => { return this.readImmediateByte(); }
+                    size: 2,
+                    set: (byte: number) => { this.mmu.setWord(this.readImmediateWord(), byte) },
+                    get: () => { return this.readImmediateWord(); }
                 };
         }
     }
