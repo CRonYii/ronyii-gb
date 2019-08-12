@@ -183,6 +183,35 @@ export default class CPU {
         };
     }
 
+    private buildPUSHInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
+            const [source] = def.operands.map((operand) => this.parse(operand));
+
+            // decrement SP twice for 2 bytes of data
+            this.decrement('SP');
+            this.decrement('SP');
+            this.mmu.setWord(this.read('SP'), source.get());
+
+            return {}
+        };
+    }
+
+    private buildPOPInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
+            const [target] = def.operands.map((operand) => this.parse(operand));
+
+            const data = this.mmu.getWord(this.read('SP'));
+            target.set(data);
+            // increment SP twice for 2 bytes of data
+            this.increment('SP');
+            this.increment('SP');
+
+            return {}
+        };
+    }
+
     private buildADDInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
@@ -213,6 +242,16 @@ export default class CPU {
         }
         throw new Error('Unsupported Addition building config');
     }
+
+    private readonly instructionBuilderMap: InstructionBuilderMap = {
+        'NOP': this.buildNOPInstruction,
+        'LD': this.buildLDInstruction,
+        'LDH': this.buildLDInstruction,
+        'LDHL': this.buildLDHLInstruction,
+        'ADD': this.buildADDInstruction,
+        'PUSH': this.buildPUSHInstruction,
+        'POP': this.buildPOPInstruction,
+    };
 
     // returns a getter setter operation object of that operand
     private parse(operand: string): Operator<number> {
@@ -352,13 +391,5 @@ export default class CPU {
     toString() {
         return `AF: ${Helper.toHexText(this.AF, 4)}, BC: ${Helper.toHexText(this.BC, 4)}, DE: ${Helper.toHexText(this.DE, 4)}, HL: ${Helper.toHexText(this.HL, 4)}, SP: ${Helper.toHexText(this.SP, 4)}, PC: ${Helper.toHexText(this.PC, 4)}\n${this.F.toString()} `;
     }
-
-    private readonly instructionBuilderMap: InstructionBuilderMap = {
-        'NOP': this.buildNOPInstruction,
-        'LD': this.buildLDInstruction,
-        'LDH': this.buildLDInstruction,
-        'LDHL': this.buildLDHLInstruction,
-        'ADD': this.buildADDInstruction,
-    };
 
 }
