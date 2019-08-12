@@ -1,12 +1,13 @@
+import { TICK_PER_FRAME as TICKS_PER_FRAME } from "../constants/index";
+import { debugEnabled } from "../index";
 import MMU from "../memory/MMU";
 import { byteBuffer } from "../utils/ByteBuffer";
 import Helper from "../utils/Helper";
+import ALU, { ALUResult } from "./ALU";
 import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { FlagAffection, Opcode } from "./Opcodes";
 import { Register16 } from "./Register16";
-import ALU, { ALUResult } from "./ALU";
-import { debugEnabled } from "../index";
 
 type InstructionSet = ((() => void) | null)[];
 
@@ -102,6 +103,8 @@ export default class CPU {
     private readonly SP = new Register16();
     private readonly PC = new Register16();
 
+    private clock: number = 0;
+
     constructor(configs: {
         mmu: MMU,
         instructionSetDefinition: Array<Opcode | null>,
@@ -113,7 +116,14 @@ export default class CPU {
         console.log(this.toString());
     }
 
-    exec() {
+    public tick() {
+        while (this.clock < TICKS_PER_FRAME) {
+            this.exec();
+        }
+        this.clock = 0;
+    }
+
+    private exec() {
         // fetch-decode-excute
         const code = this.fetchCode(); // fetch
         const op = this.decodeToOp(code); // decode
@@ -149,7 +159,7 @@ export default class CPU {
     }
 
     private updateClock(cycles: number) {
-        // TODO
+        this.clock += cycles;
     }
 
     private updatePC(length: number) {
