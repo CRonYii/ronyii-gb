@@ -1,9 +1,8 @@
-import MMU from "./memory/MMU";
-import CPU from "./cpu/CPU";
-import { OPCODES, CB_OPCODES } from "./cpu/Opcodes";
-import { debugEnabled } from "./index";
-import getROMmeta from "./memory/ROM";
 import { LOGIC_FRAME_PER_SECOND } from "./constants/index";
+import CPU from "./cpu/CPU";
+import { CB_OPCODES, OPCODES } from "./cpu/Opcodes";
+import MMU from "./memory/MMU";
+import getROMmeta from "./memory/ROM";
 
 export default class Emulator {
 
@@ -14,18 +13,29 @@ export default class Emulator {
         cbInstructionSetDefinition: CB_OPCODES
     });
 
+    private intervalID: number = 0;
+
     start(rom: Uint8Array) {
         // TODO: load the rom
         const meta = getROMmeta(rom);
         console.log(meta);
 
-        setInterval(() => {
+        this.intervalID = window.setInterval(() => {
             this.frame();
         }, 1000 / LOGIC_FRAME_PER_SECOND);
     }
 
+    pause() {
+        window.clearInterval(this.intervalID);
+    }
+
     frame() {
-        this.cpu.tick();
+        try {
+            this.cpu.tick();
+        } catch(err) {
+            console.error(err);
+            this.pause();
+        }
     }
 
     getCPUInfo() {
