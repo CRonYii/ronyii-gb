@@ -1,11 +1,14 @@
 import Emulator from "./Emulator";
 import { initPage } from "./Page";
+import { SCREEN_RESOLUTION } from "./constants/index";
 
 export const debugEnabled = {
     printMemory: false,
     breakpoints: true
 };
 
-initPage();
+const { display } = initPage();
 
-export const emulator = new Emulator();
+export const emulator = new Emulator({
+    display
+});

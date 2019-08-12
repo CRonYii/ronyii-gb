@@ -2,27 +2,21 @@ import { SCREEN_RESOLUTION } from "./constants/index";
 import { emulator } from "./index";
 import Helper from "./utils/Helper";
 import { OPCODES } from "./cpu/Opcodes";
+import { Display, CanvasDisplay } from "./gpu/Display";
 
-function initDisplay() {
-    const WINDOW_SCALE = 2;
-
-    const GAMEBOY_WIDTH = SCREEN_RESOLUTION.WIDTH * WINDOW_SCALE;
-    const GAMEBOY_HEIGHT = SCREEN_RESOLUTION.HEIGHT * WINDOW_SCALE;
-
+function initDisplay(): Display {
     const canvas: HTMLCanvasElement | null = document.querySelector('#canvas');
+
     if (!canvas) {
         throw new Error('Canvas not found');
     }
 
-    canvas.width = GAMEBOY_WIDTH;
-    canvas.height = GAMEBOY_HEIGHT;
-
-    const ctx: CanvasRenderingContext2D | null = canvas.getContext('2d');
-
-    if (ctx) {
-        ctx.fillStyle = 'black';
-        ctx.fillRect(0, 0, GAMEBOY_WIDTH, GAMEBOY_HEIGHT);
-    }
+    return new CanvasDisplay({
+        canvas,
+        width: SCREEN_RESOLUTION.WIDTH,
+        height: SCREEN_RESOLUTION.HEIGHT,
+        scale: 2
+    });
 }
 
 function loadROMFile(file: File): Promise<Uint8Array> {
@@ -113,8 +107,12 @@ function initCPUInfoDisplayer() {
     cpuInfoDiv.appendChild(updateButton);
 }
 
-export const initPage = () => {
-    initDisplay();
+export const initPage = (): {
+    display: Display
+} => {
+    const display = initDisplay();
     initROMLoader();
     initCPUInfoDisplayer();
+
+    return { display };
 };

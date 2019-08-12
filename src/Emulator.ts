@@ -1,26 +1,41 @@
 import { LOGIC_FRAME_PER_SECOND } from "./constants/index";
 import CPU from "./cpu/CPU";
+import { Display } from "./gpu/Display";
+import GPU from "./gpu/GPU";
 import MMU from "./memory/MMU";
 import getROMmeta from "./memory/ROM";
 import Helper from "./utils/Helper";
 
+export interface EmulatorConfig {
+    display: Display
+}
+
 export default class Emulator {
 
     private readonly mmu: MMU = new MMU();
-    private readonly cpu: CPU = new CPU({
-        mmu: this.mmu,
-        debuggerConfig: {
-            breakpoints: [
-                { type: 'PC', value: 0x0100 }
-            ],
-            debugger: (cpu, type, value) => {
-                this.pause();
-                console.warn(`Paused at breakpoint [${type}] => ${Helper.toHexText(value, 4)}`);
-            }
-        }
-    });
+    private readonly cpu: CPU;
+    private readonly gpu: GPU;
 
     private intervalID: number = 0;
+
+    constructor(configs: EmulatorConfig) {
+        this.cpu = new CPU({
+            mmu: this.mmu,
+            debuggerConfig: {
+                breakpoints: [
+                    { type: 'PC', value: 0x0100 }
+                ],
+                debugger: (cpu, type, value) => {
+                    this.pause();
+                    console.warn(`Paused at breakpoint [${type}] => ${Helper.toHexText(value, 4)}`);
+                }
+            }
+        })
+        this.gpu = new GPU({
+            display: configs.display,
+            mmu: this.mmu
+        });
+    }
 
     start(rom: Uint8Array) {
         // TODO: load the rom
