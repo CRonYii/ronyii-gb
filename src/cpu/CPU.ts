@@ -208,7 +208,7 @@ export default class CPU {
             this.increment('SP');
             this.increment('SP');
 
-            return {}
+            return { zero: this.F.zero, subtract: this.F.subtract, halfCarry: this.F.halfCarry, carry: this.F.carry }
         };
     }
 
