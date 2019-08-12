@@ -3,6 +3,9 @@ import { ByteBufferable, byteBuffer } from "./ByteBuffer";
 const decoder = new TextDecoder();
 
 export default {
+    toSigned8(num: number) {
+        return new Int8Array([num])[0];
+    },
     toText(buffer: ArrayBuffer, start: number, end: number) {
         return decoder.decode(buffer.slice(start, end));
     },

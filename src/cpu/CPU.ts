@@ -8,7 +8,7 @@ import { Opcode, FlagAffection } from "./Opcodes";
 import { Register } from "./Register";
 
 type InstructionSet = ((() => void) | null)[];
-type DataType = 'd8' | 'd16';
+type DataType = 'd8' | 'd16' | 'r8';
 
 interface ExecutionResult {
     cycles?: number;
@@ -139,7 +139,7 @@ export default class CPU {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
 
-        if (target.size === 1) {
+        if (source.size === 1) {
             return () => {
                 const a = target.get();
                 const b = source.get();
@@ -151,7 +151,7 @@ export default class CPU {
                     halfCarry: ((target.get() ^ b ^ a) & 0x10) !== 0
                 };
             };
-        } else if (target.size === 2) {
+        } else if (source.size === 2) {
             return () => {
                 const a = target.get();
                 const b = source.get();
@@ -182,7 +182,7 @@ export default class CPU {
         if (operand === 'SP') return CPU.toRegisterOperator(this.SP);
         if (operand === 'PC') return CPU.toRegisterOperator(this.PC);
 
-        if (operand === 'd8' || operand === 'd16') return this.toMemoryOperator(operand);
+        if (operand === 'd8' || operand === 'd16' || operand === 'r8') return this.toMemoryOperator(operand);
 
         return CPU.toRegisterOperator(this.A); // FIXME
         // throw new Error(`Unsupported operand [${operand}]`);
@@ -218,6 +218,12 @@ export default class CPU {
                     size: 2,
                     set: (byte: number) => { throw new Error('Unsupported operation'); },
                     get: () => { return this.readImmediateWord(); }
+                };
+            case 'r8':
+                return {
+                    size: 1,
+                    set: (byte: number) => { throw new Error('Unsupported operation'); },
+                    get: () => { return Helper.toSigned8(this.readImmediateByte()); }
                 };
         }
     }
