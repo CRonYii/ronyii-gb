@@ -654,49 +654,55 @@ export default class CPU {
     private buildJPInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JP] Insturction:\n' + JSON.stringify(def, null, 4));
 
-        let shouldExec = () => true;
-        let target: Operator<number>;
         if (def.operands.length === 1) {
-            target = this.parseOperator(def.operands[0]);
+            const target = this.parseOperator(def.operands[0]);
+            return () => {
+                this.PC.set(target.get());
+                return {};
+            };
         } else if (def.operands.length === 2) {
             const mode = def.operands[0];
-            shouldExec = () => this.parseFlagMode(mode);
-            target = this.parseOperator(def.operands[1]);
+            const target = this.parseOperator(def.operands[1]);
+
+            const shouldExec = () => this.parseFlagMode(mode);
+
+            return () => {
+                if (!shouldExec()) {
+                    return { cycles: def.clock_cycles[1] };
+                }
+                this.PC.set(target.get());
+                return { cycles: def.clock_cycles[0] };
+            };
         } else {
             throw new Error('Expected 1 ~ 2 operands');
         }
-
-        return () => {
-            if (!shouldExec()) {
-                return { cycles: def.clock_cycles[1] };
-            }
-            this.PC.set(target.get());
-            return { cycles: def.clock_cycles[0] };
-        };
     }
 
     private buildJRInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JP] Insturction:\n' + JSON.stringify(def, null, 4));
 
-        let shouldExec = () => true;
-        let target: Operator<number>;
         if (def.operands.length === 1) {
-            target = this.parseOperator(def.operands[0]);
+            const target = this.parseOperator(def.operands[0]);
+            return () => {
+                this.PC.set(this.read('PC') + target.get());
+                return {};
+            };
         } else if (def.operands.length === 2) {
             const mode = def.operands[0];
-            shouldExec = () => this.parseFlagMode(mode);
-            target = this.parseOperator(def.operands[1]);
+            const target = this.parseOperator(def.operands[1]);
+
+            const shouldExec = () => this.parseFlagMode(mode);
+
+            return () => {
+                if (!shouldExec()) {
+                    return { cycles: def.clock_cycles[1] };
+                }
+                this.PC.set(this.read('PC') + target.get());
+                return { cycles: def.clock_cycles[0] };
+            };
         } else {
             throw new Error('Expected 1 ~ 2 operands');
         }
-
-        return () => {
-            if (!shouldExec()) {
-                return { cycles: def.clock_cycles[1] };
-            }
-            this.PC.set(this.read('PC') + target.get());
-            return { cycles: def.clock_cycles[0] };
-        };
     }
 
     private readonly instructionBuilderMap: InstructionBuilderMap = {
