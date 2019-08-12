@@ -5,6 +5,7 @@ import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { FlagAffection, Opcode } from "./Opcodes";
 import { Register16 } from "./Register16";
+import ALU, { AdditionResult } from "./ALU";
 
 type InstructionSet = ((() => void) | null)[];
 
@@ -216,31 +217,22 @@ export default class CPU {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
 
+        let addition: (a: number, b: number) => AdditionResult;
+
         if (source.size === 1) {
-            return () => {
-                const a = target.get();
-                const b = source.get();
-                const sum = a + b;
-                target.set(sum);
-                return {
-                    zero: (sum & 0xff) === 0,
-                    carry: sum > 0xff,
-                    halfCarry: ((target.get() ^ b ^ a) & 0x10) !== 0
-                };
-            };
+            addition = ALU.add8;
         } else if (source.size === 2) {
-            return () => {
-                const a = target.get();
-                const b = source.get();
-                const sum = a + b;
-                target.set(sum);
-                return {
-                    carry: sum > 0xffff,
-                    halfCarry: ((target.get() ^ b ^ a) & 0x100) !== 0
-                };
-            };
+            addition = ALU.add16;
+        } else {
+            throw new Error('Unsupported Addition building config');
         }
-        throw new Error('Unsupported Addition building config');
+        
+        return () => {
+            const result = addition(target.get(), source.get());
+            target.set(result.sum);
+
+            return result;
+        };
     }
 
     private readonly instructionBuilderMap: InstructionBuilderMap = {
