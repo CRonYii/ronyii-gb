@@ -5,7 +5,7 @@ import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { FlagAffection, Opcode } from "./Opcodes";
 import { Register16 } from "./Register16";
-import ALU, { AdditionResult } from "./ALU";
+import ALU, { ALUResult } from "./ALU";
 
 type InstructionSet = ((() => void) | null)[];
 
@@ -217,7 +217,7 @@ export default class CPU {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
 
-        let addition: (a: number, b: number) => AdditionResult;
+        let addition: (a: number, b: number) => ALUResult;
 
         if (source.size === 1) {
             addition = ALU.add8;
@@ -226,10 +226,76 @@ export default class CPU {
         } else {
             throw new Error('Unsupported Addition building config');
         }
-        
+
         return () => {
             const result = addition(target.get(), source.get());
-            target.set(result.sum);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildADCInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [ADC] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target, source] = def.operands.map((operand) => this.parse(operand));
+
+        let addition: (a: number, b: number, carry: boolean) => ALUResult;
+
+        if (source.size === 1) {
+            addition = ALU.add8;
+        } else if (source.size === 2) {
+            addition = ALU.add16;
+        } else {
+            throw new Error('Unsupported Addition building config');
+        }
+
+        return () => {
+            const result = addition(target.get(), source.get(), this.F.carry);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildSUBInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [SUB] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [source] = def.operands.map((operand) => this.parse(operand));
+
+        let subtraction: (a: number, b: number) => ALUResult;
+
+        if (source.size === 1) {
+            subtraction = ALU.sub8;
+        } else if (source.size === 2) {
+            subtraction = ALU.sub16;
+        } else {
+            throw new Error('Unsupported Addition building config');
+        }
+
+        return () => {
+            const result = subtraction(this.read('A'), source.get());
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildSBCInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [SBC] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target, source] = def.operands.map((operand) => this.parse(operand));
+
+        let addition: (a: number, b: number, carry: boolean) => ALUResult;
+
+        if (source.size === 1) {
+            addition = ALU.sub8;
+        } else if (source.size === 2) {
+            addition = ALU.sub16;
+        } else {
+            throw new Error('Unsupported Addition building config');
+        }
+
+        return () => {
+            const result = addition(target.get(), source.get(), this.F.carry);
+            target.set(result.result);
 
             return result;
         };
@@ -241,6 +307,9 @@ export default class CPU {
         'LDH': this.buildLDInstruction,
         'LDHL': this.buildLDHLInstruction,
         'ADD': this.buildADDInstruction,
+        'ADC': this.buildADCInstruction,
+        'SUB': this.buildSUBInstruction,
+        'SBC': this.buildSBCInstruction,
         'PUSH': this.buildPUSHInstruction,
         'POP': this.buildPOPInstruction,
     };
