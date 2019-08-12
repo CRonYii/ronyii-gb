@@ -60,7 +60,10 @@ function initROMLoader() {
 
 function debug() {
     const mmu = new MMU();
-    mmu.setWord(0x0100, 0x81);
+    const data: number[] = [0xc6, 0x00];
+    for (let i = 0; i < data.length; i++) {
+        mmu.setByte(0x0100 + i, data[i]);
+    }
     const cpu = new CPU({
         mmu,
         instructionSetDefinition: OPCODES,

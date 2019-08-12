@@ -8,6 +8,8 @@ import { Opcode, FlagAffection } from "./Opcodes";
 import { Register } from "./Register";
 
 type InstructionSet = ((() => void) | null)[];
+type DataType = 'd8' | 'd16';
+
 interface ExecutionResult {
     cycles?: number;
     zero?: boolean;
@@ -17,6 +19,7 @@ interface ExecutionResult {
 }
 
 interface Operator<T> {
+    size: number,
     set: (value: T) => void;
     get: () => T;
 }
@@ -73,7 +76,7 @@ export default class CPU {
     }
 
     private fetchCode(): number {
-        return byteBuffer.value(this.mmu.getWord(byteBuffer.value(this.PC.data())));
+        return this.mmu.getByte(byteBuffer.value(this.PC.data()));
     }
 
     private decodeToOp(code: number): () => void {
@@ -136,36 +139,61 @@ export default class CPU {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
 
-        return () => {
-            const a = target.get();
-            const b = source.get();
-            const sum = a + b;
-            target.set(sum);
-            return {
-                zero: sum === 0,
-                carry: sum > 0xff,
-                halfCarry: ((target.get() ^ b ^ a) & 0x10) !== 0
+        if (target.size === 1) {
+            return () => {
+                const a = target.get();
+                const b = source.get();
+                const sum = a + b;
+                target.set(sum);
+                return {
+                    zero: (sum & 0xff) === 0,
+                    carry: sum > 0xff,
+                    halfCarry: ((target.get() ^ b ^ a) & 0x10) !== 0
+                };
             };
-        };
+        } else if (target.size === 2) {
+            return () => {
+                const a = target.get();
+                const b = source.get();
+                const sum = a + b;
+                target.set(sum);
+                return {
+                    carry: sum > 0xffff,
+                    halfCarry: ((target.get() ^ b ^ a) & 0x100) !== 0
+                };
+            };
+        }
+        throw new Error('Unsupported Addition building config');
     }
 
     // returns a getter setter operation object of that operand
     private parse(operand: string): Operator<number> {
-        if (operand === 'AF') return CPU.toOperator(this.AF);
-        if (operand === 'BC') return CPU.toOperator(this.BC);
-        if (operand === 'DE') return CPU.toOperator(this.DE);
-        if (operand === 'HL') return CPU.toOperator(this.HL);
-        if (operand === 'A') return CPU.toOperator(this.A);
-        if (operand === 'B') return CPU.toOperator(this.B);
-        if (operand === 'C') return CPU.toOperator(this.C);
-        if (operand === 'D') return CPU.toOperator(this.D);
-        if (operand === 'E') return CPU.toOperator(this.E);
-        if (operand === 'H') return CPU.toOperator(this.H);
-        if (operand === 'L') return CPU.toOperator(this.L);
-        if (operand === 'SP') return CPU.toOperator(this.SP);
-        if (operand === 'PC') return CPU.toOperator(this.PC);
-        return CPU.toOperator(this.A); // FIXME
+        if (operand === 'AF') return CPU.toRegisterOperator(this.AF);
+        if (operand === 'BC') return CPU.toRegisterOperator(this.BC);
+        if (operand === 'DE') return CPU.toRegisterOperator(this.DE);
+        if (operand === 'HL') return CPU.toRegisterOperator(this.HL);
+        if (operand === 'A') return CPU.toRegisterOperator(this.A);
+        if (operand === 'B') return CPU.toRegisterOperator(this.B);
+        if (operand === 'C') return CPU.toRegisterOperator(this.C);
+        if (operand === 'D') return CPU.toRegisterOperator(this.D);
+        if (operand === 'E') return CPU.toRegisterOperator(this.E);
+        if (operand === 'H') return CPU.toRegisterOperator(this.H);
+        if (operand === 'L') return CPU.toRegisterOperator(this.L);
+        if (operand === 'SP') return CPU.toRegisterOperator(this.SP);
+        if (operand === 'PC') return CPU.toRegisterOperator(this.PC);
+
+        if (operand === 'd8' || operand === 'd16') return this.toMemoryOperator(operand);
+
+        return CPU.toRegisterOperator(this.A); // FIXME
         // throw new Error(`Unsupported operand [${operand}]`);
+    }
+
+    private readImmediateByte(): number {
+        return this.mmu.getByte(byteBuffer.value(this.PC.data()) + 1);
+    }
+
+    private readImmediateWord(): number {
+        return this.mmu.getWord(byteBuffer.value(this.PC.data()) + 1);
     }
 
     private updateClock(cycles: number) {
@@ -177,8 +205,37 @@ export default class CPU {
         this.PC.set(result);
     }
 
-    private static toOperator(reg: Register): Operator<number> {
+    private toMemoryOperator(type: DataType): Operator<number> {
+        switch (type) {
+            case 'd8':
+                return {
+                    size: 1,
+                    set: (byte: number) => { throw new Error('Unsupported operation'); },
+                    get: () => { return this.readImmediateByte(); }
+                };
+            case 'd16':
+                return {
+                    size: 2,
+                    set: (byte: number) => { throw new Error('Unsupported operation'); },
+                    get: () => { return this.readImmediateWord(); }
+                };
+        }
+        /*      var a = Z80._r.a;
+                var m = MMU.rb(Z80._r.pc);
+                Z80._r.a += m;
+                Z80._r.pc++;
+                Z80._r.f = (Z80._r.a > 255) ? 0x10 : 0;
+                Z80._r.a &= 255;
+                if (!Z80._r.a)
+                    Z80._r.f |= 0x80;
+                if ((Z80._r.a ^ a ^ m) & 0x10)
+                    Z80._r.f |= 0x20;
+                Z80._r.m = 2; */
+    }
+
+    private static toRegisterOperator(reg: Register): Operator<number> {
         return {
+            size: reg.size(),
             set(byte: number) {
                 reg.set(byte);
             },

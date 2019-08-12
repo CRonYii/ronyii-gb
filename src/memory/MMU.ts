@@ -1,5 +1,6 @@
 import { Memory } from "./Memory";
 import { MEMORY_SIZE } from "../constants/index";
+import { byteBuffer } from "../utils/ByteBuffer";
 
 // Memory Management Unit
 export default class MMU extends Memory {
@@ -14,8 +15,8 @@ export default class MMU extends Memory {
         this.set(address, MMU.WORD_NUM_BYTES, data);
     }
 
-    getWord(address: number): Uint8Array {
-        return this.get(address, MMU.WORD_NUM_BYTES);
+    getWord(address: number): number {
+        return byteBuffer.value(this.get(address, MMU.WORD_NUM_BYTES));
     }
 
 };
