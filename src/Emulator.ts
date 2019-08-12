@@ -26,8 +26,25 @@ export default class Emulator {
 
     frame() {
         this.cpu.tick();
-        if (debugEnabled)
-            console.log(this.cpu.toString());
+    }
+
+    getCPUInfo() {
+        return {
+            AF: this.cpu.read('AF'),
+            BC: this.cpu.read('BC'),
+            DE: this.cpu.read('DE'),
+            HL: this.cpu.read('HL'),
+            SP: this.cpu.read('SP'),
+            PC: this.cpu.read('PC'),
+        }
+    }
+
+    getByteAt(address: number) {
+        return this.mmu.getByte(address);
+    }
+
+    getWordAt(address: number) {
+        return this.mmu.getWord(address);
     }
 
 };

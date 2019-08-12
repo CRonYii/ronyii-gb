@@ -1,7 +1,7 @@
 import Emulator from "./Emulator";
 import { initPage } from "./Page";
 
-export const debugEnabled = false;
+export const debugEnabled = true;
 
 initPage();
 

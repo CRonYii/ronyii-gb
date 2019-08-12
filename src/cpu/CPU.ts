@@ -113,7 +113,6 @@ export default class CPU {
         this.mmu = configs.mmu;
         this.instructionSet = this.buildInstructionSet(configs.instructionSetDefinition);
         this.cbInstructionSet = this.buildInstructionSet(configs.cbInstructionSetDefinition);
-        console.log(this.toString());
     }
 
     public tick() {
@@ -123,7 +122,7 @@ export default class CPU {
         this.clock = 0;
     }
 
-    private exec() {
+    public exec() {
         // fetch-decode-excute
         const code = this.fetchCode(); // fetch
         const op = this.decodeToOp(code); // decode
@@ -156,6 +155,10 @@ export default class CPU {
 
     private readImmediateWord(): number {
         return this.mmu.getWord(this.read('PC') - 2);
+    }
+
+    public read(type: RegisterType): number {
+        return byteBuffer.value(this[type].data());
     }
 
     private updateClock(cycles: number) {
@@ -258,9 +261,6 @@ export default class CPU {
                 setFlag('subtract', def.setSubtract, subtract);
                 setFlag('halfCarry', def.setHalfCarry, halfCarry);
                 setFlag('carry', def.setCarry, carry);
-
-                if (debugEnabled)
-                    console.log(def.label);
             };
         });
     }
@@ -1004,10 +1004,6 @@ export default class CPU {
                 return byteBuffer.value(reg.data());
             }
         };
-    }
-
-    private read(type: RegisterType): number {
-        return byteBuffer.value(this[type].data());
     }
 
     toString() {
