@@ -109,7 +109,7 @@ export default class CPU {
     private readonly PC = new Register16();
 
     private haltFlag: boolean = false;
-    private interruptsMasterEnable: boolean = true;
+    private interruptsMasterEnable: boolean = false;
     private clock: number = 0;
 
     constructor(configs: CPUConfig) {
