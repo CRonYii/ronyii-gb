@@ -46,6 +46,17 @@ function parseByteIndex(operand: string): number {
     throw new Error('Expected a number in range [0, 7]');
 }
 
+const specialAddresses = [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38];
+
+function parseSpecialAddress(operand: string): number {
+    operand = '0x' + operand.substring(0, operand.length - 1);
+    const val = Number(operand);
+    if (specialAddresses.includes(val)) {
+        return val;
+    };
+    throw new Error('Expected a number one of [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38], got ' + operand);
+}
+
 interface ExecutionResult {
     cycles?: number;
     zero?: boolean;
@@ -182,45 +193,44 @@ export default class CPU {
             }
 
             const builder = this.instructionBuilderMap[def.operation];
-            if (builder) {
-                const executor = builder(def);
-                return () => {
-                    this.updatePC(def.opcode_length);
-
-                    const { cycles, zero, subtract, halfCarry, carry } = executor();
-
-                    // Update the CPU clock
-                    if (cycles) {
-                        this.updateClock(cycles);
-                    } else {
-                        this.updateClock(def.clock_cycles[0]);
-                    }
-
-                    // increment PC
-
-                    // Update the Flag Register
-                    const setFlag = (flag: 'zero' | 'subtract' | 'halfCarry' | 'carry', affection: FlagAffection, value?: boolean): void => {
-                        if (affection === false) {
-                            return;
-                        }
-                        let flagValue: boolean;
-                        if (affection === true) {
-                            if (value === undefined) throw new Error('Expected Flag value but got none: \n' + JSON.stringify(def, null, 4));
-                            flagValue = value;
-                        } else {
-                            flagValue = affection === 1;
-                        }
-                        this.F[flag] = flagValue;
-                    }
-
-                    setFlag('zero', def.setZero, zero);
-                    setFlag('subtract', def.setSubtract, subtract);
-                    setFlag('halfCarry', def.setHalfCarry, halfCarry);
-                    setFlag('carry', def.setCarry, carry);
-                };
+            if (!builder) {
+                throw new Error('Unsupported operation: ' + def.operation);
             }
+            const executor = builder(def);
+            return () => {
+                this.updatePC(def.opcode_length);
 
-            return () => { }; // FIXME
+                const { cycles, zero, subtract, halfCarry, carry } = executor();
+
+                // Update the CPU clock
+                if (cycles) {
+                    this.updateClock(cycles);
+                } else {
+                    this.updateClock(def.clock_cycles[0]);
+                }
+
+                // increment PC
+
+                // Update the Flag Register
+                const setFlag = (flag: 'zero' | 'subtract' | 'halfCarry' | 'carry', affection: FlagAffection, value?: boolean): void => {
+                    if (affection === false) {
+                        return;
+                    }
+                    let flagValue: boolean;
+                    if (affection === true) {
+                        if (value === undefined) throw new Error('Expected Flag value but got none: \n' + JSON.stringify(def, null, 4));
+                        flagValue = value;
+                    } else {
+                        flagValue = affection === 1;
+                    }
+                    this.F[flag] = flagValue;
+                }
+
+                setFlag('zero', def.setZero, zero);
+                setFlag('subtract', def.setSubtract, subtract);
+                setFlag('halfCarry', def.setHalfCarry, halfCarry);
+                setFlag('carry', def.setCarry, carry);
+            };
         });
     }
 
@@ -678,7 +688,7 @@ export default class CPU {
                     return { cycles: def.clock_cycles[1] };
                 }
                 this.PC.set(target.get());
-                return { cycles: def.clock_cycles[0] };
+                return {};
             };
         } else {
             throw new Error('Expected 1 ~ 2 operands');
@@ -686,7 +696,7 @@ export default class CPU {
     }
 
     private buildJRInstruction = (def: Opcode): () => ExecutionResult => {
-        if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JP] Insturction:\n' + JSON.stringify(def, null, 4));
+        if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JR] Insturction:\n' + JSON.stringify(def, null, 4));
 
         if (def.operands.length === 1) {
             const target = this.parseOperator(def.operands[0]);
@@ -703,7 +713,7 @@ export default class CPU {
                     return { cycles: def.clock_cycles[1] };
                 }
                 this.PC.set(this.read('PC') + target.get());
-                return { cycles: def.clock_cycles[0] };
+                return {};
             };
         } else {
             throw new Error('Expected 1 ~ 2 operands');
@@ -711,7 +721,7 @@ export default class CPU {
     }
 
     private buildCALLInstruction = (def: Opcode): () => ExecutionResult => {
-        if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JP] Insturction:\n' + JSON.stringify(def, null, 4));
+        if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [CALL] Insturction:\n' + JSON.stringify(def, null, 4));
 
         if (def.operands.length === 1) {
             const target = this.parseOperator(def.operands[0]);
@@ -730,11 +740,52 @@ export default class CPU {
                 }
                 this.pushStack(this.read('PC'));
                 this.PC.set(target.get());
-                return { cycles: def.clock_cycles[0] };
+                return {};
             };
         } else {
             throw new Error('Expected 1 ~ 2 operands');
         }
+    }
+
+    private buildRSTInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [RST] Insturction:\n' + JSON.stringify(def, null, 4));
+
+        const target = parseSpecialAddress(def.operands[0]);
+
+        return () => {
+            // TODO: rsv() save the current register values temporarily
+            this.pushStack(this.read('PC'));
+            this.PC.set(target);
+            return {}
+        };
+    }
+
+    private buildRETInstruction = (def: Opcode): () => ExecutionResult => {
+        if (def.operands) {
+            const mode = def.operands[0];
+
+            return () => {
+                if (!this.shouldExecute(mode)) {
+                    return { cycles: def.clock_cycles[1] };
+                }
+                this.PC.set(this.popStack());
+                return {};
+            };
+        } else {
+            return () => {
+                this.PC.set(this.popStack());
+                return {}
+            };
+        }
+    }
+
+    private buildRETIInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            this.PC.set(this.popStack());
+            this.setInterrupts(true);
+            // TODO: rrs() restore all the previous register values
+            return {}
+        };
     }
 
     private readonly instructionBuilderMap: InstructionBuilderMap = {
@@ -779,6 +830,9 @@ export default class CPU {
         'JP': this.buildJPInstruction,
         'JR': this.buildJRInstruction,
         'CALL': this.buildCALLInstruction,
+        'RST': this.buildRSTInstruction,
+        'RET': this.buildRETInstruction,
+        'RETI': this.buildRETIInstruction,
     };
 
     shouldExecute(flagMode: string): boolean {
