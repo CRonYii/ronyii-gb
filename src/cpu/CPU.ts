@@ -8,10 +8,10 @@ import { Register16 } from "./Register16";
 
 type InstructionSet = ((() => void) | null)[];
 
-type DataType = 'd8' | 'd16' | 'r8';
+type DataType = 'd8' | 'd16' | 'r8' | 'a8' | 'a16';
 
 function isDataType(arg: string): arg is DataType {
-    return arg === 'd8' || arg === 'd16' || arg === 'r8';
+    return arg === 'd8' || arg === 'd16' || arg === 'r8' || arg === 'a8' || arg === 'a16';
 }
 
 type RegisterType =
@@ -153,7 +153,21 @@ export default class CPU {
         });
     }
 
-    private buildAddInstruction = (def: Opcode): () => ExecutionResult => {
+    private buildNOPInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => { return {} };
+    }
+
+    private buildLDInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [LD] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target, source] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            target.set(source.get());
+            return {};
+        };
+    }
+
+    private buildADDInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
 
@@ -186,15 +200,32 @@ export default class CPU {
 
     // returns a getter setter operation object of that operand
     private parse(operand: string): Operator<number> {
-        const mem = Helper.parseParentheses(operand);
-        if (mem && isRegisterType(mem)) {
-            return this.toMemoryOperator(mem);
+        let mem = Helper.parseParentheses(operand);
+        if (mem) {
+            if (mem === 'a16') {
+                return this.toImmediateMemoryOperator('a16');
+            }
+            if (mem === 'a8') {
+                return this.toImmediateMemoryOperator('a8');
+            }
+            const lastChar = mem[mem.length - 1];
+            let sign: '+' | '-' | undefined;
+            if (lastChar === '+' || lastChar === '-') {
+                sign = lastChar;
+                mem = mem.substring(0, mem.length - 1);
+            }
+            if (isRegisterType(mem)) {
+                return this.toMemoryOperator(mem, sign);
+            }
         }
         if (isRegisterType(operand)) {
             return this.toRegisterOperator(operand);
         }
         if (isDataType(operand)) {
             return this.toImmediateMemoryOperator(operand);
+        }
+        if (operand === 'SP+r8') {
+            return this.toSPR8Operator();
         }
 
         throw new Error(`Unsupported operand [${operand}]`);
@@ -217,19 +248,39 @@ export default class CPU {
         this.PC.set(result);
     }
 
-    private toMemoryOperator(regType: RegisterType): Operator<number> {
-        const reg = this[regType];
+    private increment(type: RegisterType) {
+        const val = byteBuffer.value(this[type].data()) + 1;
+        this[type].set(val);
+    }
+
+    private decrement(type: RegisterType) {
+        const val = byteBuffer.value(this[type].data()) - 1;
+        this[type].set(val);
+    }
+
+    private toMemoryOperator(type: RegisterType, sign?: '+' | '-'): Operator<number> {
+        const reg = this[type];
         let address = byteBuffer.value(reg.data());
         if (reg.size() === 1) {
             address = 0xff00 | address;
         }
+        const handleSign = () => {
+            if (sign === '+') {
+                this.increment(type);
+            } else {
+                this.decrement(type);
+            }
+        };
         return {
             size: 1,
             set: (byte: number) => {
                 this.mmu.setByte(address, byte);
+                handleSign();
             },
             get: () => {
-                return this.mmu.getByte(address);
+                const val = this.mmu.getByte(address);
+                handleSign();
+                return val;
             }
         };
     }
@@ -254,9 +305,20 @@ export default class CPU {
                     set: (byte: number) => { throw new Error('Unsupported operation'); },
                     get: () => { return Helper.toSigned8(this.readImmediateByte()); }
                 };
+            case 'a8':
+                return {
+                    size: 1,
+                    set: (byte: number) => { this.mmu.setByte(this.readImmediateByte() | 0xff00, byte) },
+                    get: () => { return this.readImmediateByte() | 0xff00; }
+                };
+            case 'a16':
+                return {
+                    size: 1,
+                    set: (byte: number) => { this.mmu.setByte(this.readImmediateByte(), byte) },
+                    get: () => { return this.readImmediateByte(); }
+                };
         }
     }
-
     private toRegisterOperator(regType: RegisterType): Operator<number> {
         const reg = this[regType];
         return {
@@ -270,12 +332,25 @@ export default class CPU {
         };
     }
 
+    private toSPR8Operator(): Operator<number> {
+        return {
+            size: 2,
+            set: (byte: number) => { throw new Error('Unsupported operation'); },
+            get: () => {
+                return Helper.toSigned8(this.readImmediateByte()) + byteBuffer.value(this.SP.data());
+            }
+        };
+    }
+
     toString() {
         return `AF: ${Helper.toHexText(this.AF, 4)}, BC: ${Helper.toHexText(this.BC, 4)}, DE: ${Helper.toHexText(this.DE, 4)}, HL: ${Helper.toHexText(this.HL, 4)}, SP: ${Helper.toHexText(this.SP, 4)}, PC: ${Helper.toHexText(this.PC, 4)}\n${this.F.toString()} `;
     }
 
     private readonly instructionBuilderMap: InstructionBuilderMap = {
-        'ADD': this.buildAddInstruction
+        'NOP': this.buildNOPInstruction,
+        'LD': this.buildLDInstruction,
+        'LDH': this.buildLDInstruction,
+        'ADD': this.buildADDInstruction,
     };
 
 }
