@@ -1,4 +1,4 @@
-import { LOGIC_FRAME_PER_SECOND } from "./constants/index";
+import Clock, { Z80Clock } from "./cpu/Clock";
 import CPU from "./cpu/CPU";
 import { Display } from "./gpu/Display";
 import GPU from "./gpu/GPU";
@@ -13,62 +13,49 @@ export interface EmulatorConfig {
 export default class Emulator {
 
     private readonly mmu: MMU = new MMU();
+    private readonly clock: Clock = Z80Clock();
     private readonly cpu: CPU;
     private readonly gpu: GPU;
 
-    private intervalID: number = 0;
-
     constructor(configs: EmulatorConfig) {
         this.cpu = new CPU({
+            clock: this.clock,
             mmu: this.mmu,
             debuggerConfig: {
                 breakpoints: [
                     { type: 'PC', value: 0x0100 }
                 ],
                 debugger: (cpu, type, value) => {
-                    this.pause();
+                    this.clock.pause();
                     console.warn(`Paused at breakpoint [${type}] => ${Helper.toHexText(value, 4)}`);
                 }
             }
         })
         this.gpu = new GPU({
+            clock: this.clock,
             display: configs.display,
             mmu: this.mmu
         });
     }
 
-    start(rom: Uint8Array) {
-        // TODO: load the rom
-        const meta = getROMmeta(rom);
-        console.log(meta);
+    start(rom?: Uint8Array) {
+        if (rom) {
+            // TODO: load the rom
+            const meta = getROMmeta(rom);
+            console.log(meta);
+        }
 
-        this.intervalID = window.setInterval(() => {
-            this.frame();
-        }, 1000 / LOGIC_FRAME_PER_SECOND);
+        this.clock.start();
     }
 
     pause() {
-        window.clearInterval(this.intervalID);
-        this.intervalID = 0;
-    }
-
-    frame() {
-        try {
-            this.cpu.tick();
-        } catch (err) {
-            console.error(err);
-            this.pause();
-        }
+        this.clock.pause();
     }
 
     step() {
-        if (this.isPaused()) {
+        if (this.clock.isPaused()) {
             this.cpu.exec();
         }
-    }
-
-    isPaused(): boolean {
-        return this.intervalID === 0;
     }
 
     getCPUInfo() {

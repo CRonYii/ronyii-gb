@@ -1,8 +1,8 @@
 export const CPU_CLOCK_SPEED = 4_194_304;
 
-export const LOGIC_FRAME_PER_SECOND = 1000;
+export const TICKS_PER_SECOND = 1000;
 
-export const TICK_PER_FRAME = CPU_CLOCK_SPEED / LOGIC_FRAME_PER_SECOND;
+export const TICK_PER_FRAME = CPU_CLOCK_SPEED / TICKS_PER_SECOND;
 
 export const MEMORY_SIZE = 1 << 16;
 

@@ -1,15 +1,17 @@
-import { TICK_PER_FRAME as TICKS_PER_FRAME } from "../constants/index";
+import { debugEnabled } from "../index";
 import MMU from "../memory/MMU";
 import { byteBuffer } from "../utils/ByteBuffer";
 import Helper from "../utils/Helper";
 import ALU, { ALUResult } from "./ALU";
+import Clock from "./Clock";
 import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
-import { FlagAffection, Opcode, OPCODES, CB_OPCODES } from "./Opcodes";
+import { CB_OPCODES, FlagAffection, Opcode, OPCODES } from "./Opcodes";
 import { Register16 } from "./Register16";
-import { debugEnabled } from "../index";
 
-type InstructionSet = ((() => void) | null)[];
+type OpcodeExecutor = (() => number);
+
+type InstructionSet = (OpcodeExecutor | null)[];
 
 type DataType = 'd8' | 'd16' | 'r8' | 'a8' | 'a16';
 
@@ -79,6 +81,7 @@ interface InstructionBuilderMap {
 
 export interface CPUConfig {
     mmu: MMU,
+    clock: Clock,
     debuggerConfig?: CPUDebuggerConfig
 }
 
@@ -122,7 +125,6 @@ export default class CPU {
 
     private haltFlag: boolean = false;
     private interruptsMasterEnable: boolean = false;
-    private clock: number = 0;
 
     private debuggerConfig?: CPUDebuggerConfig;
 
@@ -131,59 +133,40 @@ export default class CPU {
         this.instructionSet = this.buildInstructionSet(OPCODES);
         this.cbInstructionSet = this.buildInstructionSet(CB_OPCODES);
         this.debuggerConfig = configs.debuggerConfig;
-    }
-
-    public tick() {
-        while (this.clock < TICKS_PER_FRAME) {
-            if (debugEnabled.breakpoints) {
-                if (this.debuggerConfig) {
-                    let stop = false;
-                    for (let bp of this.debuggerConfig.breakpoints) {
-                        if (bp.type === 'PC') {
-                            if (this.read('PC') !== bp.value) {
-                                continue;
-                            }
-                        } else if (bp.type === 'OPCODE') {
-                            if (this.fetchCode() !== bp.value) {
-                                continue;
-                            }
-                        }
-                        stop = true;
-                        this.debuggerConfig.debugger(this, bp.type, bp.value);
-                        break;
-                    }
-                }
-                if (stop) {
-                    break; // break the tick loop
-                }
+        configs.clock.add(() => {
+            const pause = this.debug();
+            if (pause) {
+                return 'pause';
             }
-            this.exec();
-        }
-        this.clock = 0;
+            return this.exec();
+        });
     }
 
-    public exec() {
+    public exec(): number {
+        let result: number;
+
         if (this.isHalt()) {
             // one halt takes 4 clock cycles
-            this.updateClock(4);
+            result = 4;
         } else {
             // fetch-decode-excute
             const code = this.fetchCode(); // fetch
             const op = this.decodeToOp(code); // decode
-            op(); // execute
+            result = op(); // execute
         }
         if (this.interruptsMasterEnable) {
             this.halt(false);
             this.setInterrupts(false);
             console.warn(`CPU INTERRUPTS => IE: ${Helper.toHexText(this.mmu.getByte(0xffff), 4)}, IF: ${Helper.toHexText(this.mmu.getByte(0xff0f), 4)}`);
         }
+        return result;
     }
 
     private fetchCode(): number {
         return this.mmu.getByte(this.read('PC'));
     }
 
-    private decodeToOp(code: number): () => void {
+    private decodeToOp(code: number): OpcodeExecutor {
         const op = this.instructionSet[code];
         if (!op) {
             throw new Error(`The requested opcode [${Helper.toHexText(code, 4)}] does not exist in the instruction set`);
@@ -191,7 +174,7 @@ export default class CPU {
         return op;
     }
 
-    private decodeToCBOp(code: number): () => void {
+    private decodeToCBOp(code: number): OpcodeExecutor {
         const op = this.cbInstructionSet[code];
         if (!op) {
             throw new Error(`The requested opcode [${Helper.toHexText(code, 4)}] does not exist in the CB instruction set`);
@@ -209,10 +192,6 @@ export default class CPU {
 
     public read(type: RegisterType): number {
         return byteBuffer.value(this[type].data());
-    }
-
-    private updateClock(cycles: number) {
-        this.clock += cycles;
     }
 
     private updatePC(length: number) {
@@ -261,6 +240,27 @@ export default class CPU {
         this.interruptsMasterEnable = flag;
     }
 
+    private debug(): boolean {
+        if (debugEnabled.breakpoints) {
+            if (this.debuggerConfig) {
+                for (let bp of this.debuggerConfig.breakpoints) {
+                    if (bp.type === 'PC') {
+                        if (this.read('PC') !== bp.value) {
+                            continue;
+                        }
+                    } else if (bp.type === 'OPCODE') {
+                        if (this.fetchCode() !== bp.value) {
+                            continue;
+                        }
+                    }
+                    this.debuggerConfig.debugger(this, bp.type, bp.value);
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
     private initRegisters() {
         this.AF.set(0x01b0);
         this.BC.set(0x0013);
@@ -286,15 +286,6 @@ export default class CPU {
 
                 const { cycles, zero, subtract, halfCarry, carry } = executor();
 
-                // Update the CPU clock
-                if (cycles) {
-                    this.updateClock(cycles);
-                } else {
-                    this.updateClock(def.clock_cycles[0]);
-                }
-
-                // increment PC
-
                 // Update the Flag Register
                 const setFlag = (flag: 'zero' | 'subtract' | 'halfCarry' | 'carry', affection: FlagAffection, value?: boolean): void => {
                     if (affection === false) {
@@ -314,6 +305,13 @@ export default class CPU {
                 setFlag('subtract', def.setSubtract, subtract);
                 setFlag('halfCarry', def.setHalfCarry, halfCarry);
                 setFlag('carry', def.setCarry, carry);
+
+                // Update the CPU clock
+                if (cycles) {
+                    return cycles;
+                } else {
+                    return def.clock_cycles[0];
+                }
             };
         });
     }
@@ -888,8 +886,8 @@ export default class CPU {
         return () => {
             const code = this.fetchCode(); // fetch
             const op = this.decodeToCBOp(code); // op
-            op(); // execute
-            return {}
+            const cycles = op(); // execute
+            return { cycles: def.clock_cycles[0] + cycles }
         };
     }
 
