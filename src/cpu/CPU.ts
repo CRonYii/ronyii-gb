@@ -664,10 +664,8 @@ export default class CPU {
             const mode = def.operands[0];
             const target = this.parseOperator(def.operands[1]);
 
-            const shouldExec = () => this.parseFlagMode(mode);
-
             return () => {
-                if (!shouldExec()) {
+                if (!this.shouldExecute(mode)) {
                     return { cycles: def.clock_cycles[1] };
                 }
                 this.PC.set(target.get());
@@ -691,10 +689,8 @@ export default class CPU {
             const mode = def.operands[0];
             const target = this.parseOperator(def.operands[1]);
 
-            const shouldExec = () => this.parseFlagMode(mode);
-
             return () => {
-                if (!shouldExec()) {
+                if (!this.shouldExecute(mode)) {
                     return { cycles: def.clock_cycles[1] };
                 }
                 this.PC.set(this.read('PC') + target.get());
@@ -748,7 +744,7 @@ export default class CPU {
         'JR': this.buildJRInstruction,
     };
 
-    parseFlagMode(flagMode: string): boolean {
+    shouldExecute(flagMode: string): boolean {
         if (!isFlagMode(flagMode)) {
             throw new Error(`Invalid flag mode value [${flagMode}]`);
         }
