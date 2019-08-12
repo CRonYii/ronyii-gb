@@ -147,6 +147,22 @@ export default class CPU {
         this[type].set(val);
     }
 
+    private pushStack(data: number) {
+        // decrement SP twice for 2 bytes of data
+        this.decrement('SP');
+        this.decrement('SP');
+        this.mmu.setWord(this.read('SP'), data);
+    }
+
+    private popStack(): number {
+        const data = this.mmu.getWord(this.read('SP'));
+
+        // increment SP twice for 2 bytes of data
+        this.increment('SP');
+        this.increment('SP');
+        return data;
+    }
+
     private halt() {
         // TODO
     }
@@ -243,10 +259,7 @@ export default class CPU {
             if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
             const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
-            // decrement SP twice for 2 bytes of data
-            this.decrement('SP');
-            this.decrement('SP');
-            this.mmu.setWord(this.read('SP'), source.get());
+            this.pushStack(source.get());
 
             return {}
         };
@@ -257,11 +270,7 @@ export default class CPU {
             if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
             const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
-            const data = this.mmu.getWord(this.read('SP'));
-            target.set(data);
-            // increment SP twice for 2 bytes of data
-            this.increment('SP');
-            this.increment('SP');
+            target.set(this.popStack());
 
             return { zero: this.F.zero, subtract: this.F.subtract, halfCarry: this.F.halfCarry, carry: this.F.carry }
         };
@@ -701,6 +710,33 @@ export default class CPU {
         }
     }
 
+    private buildCALLInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected 1 ~ 2 operands when building [JP] Insturction:\n' + JSON.stringify(def, null, 4));
+
+        if (def.operands.length === 1) {
+            const target = this.parseOperator(def.operands[0]);
+            return () => {
+                this.pushStack(this.read('PC'));
+                this.PC.set(target.get());
+                return {};
+            };
+        } else if (def.operands.length === 2) {
+            const mode = def.operands[0];
+            const target = this.parseOperator(def.operands[1]);
+
+            return () => {
+                if (!this.shouldExecute(mode)) {
+                    return { cycles: def.clock_cycles[1] };
+                }
+                this.pushStack(this.read('PC'));
+                this.PC.set(target.get());
+                return { cycles: def.clock_cycles[0] };
+            };
+        } else {
+            throw new Error('Expected 1 ~ 2 operands');
+        }
+    }
+
     private readonly instructionBuilderMap: InstructionBuilderMap = {
         'NOP': this.buildNOPInstruction,
         'LD': this.buildLDInstruction,
@@ -742,6 +778,7 @@ export default class CPU {
         'RES': this.buildRESInstruction,
         'JP': this.buildJPInstruction,
         'JR': this.buildJRInstruction,
+        'CALL': this.buildCALLInstruction,
     };
 
     shouldExecute(flagMode: string): boolean {
@@ -847,6 +884,7 @@ export default class CPU {
                 };
         }
     }
+
     private toRegisterOperator(regType: RegisterType): Operator<number> {
         const reg = this[regType];
         return {
