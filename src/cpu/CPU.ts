@@ -94,7 +94,7 @@ export default class CPU {
     }
 
     private fetchCode(): number {
-        return this.mmu.getByte(byteBuffer.value(this.PC.data()));
+        return this.mmu.getByte(this.read('PC'));
     }
 
     private decodeToOp(code: number): () => void {
@@ -232,11 +232,11 @@ export default class CPU {
     }
 
     private readImmediateByte(): number {
-        return this.mmu.getByte(byteBuffer.value(this.PC.data()) + 1);
+        return this.mmu.getByte(this.read('PC') + 1);
     }
 
     private readImmediateWord(): number {
-        return this.mmu.getWord(byteBuffer.value(this.PC.data()) + 1);
+        return this.mmu.getWord(this.read('PC') + 1);
     }
 
     private updateClock(cycles: number) {
@@ -244,7 +244,7 @@ export default class CPU {
     }
 
     private updatePC(length: number) {
-        const result = byteBuffer.value(this.PC.data()) + length;
+        const result = this.read('PC') + length;
         this.PC.set(result);
     }
 
@@ -337,9 +337,13 @@ export default class CPU {
             size: 2,
             set: (byte: number) => { throw new Error('Unsupported operation'); },
             get: () => {
-                return Helper.toSigned8(this.readImmediateByte()) + byteBuffer.value(this.SP.data());
+                return Helper.toSigned8(this.readImmediateByte()) + this.read('SP');
             }
         };
+    }
+
+    private read(type: RegisterType): number {
+        return byteBuffer.value(this[type].data());
     }
 
     toString() {
