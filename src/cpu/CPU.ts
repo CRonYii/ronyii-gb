@@ -258,21 +258,11 @@ export default class CPU {
     }
 
     private buildSUBInstruction = (def: Opcode): () => ExecutionResult => {
-        if (!def.operands) throw new Error('Expected two operands when building [SUB] Insturction:\n' + JSON.stringify(def, null, 4));
+        if (!def.operands) throw new Error('Expected one operands when building [SUB] Insturction:\n' + JSON.stringify(def, null, 4));
         const [source] = def.operands.map((operand) => this.parse(operand));
 
-        let subtraction: (a: number, b: number) => ALUResult;
-
-        if (source.size === 1) {
-            subtraction = ALU.sub8;
-        } else if (source.size === 2) {
-            subtraction = ALU.sub16;
-        } else {
-            throw new Error('Unsupported Addition building config');
-        }
-
         return () => {
-            const result = subtraction(this.read('A'), source.get());
+            const result = ALU.sub8(this.read('A'), source.get());
             this.A.set(result.result);
 
             return result;
@@ -283,18 +273,87 @@ export default class CPU {
         if (!def.operands) throw new Error('Expected two operands when building [SBC] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
 
-        let addition: (a: number, b: number, carry: boolean) => ALUResult;
+        return () => {
+            const result = ALU.sub8(target.get(), source.get(), this.F.carry);
+            target.set(result.result);
 
-        if (source.size === 1) {
-            addition = ALU.sub8;
-        } else if (source.size === 2) {
-            addition = ALU.sub16;
+            return result;
+        };
+    }
+
+    private buildORInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
+            const [source] = def.operands.map((operand) => this.parse(operand));
+
+            const result = ALU.or(this.read('A'), source.get());
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildXORInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            if (!def.operands) throw new Error('Expected one operands when building [XOR] Insturction:\n' + JSON.stringify(def, null, 4));
+            const [source] = def.operands.map((operand) => this.parse(operand));
+
+            const result = ALU.xor(this.read('A'), source.get());
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildCPInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [CP] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [source] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.sub8(this.read('A'), source.get());
+
+            return result;
+        };
+    }
+
+    private buildINCInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [INC] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        let addition: (a: number, b: number) => ALUResult;
+
+        if (target.size === 1) {
+            addition = ALU.add8;
+        } else if (target.size === 2) {
+            addition = ALU.add16;
         } else {
             throw new Error('Unsupported Addition building config');
         }
 
         return () => {
-            const result = addition(target.get(), source.get(), this.F.carry);
+            const result = addition(target.get(), 1);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildDECInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [DEC] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        let subtraction: (a: number, b: number) => ALUResult;
+
+        if (target.size === 1) {
+            subtraction = ALU.sub8;
+        } else if (target.size === 2) {
+            subtraction = ALU.sub16;
+        } else {
+            throw new Error('Unsupported Subtraction building config');
+        }
+
+        return () => {
+            const result = subtraction(target.get(), 1);
             target.set(result.result);
 
             return result;
@@ -306,12 +365,17 @@ export default class CPU {
         'LD': this.buildLDInstruction,
         'LDH': this.buildLDInstruction,
         'LDHL': this.buildLDHLInstruction,
+        'PUSH': this.buildPUSHInstruction,
+        'POP': this.buildPOPInstruction,
         'ADD': this.buildADDInstruction,
         'ADC': this.buildADCInstruction,
         'SUB': this.buildSUBInstruction,
         'SBC': this.buildSBCInstruction,
-        'PUSH': this.buildPUSHInstruction,
-        'POP': this.buildPOPInstruction,
+        'OR': this.buildORInstruction,
+        'XOR': this.buildXORInstruction,
+        'CP': this.buildCPInstruction,
+        'INC': this.buildINCInstruction,
+        'DEC': this.buildDECInstruction,
     };
 
     // returns a getter setter operation object of that operand

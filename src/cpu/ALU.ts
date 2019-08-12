@@ -61,5 +61,19 @@ export default {
             carry: raw < 0,
             halfCarry: ((result ^ b ^ a) & 0x1000) !== 0
         };
+    },
+    or(a: number, b: number): ALUResult {
+        const result = (a | b) & 0xff;
+        return {
+            result,
+            zero: result === 0
+        };
+    },
+    xor(a: number, b: number): ALUResult {
+        const result = (a ^ b) & 0xff;
+        return {
+            result,
+            zero: result === 0
+        };
     }
 };
