@@ -199,7 +199,7 @@ export default class CPU {
 
     private buildLDInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [LD] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target, source] = def.operands.map((operand) => this.parse(operand));
+        const [target, source] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             target.set(source.get());
@@ -209,7 +209,7 @@ export default class CPU {
 
     private buildLDHLInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [LD] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [SP, n] = def.operands.map((operand) => this.parse(operand));
+        const [SP, n] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const a = SP.get();
@@ -226,7 +226,7 @@ export default class CPU {
     private buildPUSHInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
             if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [source] = def.operands.map((operand) => this.parse(operand));
+            const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
             // decrement SP twice for 2 bytes of data
             this.decrement('SP');
@@ -240,7 +240,7 @@ export default class CPU {
     private buildPOPInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
             if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [target] = def.operands.map((operand) => this.parse(operand));
+            const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
             const data = this.mmu.getWord(this.read('SP'));
             target.set(data);
@@ -254,7 +254,7 @@ export default class CPU {
 
     private buildADDInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target, source] = def.operands.map((operand) => this.parse(operand));
+        const [target, source] = def.operands.map((operand) => this.parseOperator(operand));
 
         let addition: (a: number, b: number) => ALUResult;
 
@@ -276,7 +276,7 @@ export default class CPU {
 
     private buildADCInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [ADC] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target, source] = def.operands.map((operand) => this.parse(operand));
+        const [target, source] = def.operands.map((operand) => this.parseOperator(operand));
 
         let addition: (a: number, b: number, carry: boolean) => ALUResult;
 
@@ -298,7 +298,7 @@ export default class CPU {
 
     private buildSUBInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [SUB] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [source] = def.operands.map((operand) => this.parse(operand));
+        const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.sub8(this.read('A'), source.get());
@@ -310,7 +310,7 @@ export default class CPU {
 
     private buildSBCInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [SBC] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target, source] = def.operands.map((operand) => this.parse(operand));
+        const [target, source] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.sub8(target.get(), source.get(), this.F.carry);
@@ -323,7 +323,7 @@ export default class CPU {
     private buildORInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
             if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [source] = def.operands.map((operand) => this.parse(operand));
+            const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
             const result = ALU.or(this.read('A'), source.get());
             this.A.set(result.result);
@@ -335,7 +335,7 @@ export default class CPU {
     private buildXORInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
             if (!def.operands) throw new Error('Expected one operands when building [XOR] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [source] = def.operands.map((operand) => this.parse(operand));
+            const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
             const result = ALU.xor(this.read('A'), source.get());
             this.A.set(result.result);
@@ -346,7 +346,7 @@ export default class CPU {
 
     private buildCPInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [CP] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [source] = def.operands.map((operand) => this.parse(operand));
+        const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.sub8(this.read('A'), source.get());
@@ -357,7 +357,7 @@ export default class CPU {
 
     private buildINCInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [INC] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         let addition: (a: number, b: number) => ALUResult;
 
@@ -379,7 +379,7 @@ export default class CPU {
 
     private buildDECInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [DEC] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         let subtraction: (a: number, b: number) => ALUResult;
 
@@ -401,7 +401,7 @@ export default class CPU {
 
     private buildSWAPInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [SWAP] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.swap8(target.get());
@@ -515,7 +515,7 @@ export default class CPU {
 
     private buildRLCInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [RLC] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.shiftLeft8(target.get(), true);
@@ -527,7 +527,7 @@ export default class CPU {
 
     private buildRLInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [RL] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.shiftLeft8(target.get(), true, this.F.carry);
@@ -539,7 +539,7 @@ export default class CPU {
 
     private buildRRCInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [RRC] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.shiftRight8(target.get(), true);
@@ -551,7 +551,7 @@ export default class CPU {
 
     private buildRRInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [RR] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.shiftRight8(target.get(), true, this.F.carry);
@@ -563,7 +563,7 @@ export default class CPU {
 
     private buildSLAInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [SLA] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.shiftLeft8(target.get(), false);
@@ -575,7 +575,7 @@ export default class CPU {
 
     private buildSRAInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [SRA] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const value = target.get();
@@ -592,13 +592,47 @@ export default class CPU {
 
     private buildSRLInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [SRL] Insturction:\n' + JSON.stringify(def, null, 4));
-        const [target] = def.operands.map((operand) => this.parse(operand));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
             const result = ALU.shiftRight8(target.get(), false);
             target.set(result.result);
 
             return result;
+        };
+    }
+
+    private buildBITInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [BIT] Insturction:\n' + JSON.stringify(def, null, 4));
+        const index = 1 << this.parseByteIndex(def.operands[0]);
+        const target = this.parseOperator(def.operands[1]);
+
+        return () => {
+            return { zero: (target.get() & index) === 0 };
+        };
+    }
+
+    private buildSETInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [SET] Insturction:\n' + JSON.stringify(def, null, 4));
+        const index = 1 << this.parseByteIndex(def.operands[0]);
+        const target = this.parseOperator(def.operands[1]);
+
+        return () => {
+            const value = target.get() | index;
+            target.set(value);
+            return {};
+        };
+    }
+
+    private buildRESInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [RES] Insturction:\n' + JSON.stringify(def, null, 4));
+        const index = ~(1 << this.parseByteIndex(def.operands[0]));
+        const target = this.parseOperator(def.operands[1]);
+
+        return () => {
+            const value = target.get() & index;
+            target.set(value);
+            return {};
         };
     }
 
@@ -638,10 +672,21 @@ export default class CPU {
         'SLA': this.buildSLAInstruction,
         'SRA': this.buildSRAInstruction,
         'SRL': this.buildSRLInstruction,
+        'BIT': this.buildBITInstruction,
+        'SET': this.buildSETInstruction,
+        'RES': this.buildRESInstruction,
     };
 
+    private parseByteIndex(operand: string): number {
+        const val = Number(operand);
+        if (val >= 0 && val <= 7) {
+            return val;
+        }
+        throw new Error('Expected a number in range [0, 7]');
+    }
+
     // returns a getter setter operation object of that operand
-    private parse(operand: string): Operator<number> {
+    private parseOperator(operand: string): Operator<number> {
         let mem = Helper.parseParentheses(operand);
         if (mem) {
             if (mem === 'a16') {
