@@ -1,14 +1,35 @@
 import MMU from "../memory/MMU";
+import { byteBuffer } from "../utils/ByteBuffer";
 import Helper from "../utils/Helper";
 import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
+import { FlagAffection, Opcode } from "./Opcodes";
 import { Register16 } from "./Register16";
-import { byteBuffer } from "../utils/ByteBuffer";
-import { Opcode, FlagAffection } from "./Opcodes";
-import { Register } from "./Register";
 
 type InstructionSet = ((() => void) | null)[];
+
 type DataType = 'd8' | 'd16' | 'r8';
+
+function isDataType(arg: string): arg is DataType {
+    return arg === 'd8' || arg === 'd16' || arg === 'r8';
+}
+
+type RegisterType =
+    'AF' | 'BC' | 'DE' | 'HL' |
+    'A' | 'F' | 'B' | 'C' |
+    'D' | 'E' | 'H' | 'L' |
+    'SP' | 'PC';
+
+const registerTypes = [
+    'AF', 'BC', 'DE', 'HL',
+    'A', 'F', 'B', 'C',
+    'D', 'E', 'H', 'L',
+    'SP', 'PC'
+];
+
+function isRegisterType(arg: string): arg is RegisterType {
+    return registerTypes.includes(arg);
+}
 
 interface ExecutionResult {
     cycles?: number;
@@ -168,23 +189,18 @@ export default class CPU {
 
     // returns a getter setter operation object of that operand
     private parse(operand: string): Operator<number> {
-        if (operand === 'AF') return CPU.toRegisterOperator(this.AF);
-        if (operand === 'BC') return CPU.toRegisterOperator(this.BC);
-        if (operand === 'DE') return CPU.toRegisterOperator(this.DE);
-        if (operand === 'HL') return CPU.toRegisterOperator(this.HL);
-        if (operand === 'A') return CPU.toRegisterOperator(this.A);
-        if (operand === 'B') return CPU.toRegisterOperator(this.B);
-        if (operand === 'C') return CPU.toRegisterOperator(this.C);
-        if (operand === 'D') return CPU.toRegisterOperator(this.D);
-        if (operand === 'E') return CPU.toRegisterOperator(this.E);
-        if (operand === 'H') return CPU.toRegisterOperator(this.H);
-        if (operand === 'L') return CPU.toRegisterOperator(this.L);
-        if (operand === 'SP') return CPU.toRegisterOperator(this.SP);
-        if (operand === 'PC') return CPU.toRegisterOperator(this.PC);
+        const mem = Helper.parseParentheses(operand);
+        if (mem && isRegisterType(mem)) {
+            return this.toMemoryOperator(mem);
+        }
+        if (isRegisterType(operand)) {
+            return this.toRegisterOperator(operand);
+        }
+        if (isDataType(operand)) {
+            return this.toImmediateMemoryOperator(operand);
+        }
 
-        if (operand === 'd8' || operand === 'd16' || operand === 'r8') return this.toMemoryOperator(operand);
-
-        return CPU.toRegisterOperator(this.A); // FIXME
+        return this.toRegisterOperator('A'); // FIXME
         // throw new Error(`Unsupported operand [${operand}]`);
     }
 
@@ -205,7 +221,24 @@ export default class CPU {
         this.PC.set(result);
     }
 
-    private toMemoryOperator(type: DataType): Operator<number> {
+    private toMemoryOperator(regType: RegisterType): Operator<number> {
+        const reg = this[regType];
+        let address = byteBuffer.value(reg.data());
+        if (reg.size() === 1) {
+            address = 0xff00 | address;
+        }
+        return {
+            size: 1,
+            set: (byte: number) => {
+                this.mmu.setByte(address, byte);
+            },
+            get: () => {
+                return this.mmu.getByte(address);
+            }
+        };
+    }
+
+    private toImmediateMemoryOperator(type: DataType): Operator<number> {
         switch (type) {
             case 'd8':
                 return {
@@ -228,7 +261,8 @@ export default class CPU {
         }
     }
 
-    private static toRegisterOperator(reg: Register): Operator<number> {
+    private toRegisterOperator(regType: RegisterType): Operator<number> {
+        const reg = this[regType];
         return {
             size: reg.size(),
             set(byte: number) {

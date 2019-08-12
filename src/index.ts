@@ -60,7 +60,8 @@ function initROMLoader() {
 
 function debug() {
     const mmu = new MMU();
-    const data: number[] = [0xe8, 128];
+    mmu.setByte(0x014d, 0x00F0);
+    const data: number[] = [0x86];
     for (let i = 0; i < data.length; i++) {
         mmu.setByte(0x0100 + i, data[i]);
     }

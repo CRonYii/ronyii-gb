@@ -17,6 +17,14 @@ export default class FlagRegister {
         this.reg.set(byte);
     }
 
+    data() {
+        return this.reg.data();
+    }
+
+    size() {
+        return this.reg.size();
+    }
+
     set zero(flag: boolean) {
         const byte = flag
             ? ZERO_FLAG | this.byte()

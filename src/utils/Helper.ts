@@ -14,5 +14,11 @@ export default {
             byteBuffer.toHex(byteBuffer.from(buffer, precision)),
             precision
         );
+    },
+    parseParentheses(value: string): string | null {
+        if (value[0] === '(' && value[value.length - 1] === ')') {
+            return value.substring(1, value.length - 1);
+        }
+        return null;
     }
 };
