@@ -3,6 +3,7 @@ import CPU from "./cpu/CPU";
 import { CB_OPCODES, OPCODES } from "./cpu/Opcodes";
 import MMU from "./memory/MMU";
 import getROMmeta from "./memory/ROM";
+import Helper from "./utils/Helper";
 
 export default class Emulator {
 
@@ -10,7 +11,16 @@ export default class Emulator {
     private readonly cpu: CPU = new CPU({
         mmu: this.mmu,
         instructionSetDefinition: OPCODES,
-        cbInstructionSetDefinition: CB_OPCODES
+        cbInstructionSetDefinition: CB_OPCODES,
+        debuggerConfig: {
+            breakpoints: [
+                { type: 'PC', value: 0x0100 }
+            ],
+            debugger: (cpu, type, value) => {
+                this.pause();
+                console.warn(`Paused at breakpoint [${type}] => ${Helper.toHexText(value, 4)}`);
+            }
+        }
     });
 
     private intervalID: number = 0;
@@ -27,15 +37,26 @@ export default class Emulator {
 
     pause() {
         window.clearInterval(this.intervalID);
+        this.intervalID = 0;
     }
 
     frame() {
         try {
             this.cpu.tick();
-        } catch(err) {
+        } catch (err) {
             console.error(err);
             this.pause();
         }
+    }
+
+    step() {
+        if (this.isPaused()) {
+            this.cpu.exec();
+        }
+    }
+
+    isPaused(): boolean {
+        return this.intervalID === 0;
     }
 
     getCPUInfo() {

@@ -38,7 +38,7 @@ export class Memory {
         if (controller) {
             controller.set(this, address, data);
         }
-        if (debugEnabled) {
+        if (debugEnabled.printMemory) {
             console.log(`${Helper.toHexText(address, 4)} => ${Helper.toHexText(data, 4)}`);
         }
         this._data[address] = data;

@@ -84,9 +84,7 @@ function initCPUInfoDisplayer() {
     const instructionLabel = document.createElement('div');
     instructionLabel.innerText = `Next Opcode: `;
 
-    const button = document.createElement('button');
-    button.innerText = 'update';
-    button.onclick = () => {
+    const update = () => {
         const info: any = emulator.getCPUInfo();
         regs.forEach((reg, index) => {
             cells[index].innerText = `${reg}: ${Helper.toHexText(info[reg], 4)}`;
@@ -96,11 +94,23 @@ function initCPUInfoDisplayer() {
         if (op) {
             instructionLabel.innerText = `Next Opcode: ${op.label}`;
         }
+    }
+
+    const stepButton = document.createElement('button');
+    stepButton.innerText = 'step';
+    stepButton.onclick = () => {
+        emulator.step();
+        update();
     };
+
+    const updateButton = document.createElement('button');
+    updateButton.innerText = 'update';
+    updateButton.onclick = update;
 
     cpuInfoDiv.appendChild(table);
     cpuInfoDiv.appendChild(instructionLabel);
-    cpuInfoDiv.appendChild(button);
+    cpuInfoDiv.appendChild(stepButton);
+    cpuInfoDiv.appendChild(updateButton);
 }
 
 export const initPage = () => {

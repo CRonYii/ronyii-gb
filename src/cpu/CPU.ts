@@ -7,6 +7,7 @@ import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { FlagAffection, Opcode } from "./Opcodes";
 import { Register16 } from "./Register16";
+import { debugEnabled } from "../index";
 
 type InstructionSet = ((() => void) | null)[];
 
@@ -79,7 +80,20 @@ interface InstructionBuilderMap {
 export interface CPUConfig {
     mmu: MMU,
     instructionSetDefinition: Array<Opcode | null>,
-    cbInstructionSetDefinition: Array<Opcode | null>
+    cbInstructionSetDefinition: Array<Opcode | null>,
+    debuggerConfig?: CPUDebuggerConfig
+}
+
+interface Breakpoint {
+    type: 'PC' | 'OPCODE',
+    value: number
+};
+
+type CPUDebugger = (cpu: CPU, type: 'PC' | 'OPCODE', value: number) => void;
+
+export interface CPUDebuggerConfig {
+    breakpoints: Breakpoint[],
+    debugger: CPUDebugger
 }
 
 export default class CPU {
@@ -112,14 +126,39 @@ export default class CPU {
     private interruptsMasterEnable: boolean = false;
     private clock: number = 0;
 
+    private debuggerConfig?: CPUDebuggerConfig;
+
     constructor(configs: CPUConfig) {
         this.mmu = configs.mmu;
         this.instructionSet = this.buildInstructionSet(configs.instructionSetDefinition);
         this.cbInstructionSet = this.buildInstructionSet(configs.cbInstructionSetDefinition);
+        this.debuggerConfig = configs.debuggerConfig;
     }
 
     public tick() {
         while (this.clock < TICKS_PER_FRAME) {
+            if (debugEnabled.breakpoints) {
+                if (this.debuggerConfig) {
+                    let stop = false;
+                    for (let bp of this.debuggerConfig.breakpoints) {
+                        if (bp.type === 'PC') {
+                            if (this.read('PC') !== bp.value) {
+                                continue;
+                            }
+                        } else if (bp.type === 'OPCODE') {
+                            if (this.fetchCode() !== bp.value) {
+                                continue;
+                            }
+                        }
+                        stop = true;
+                        this.debuggerConfig.debugger(this, bp.type, bp.value);
+                        break;
+                    }
+                }
+                if (stop) {
+                    break; // break the tick loop
+                }
+            }
             this.exec();
         }
         this.clock = 0;
