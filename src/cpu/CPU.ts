@@ -354,6 +354,18 @@ export default class CPU {
         };
     }
 
+    private buildANDInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
+            const [source] = def.operands.map((operand) => this.parseOperator(operand));
+
+            const result = ALU.and(this.read('A'), source.get());
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
     private buildORInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
             if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
@@ -799,6 +811,7 @@ export default class CPU {
         'ADC': this.buildADCInstruction,
         'SUB': this.buildSUBInstruction,
         'SBC': this.buildSBCInstruction,
+        'AND': this.buildANDInstruction,
         'OR': this.buildORInstruction,
         'XOR': this.buildXORInstruction,
         'CP': this.buildCPInstruction,

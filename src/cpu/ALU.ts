@@ -62,6 +62,13 @@ export default {
             halfCarry: ((result ^ b ^ a) & 0x1000) !== 0
         };
     },
+    and(a: number, b: number): ALUResult {
+        const result = (a & b) & 0xff;
+        return {
+            result,
+            zero: result === 0
+        };
+    },
     or(a: number, b: number): ALUResult {
         const result = (a | b) & 0xff;
         return {
