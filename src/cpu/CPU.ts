@@ -1,5 +1,4 @@
 import { TICK_PER_FRAME as TICKS_PER_FRAME } from "../constants/index";
-import { debugEnabled } from "../index";
 import MMU from "../memory/MMU";
 import { byteBuffer } from "../utils/ByteBuffer";
 import Helper from "../utils/Helper";
@@ -77,6 +76,12 @@ interface InstructionBuilderMap {
     [key: string]: (def: Opcode) => () => ExecutionResult
 }
 
+export interface CPUConfig {
+    mmu: MMU,
+    instructionSetDefinition: Array<Opcode | null>,
+    cbInstructionSetDefinition: Array<Opcode | null>
+}
+
 export default class CPU {
 
     private readonly mmu: MMU;
@@ -103,13 +108,11 @@ export default class CPU {
     private readonly SP = new Register16();
     private readonly PC = new Register16();
 
+    private haltFlag: boolean = false;
+    private interruptsMasterEnable: boolean = true;
     private clock: number = 0;
 
-    constructor(configs: {
-        mmu: MMU,
-        instructionSetDefinition: Array<Opcode | null>,
-        cbInstructionSetDefinition: Array<Opcode | null>
-    }) {
+    constructor(configs: CPUConfig) {
         this.mmu = configs.mmu;
         this.instructionSet = this.buildInstructionSet(configs.instructionSetDefinition);
         this.cbInstructionSet = this.buildInstructionSet(configs.cbInstructionSetDefinition);
@@ -123,10 +126,20 @@ export default class CPU {
     }
 
     public exec() {
-        // fetch-decode-excute
-        const code = this.fetchCode(); // fetch
-        const op = this.decodeToOp(code); // decode
-        op(); // execute
+        if (this.isHalt()) {
+            // one halt takes 4 clock cycles
+            this.updateClock(4);
+        } else {
+            // fetch-decode-excute
+            const code = this.fetchCode(); // fetch
+            const op = this.decodeToOp(code); // decode
+            op(); // execute
+        }
+        if (this.interruptsMasterEnable) {
+            this.halt(false);
+            this.setInterrupts(false);
+            console.warn(`CPU INTERRUPTS => IE: ${Helper.toHexText(this.mmu.getByte(0xffff), 4)}, IF: ${Helper.toHexText(this.mmu.getByte(0xff0f), 4)}`);
+        }
     }
 
     private fetchCode(): number {
@@ -196,16 +209,19 @@ export default class CPU {
         return data;
     }
 
-    private halt() {
-        // TODO
+    private halt(flag: boolean) {
+        console.warn('CPU HALT => ' + flag);
+        this.haltFlag = flag;
     }
 
     private stop() {
+        console.warn('CPU STOP');
         // TODO
     }
 
     private setInterrupts(flag: boolean) {
-        // TODO
+        console.warn('CPU SET INTERRUPTS => ' + flag);
+        this.interruptsMasterEnable = flag;
     }
 
     private initRegisters() {
@@ -528,7 +544,7 @@ export default class CPU {
 
     private buildHALTInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
-            this.halt();
+            this.halt(true);
             return {};
         };
     }
@@ -1004,6 +1020,10 @@ export default class CPU {
                 return byteBuffer.value(reg.data());
             }
         };
+    }
+
+    public isHalt(): boolean {
+        return this.haltFlag;
     }
 
     toString() {
