@@ -200,8 +200,7 @@ export default class CPU {
             return this.toImmediateMemoryOperator(operand);
         }
 
-        return this.toRegisterOperator('A'); // FIXME
-        // throw new Error(`Unsupported operand [${operand}]`);
+        throw new Error(`Unsupported operand [${operand}]`);
     }
 
     private readImmediateByte(): number {
