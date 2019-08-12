@@ -131,6 +131,14 @@ export default class CPU {
         return op;
     }
 
+    private decodeToCBOp(code: number): () => void {
+        const op = this.cbInstructionSet[code];
+        if (!op) {
+            throw new Error(`The requested opcode [${Helper.toHexText(code, 4)}] does not exist in the CB instruction set`);
+        }
+        return op;
+    }
+
     private readImmediateByte(): number {
         return this.mmu.getByte(this.read('PC') - 1);
     }
@@ -799,6 +807,15 @@ export default class CPU {
             return {}
         };
     }
+    
+    private buildCBInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            const code = this.fetchCode(); // fetch
+            const op = this.decodeToCBOp(code); // op
+            op(); // execute
+            return {}
+        };
+    }
 
     private readonly instructionBuilderMap: InstructionBuilderMap = {
         'NOP': this.buildNOPInstruction,
@@ -846,6 +863,7 @@ export default class CPU {
         'RST': this.buildRSTInstruction,
         'RET': this.buildRETInstruction,
         'RETI': this.buildRETIInstruction,
+        'PREFIX': this.buildCBInstruction,
     };
 
     shouldExecute(flagMode: string): boolean {
