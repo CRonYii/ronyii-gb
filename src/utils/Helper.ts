@@ -1,4 +1,5 @@
 import { ByteBufferable, byteBuffer } from "./ByteBuffer";
+import { OPCODES, CB_OPCODES } from "../cpu/Opcodes";
 
 const decoder = new TextDecoder();
 
@@ -20,5 +21,23 @@ export default {
             return value.substring(1, value.length - 1);
         }
         return null;
+    },
+    toAssembly(executable: Uint8Array): string {
+        const assembly = [];
+        for (let i = 0; i < executable.length;) {
+            let opcode;
+            if (assembly[assembly.length - 1] === 'PREFIX CB') {
+                opcode = CB_OPCODES[executable[i]]
+            } else {
+                opcode = OPCODES[executable[i]];
+            }
+            if (!opcode) {
+                assembly.push('Encounter Error: ' + this.toHexText(executable[i], 2));
+                break;
+            }
+            assembly.push(opcode.label);
+            i += opcode.opcode_length;
+        }
+        return assembly.join('\n');
     }
 };
