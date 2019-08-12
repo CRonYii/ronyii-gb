@@ -32,6 +32,14 @@ function isRegisterType(arg: string): arg is RegisterType {
     return registerTypes.includes(arg);
 }
 
+function parseByteIndex(operand: string): number {
+    const val = Number(operand);
+    if (val >= 0 && val <= 7) {
+        return val;
+    }
+    throw new Error('Expected a number in range [0, 7]');
+}
+
 interface ExecutionResult {
     cycles?: number;
     zero?: boolean;
@@ -604,7 +612,7 @@ export default class CPU {
 
     private buildBITInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [BIT] Insturction:\n' + JSON.stringify(def, null, 4));
-        const index = 1 << this.parseByteIndex(def.operands[0]);
+        const index = 1 << parseByteIndex(def.operands[0]);
         const target = this.parseOperator(def.operands[1]);
 
         return () => {
@@ -614,7 +622,7 @@ export default class CPU {
 
     private buildSETInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [SET] Insturction:\n' + JSON.stringify(def, null, 4));
-        const index = 1 << this.parseByteIndex(def.operands[0]);
+        const index = 1 << parseByteIndex(def.operands[0]);
         const target = this.parseOperator(def.operands[1]);
 
         return () => {
@@ -626,7 +634,7 @@ export default class CPU {
 
     private buildRESInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [RES] Insturction:\n' + JSON.stringify(def, null, 4));
-        const index = ~(1 << this.parseByteIndex(def.operands[0]));
+        const index = ~(1 << parseByteIndex(def.operands[0]));
         const target = this.parseOperator(def.operands[1]);
 
         return () => {
@@ -676,14 +684,6 @@ export default class CPU {
         'SET': this.buildSETInstruction,
         'RES': this.buildRESInstruction,
     };
-
-    private parseByteIndex(operand: string): number {
-        const val = Number(operand);
-        if (val >= 0 && val <= 7) {
-            return val;
-        }
-        throw new Error('Expected a number in range [0, 7]');
-    }
 
     // returns a getter setter operation object of that operand
     private parseOperator(operand: string): Operator<number> {
