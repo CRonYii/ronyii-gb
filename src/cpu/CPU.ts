@@ -6,6 +6,7 @@ import FlagRegister from "./FlagRegister";
 import { FlagAffection, Opcode } from "./Opcodes";
 import { Register16 } from "./Register16";
 import ALU, { ALUResult } from "./ALU";
+import { debugEnabled } from "../index";
 
 type InstructionSet = ((() => void) | null)[];
 
@@ -238,6 +239,9 @@ export default class CPU {
                 setFlag('subtract', def.setSubtract, subtract);
                 setFlag('halfCarry', def.setHalfCarry, halfCarry);
                 setFlag('carry', def.setCarry, carry);
+                
+                if (debugEnabled)
+                    console.log(def.label);
             };
         });
     }
@@ -807,7 +811,7 @@ export default class CPU {
             return {}
         };
     }
-    
+
     private buildCBInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
             const code = this.fetchCode(); // fetch

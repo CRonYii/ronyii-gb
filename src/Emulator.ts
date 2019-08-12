@@ -1,6 +1,7 @@
 import MMU from "./memory/MMU";
 import CPU from "./cpu/CPU";
 import { OPCODES, CB_OPCODES } from "./cpu/Opcodes";
+import { debugEnabled } from "./index";
 
 export default class Emulator {
 
@@ -15,12 +16,13 @@ export default class Emulator {
         // TODO: load the rom
         setInterval(() => {
             this.tick();
-        }, 1000); // TODO: implement timing
+        }, 10); // TODO: implement timing
     }
 
     tick() {
         this.cpu.exec();
-        console.log(this.cpu.toString());
+        if (debugEnabled)
+            console.log(this.cpu.toString());
     }
 
 };
