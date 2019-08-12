@@ -106,6 +106,45 @@ export default class CPU {
         return op;
     }
 
+    private readImmediateByte(): number {
+        return this.mmu.getByte(this.read('PC') + 1);
+    }
+
+    private readImmediateWord(): number {
+        return this.mmu.getWord(this.read('PC') + 1);
+    }
+
+    private updateClock(cycles: number) {
+        // TODO
+    }
+
+    private updatePC(length: number) {
+        const result = this.read('PC') + length;
+        this.PC.set(result);
+    }
+
+    private increment(type: RegisterType) {
+        const val = byteBuffer.value(this[type].data()) + 1;
+        this[type].set(val);
+    }
+
+    private decrement(type: RegisterType) {
+        const val = byteBuffer.value(this[type].data()) - 1;
+        this[type].set(val);
+    }
+
+    private halt() {
+        // TODO
+    }
+
+    private stop() {
+        // TODO
+    }
+
+    private setInterrupts(flag: boolean) {
+        // TODO
+    }
+
     private buildInstructionSet(defs: Array<Opcode | null>): InstructionSet {
         return defs.map((def) => {
             if (!def) {
@@ -360,6 +399,209 @@ export default class CPU {
         };
     }
 
+    private buildSWAPInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [SWAP] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.swap8(target.get());
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildDAAInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            let a = this.read('A');
+            let carry = false;
+            if (this.F.halfCarry || (this.read('A') & 0xf) > 0x9) {
+                a += 0x6;
+            }
+            if (this.F.halfCarry || this.read('A') > 0x99) {
+                a += 0x60;
+                carry = true;
+            }
+            a &= 0xff;
+
+            return { zero: a === 0, carry };
+        };
+    }
+
+    private buildCPLInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            const val = this.read('A');
+            this.A.set(~val);
+
+            return {};
+        };
+    }
+
+    private buildCCFInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            return { carry: !this.F.carry };
+        };
+    }
+
+    private buildSCFInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            return { carry: true };
+        };
+    }
+
+    private buildHALTInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            this.halt();
+            return {};
+        };
+    }
+
+    private buildSTOPInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            this.stop();
+            return {};
+        };
+    }
+
+    private buildDIInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            this.setInterrupts(false);
+            return {};
+        };
+    }
+
+    private buildEIInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            this.setInterrupts(true);
+            return {};
+        };
+    }
+
+    private buildRLCAInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            const result = ALU.shiftLeft8(this.read('A'), true);
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildRLAInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            const result = ALU.shiftLeft8(this.read('A'), true, this.F.carry);
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildRRCAInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            const result = ALU.shiftRight8(this.read('A'), true);
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildRRAInstruction = (def: Opcode): () => ExecutionResult => {
+        return () => {
+            const result = ALU.shiftRight8(this.read('A'), true, this.F.carry);
+            this.A.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildRLCInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [RLC] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.shiftLeft8(target.get(), true);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildRLInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [RL] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.shiftLeft8(target.get(), true, this.F.carry);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildRRCInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [RRC] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.shiftRight8(target.get(), true);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildRRInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [RR] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.shiftRight8(target.get(), true, this.F.carry);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildSLAInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [SLA] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.shiftLeft8(target.get(), false);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildSRAInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [SRA] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const value = target.get();
+            let { result, carry } = ALU.shiftRight8(value, false);
+
+            const leftMostBit = value & 0x80;
+            result |= leftMostBit;
+
+            target.set(result);
+
+            return { zero: result === 0, carry };
+        };
+    }
+
+    private buildSRLInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [SRL] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const result = ALU.shiftRight8(target.get(), false);
+            target.set(result.result);
+
+            return result;
+        };
+    }
+
     private readonly instructionBuilderMap: InstructionBuilderMap = {
         'NOP': this.buildNOPInstruction,
         'LD': this.buildLDInstruction,
@@ -376,6 +618,26 @@ export default class CPU {
         'CP': this.buildCPInstruction,
         'INC': this.buildINCInstruction,
         'DEC': this.buildDECInstruction,
+        'SWAP': this.buildSWAPInstruction,
+        'DAA': this.buildDAAInstruction,
+        'CPL': this.buildCPLInstruction,
+        'CCF': this.buildCCFInstruction,
+        'SCF': this.buildSCFInstruction,
+        'HALT': this.buildHALTInstruction,
+        'STOP': this.buildSTOPInstruction,
+        'DI': this.buildDIInstruction,
+        'EI': this.buildEIInstruction,
+        'RLCA': this.buildRLCAInstruction,
+        'RLA': this.buildRLAInstruction,
+        'RRCA': this.buildRRCAInstruction,
+        'RRA': this.buildRRAInstruction,
+        'RLC': this.buildRLCInstruction,
+        'RL': this.buildRLInstruction,
+        'RRC': this.buildRRCInstruction,
+        'RR': this.buildRRInstruction,
+        'SLA': this.buildSLAInstruction,
+        'SRA': this.buildSRAInstruction,
+        'SRL': this.buildSRLInstruction,
     };
 
     // returns a getter setter operation object of that operand
@@ -406,33 +668,6 @@ export default class CPU {
         }
 
         throw new Error(`Unsupported operand [${operand}]`);
-    }
-
-    private readImmediateByte(): number {
-        return this.mmu.getByte(this.read('PC') + 1);
-    }
-
-    private readImmediateWord(): number {
-        return this.mmu.getWord(this.read('PC') + 1);
-    }
-
-    private updateClock(cycles: number) {
-        // TODO
-    }
-
-    private updatePC(length: number) {
-        const result = this.read('PC') + length;
-        this.PC.set(result);
-    }
-
-    private increment(type: RegisterType) {
-        const val = byteBuffer.value(this[type].data()) + 1;
-        this[type].set(val);
-    }
-
-    private decrement(type: RegisterType) {
-        const val = byteBuffer.value(this[type].data()) - 1;
-        this[type].set(val);
     }
 
     private toMemoryOperator(type: RegisterType, sign?: '+' | '-'): Operator<number> {

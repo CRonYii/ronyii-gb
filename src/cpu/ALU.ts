@@ -75,5 +75,49 @@ export default {
             result,
             zero: result === 0
         };
+    },
+    swap8(value: number): ALUResult {
+        const upper = value & 0xf0;
+        const lower = value & 0x0f;
+        const result = (upper >> 4) | (lower << 4);
+
+        return {
+            result,
+            zero: result === 0
+        };
+    },
+    shiftLeft8(value: number, LSB: boolean, carry?: boolean): ALUResult {
+        const leftMostBit = (value & 0x80) ? 1 : 0;
+        let result = value << 1;
+        if (LSB) {
+            const padBit = (carry == undefined)
+                ? leftMostBit
+                : carry === true ? 1 : 0;
+            result += padBit;
+        }
+        result &= 0xff;
+
+        return {
+            result,
+            zero: result === 0,
+            carry: leftMostBit === 1
+        };
+    },
+    shiftRight8(value: number, MSB: boolean, carry?: boolean): ALUResult {
+        const rightMostBit = (value & 0x1) ? 0x80 : 0;
+        let result = value >> 1;
+        if (MSB) {
+            const padBit = (carry == undefined)
+                ? rightMostBit
+                : carry === true ? 0x80 : 0;
+            result += padBit;
+        }
+        result &= 0xff;
+
+        return {
+            result,
+            zero: result === 0,
+            carry: rightMostBit === 0x80
+        };
     }
 };
