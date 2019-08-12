@@ -1,4 +1,6 @@
 import { ByteBuffer, byteBuffer, ByteBufferable } from "../utils/ByteBuffer";
+import Helper from "../utils/Helper";
+import { debugEnabled } from "../index";
 
 export interface MemoryOptions {
     size: number,
@@ -35,6 +37,9 @@ export class Memory {
         const controller = this.getController(address);
         if (controller) {
             controller.set(this, address, data);
+        }
+        if (debugEnabled) {
+            console.log(`${Helper.toHexText(address, 4)} => ${Helper.toHexText(data, 4)}`);
         }
         this._data[address] = data;
     }
