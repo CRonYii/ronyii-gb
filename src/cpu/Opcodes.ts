@@ -3827,7 +3827,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3842,7 +3842,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3857,7 +3857,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3872,7 +3872,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3887,7 +3887,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3902,7 +3902,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3917,7 +3917,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -3932,7 +3932,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3947,7 +3947,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3962,7 +3962,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3977,7 +3977,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3992,7 +3992,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4007,7 +4007,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4022,7 +4022,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4037,7 +4037,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4052,7 +4052,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4067,7 +4067,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4082,7 +4082,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4097,7 +4097,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4112,7 +4112,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4127,7 +4127,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4142,7 +4142,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4157,7 +4157,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4172,7 +4172,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4187,7 +4187,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4202,7 +4202,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4217,7 +4217,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4232,7 +4232,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4247,7 +4247,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4262,7 +4262,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4277,7 +4277,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4292,7 +4292,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4307,7 +4307,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4322,7 +4322,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4337,7 +4337,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4352,7 +4352,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4367,7 +4367,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4382,7 +4382,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4397,7 +4397,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4412,7 +4412,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4427,7 +4427,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4442,7 +4442,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4457,7 +4457,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4472,7 +4472,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4487,7 +4487,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4502,7 +4502,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4517,7 +4517,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4532,7 +4532,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4547,7 +4547,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4562,7 +4562,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4577,7 +4577,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4592,7 +4592,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4607,7 +4607,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4622,7 +4622,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4637,7 +4637,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4652,7 +4652,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4667,7 +4667,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4682,7 +4682,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4697,7 +4697,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4712,7 +4712,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4727,7 +4727,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4742,7 +4742,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4757,7 +4757,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4772,7 +4772,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "operands": [
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4788,7 +4788,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4804,7 +4804,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4820,7 +4820,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4836,7 +4836,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4852,7 +4852,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4868,7 +4868,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4884,7 +4884,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -4900,7 +4900,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4916,7 +4916,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4932,7 +4932,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4948,7 +4948,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4964,7 +4964,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4980,7 +4980,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -4996,7 +4996,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5012,7 +5012,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5028,7 +5028,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5044,7 +5044,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5060,7 +5060,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5076,7 +5076,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5092,7 +5092,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5108,7 +5108,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5124,7 +5124,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5140,7 +5140,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5156,7 +5156,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5172,7 +5172,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5188,7 +5188,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5204,7 +5204,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5220,7 +5220,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5236,7 +5236,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5252,7 +5252,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5268,7 +5268,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5284,7 +5284,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5300,7 +5300,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5316,7 +5316,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5332,7 +5332,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5348,7 +5348,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5364,7 +5364,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5380,7 +5380,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5396,7 +5396,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5412,7 +5412,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5428,7 +5428,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5444,7 +5444,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5460,7 +5460,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5476,7 +5476,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5492,7 +5492,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5508,7 +5508,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5524,7 +5524,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5540,7 +5540,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5556,7 +5556,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5572,7 +5572,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5588,7 +5588,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5604,7 +5604,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5620,7 +5620,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5636,7 +5636,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5652,7 +5652,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5668,7 +5668,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5684,7 +5684,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5700,7 +5700,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5716,7 +5716,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5732,7 +5732,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5748,7 +5748,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5764,7 +5764,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5780,7 +5780,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5796,7 +5796,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5812,7 +5812,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5828,7 +5828,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5844,7 +5844,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5860,7 +5860,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5876,7 +5876,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5892,7 +5892,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5908,7 +5908,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -5924,7 +5924,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5940,7 +5940,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5956,7 +5956,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5972,7 +5972,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -5988,7 +5988,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6004,7 +6004,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6020,7 +6020,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6036,7 +6036,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6052,7 +6052,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6068,7 +6068,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6084,7 +6084,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6100,7 +6100,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6116,7 +6116,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6132,7 +6132,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6148,7 +6148,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6164,7 +6164,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6180,7 +6180,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6196,7 +6196,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6212,7 +6212,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6228,7 +6228,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6244,7 +6244,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6260,7 +6260,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6276,7 +6276,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6292,7 +6292,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6308,7 +6308,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6324,7 +6324,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6340,7 +6340,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6356,7 +6356,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6372,7 +6372,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6388,7 +6388,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6404,7 +6404,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6420,7 +6420,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6436,7 +6436,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6452,7 +6452,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6468,7 +6468,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6484,7 +6484,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6500,7 +6500,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6516,7 +6516,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6532,7 +6532,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6548,7 +6548,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6564,7 +6564,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6580,7 +6580,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6596,7 +6596,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6612,7 +6612,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6628,7 +6628,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6644,7 +6644,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6660,7 +6660,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6676,7 +6676,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6692,7 +6692,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6708,7 +6708,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6724,7 +6724,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6740,7 +6740,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6756,7 +6756,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6772,7 +6772,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6788,7 +6788,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6804,7 +6804,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6820,7 +6820,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6836,7 +6836,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6852,7 +6852,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6868,7 +6868,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6884,7 +6884,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6900,7 +6900,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6916,7 +6916,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6932,7 +6932,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -6948,7 +6948,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "0",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6964,7 +6964,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6980,7 +6980,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -6996,7 +6996,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7012,7 +7012,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7028,7 +7028,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7044,7 +7044,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7060,7 +7060,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -7076,7 +7076,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "1",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7092,7 +7092,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7108,7 +7108,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7124,7 +7124,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7140,7 +7140,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7156,7 +7156,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7172,7 +7172,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7188,7 +7188,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -7204,7 +7204,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "2",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7220,7 +7220,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7236,7 +7236,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7252,7 +7252,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7268,7 +7268,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7284,7 +7284,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7300,7 +7300,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7316,7 +7316,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -7332,7 +7332,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "3",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7348,7 +7348,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7364,7 +7364,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7380,7 +7380,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7396,7 +7396,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7412,7 +7412,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7428,7 +7428,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7444,7 +7444,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -7460,7 +7460,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "4",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7476,7 +7476,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7492,7 +7492,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7508,7 +7508,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7524,7 +7524,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7540,7 +7540,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7556,7 +7556,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7572,7 +7572,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -7588,7 +7588,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "5",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7604,7 +7604,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7620,7 +7620,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7636,7 +7636,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7652,7 +7652,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7668,7 +7668,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7684,7 +7684,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7700,7 +7700,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -7716,7 +7716,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "6",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7732,7 +7732,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "B"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7748,7 +7748,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "C"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7764,7 +7764,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "D"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7780,7 +7780,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "E"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7796,7 +7796,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "H"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7812,7 +7812,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "L"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -7828,7 +7828,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "(HL)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             16
         ],
@@ -7844,7 +7844,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
             "7",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
