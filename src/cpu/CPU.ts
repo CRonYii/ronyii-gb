@@ -99,7 +99,7 @@ export default class CPU {
     private readonly L = this.HL.low;
 
     private readonly SP = new Register16(0xfffe);
-    private readonly PC = new Register16(0x0100);
+    private readonly PC = new Register16(0x0000);
 
     constructor(configs: {
         mmu: MMU,

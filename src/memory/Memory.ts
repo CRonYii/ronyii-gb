@@ -69,7 +69,7 @@ export class Memory {
         }
         if (defaultValues) {
             const size = end - start + 1;
-            if (defaultValues.length !== size) {
+            if (defaultValues.length >= size) {
                 throw new Error(`Incompatiable default value size, expect ${size} but got ${defaultValues.length}`);
             }
             this._data.set(defaultValues, start);
