@@ -1,6 +1,5 @@
 import { LOGIC_FRAME_PER_SECOND } from "./constants/index";
 import CPU from "./cpu/CPU";
-import { CB_OPCODES, OPCODES } from "./cpu/Opcodes";
 import MMU from "./memory/MMU";
 import getROMmeta from "./memory/ROM";
 import Helper from "./utils/Helper";
@@ -10,8 +9,6 @@ export default class Emulator {
     private readonly mmu: MMU = new MMU();
     private readonly cpu: CPU = new CPU({
         mmu: this.mmu,
-        instructionSetDefinition: OPCODES,
-        cbInstructionSetDefinition: CB_OPCODES,
         debuggerConfig: {
             breakpoints: [
                 { type: 'PC', value: 0x0100 }

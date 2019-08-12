@@ -5,7 +5,7 @@ import Helper from "../utils/Helper";
 import ALU, { ALUResult } from "./ALU";
 import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
-import { FlagAffection, Opcode } from "./Opcodes";
+import { FlagAffection, Opcode, OPCODES, CB_OPCODES } from "./Opcodes";
 import { Register16 } from "./Register16";
 import { debugEnabled } from "../index";
 
@@ -79,8 +79,6 @@ interface InstructionBuilderMap {
 
 export interface CPUConfig {
     mmu: MMU,
-    instructionSetDefinition: Array<Opcode | null>,
-    cbInstructionSetDefinition: Array<Opcode | null>,
     debuggerConfig?: CPUDebuggerConfig
 }
 
@@ -130,8 +128,8 @@ export default class CPU {
 
     constructor(configs: CPUConfig) {
         this.mmu = configs.mmu;
-        this.instructionSet = this.buildInstructionSet(configs.instructionSetDefinition);
-        this.cbInstructionSet = this.buildInstructionSet(configs.cbInstructionSetDefinition);
+        this.instructionSet = this.buildInstructionSet(OPCODES);
+        this.cbInstructionSet = this.buildInstructionSet(CB_OPCODES);
         this.debuggerConfig = configs.debuggerConfig;
     }
 
