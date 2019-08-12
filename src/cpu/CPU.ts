@@ -82,10 +82,10 @@ export default class CPU {
     private readonly instructionSet: InstructionSet;
     private readonly cbInstructionSet: InstructionSet;
 
-    private readonly AF = new CombinedRegister(0x01b0);
-    private readonly BC = new CombinedRegister(0x0013);
-    private readonly DE = new CombinedRegister(0x00d8);
-    private readonly HL = new CombinedRegister(0x014d);
+    private readonly AF = new CombinedRegister();
+    private readonly BC = new CombinedRegister();
+    private readonly DE = new CombinedRegister();
+    private readonly HL = new CombinedRegister();
 
     private readonly A = this.AF.high;
     private readonly F = new FlagRegister(this.AF.low);
@@ -99,8 +99,8 @@ export default class CPU {
     private readonly H = this.HL.high;
     private readonly L = this.HL.low;
 
-    private readonly SP = new Register16(0xfffe);
-    private readonly PC = new Register16(0x0000);
+    private readonly SP = new Register16();
+    private readonly PC = new Register16();
 
     constructor(configs: {
         mmu: MMU,
@@ -195,6 +195,15 @@ export default class CPU {
         // TODO
     }
 
+    private initRegisters() {
+        this.AF.set(0x01b0);
+        this.BC.set(0x0013);
+        this.DE.set(0x00d8);
+        this.HL.set(0x014d);
+        this.SP.set(0xfffe);
+        this.PC.set(0x0100);
+    }
+
     private buildInstructionSet(defs: Array<Opcode | null>): InstructionSet {
         return defs.map((def) => {
             if (!def) {
@@ -239,7 +248,7 @@ export default class CPU {
                 setFlag('subtract', def.setSubtract, subtract);
                 setFlag('halfCarry', def.setHalfCarry, halfCarry);
                 setFlag('carry', def.setCarry, carry);
-                
+
                 if (debugEnabled)
                     console.log(def.label);
             };
