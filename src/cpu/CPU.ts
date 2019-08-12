@@ -167,6 +167,22 @@ export default class CPU {
         };
     }
 
+    private buildLDHLInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [LD] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [SP, n] = def.operands.map((operand) => this.parse(operand));
+
+        return () => {
+            const a = SP.get();
+            const b = n.get();
+            const sum = a + b;
+            this.HL.set(sum);
+            return {
+                carry: sum > 0xffff,
+                halfCarry: ((SP.get() ^ b ^ a) & 0x100) !== 0
+            };
+        };
+    }
+
     private buildADDInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
         const [target, source] = def.operands.map((operand) => this.parse(operand));
@@ -223,9 +239,6 @@ export default class CPU {
         }
         if (isDataType(operand)) {
             return this.toImmediateMemoryOperator(operand);
-        }
-        if (operand === 'SP+r8') {
-            return this.toSPR8Operator();
         }
 
         throw new Error(`Unsupported operand [${operand}]`);
@@ -332,16 +345,6 @@ export default class CPU {
         };
     }
 
-    private toSPR8Operator(): Operator<number> {
-        return {
-            size: 2,
-            set: (byte: number) => { throw new Error('Unsupported operation'); },
-            get: () => {
-                return Helper.toSigned8(this.readImmediateByte()) + this.read('SP');
-            }
-        };
-    }
-
     private read(type: RegisterType): number {
         return byteBuffer.value(this[type].data());
     }
@@ -354,6 +357,7 @@ export default class CPU {
         'NOP': this.buildNOPInstruction,
         'LD': this.buildLDInstruction,
         'LDH': this.buildLDInstruction,
+        'LDHL': this.buildLDHLInstruction,
         'ADD': this.buildADDInstruction,
     };
 

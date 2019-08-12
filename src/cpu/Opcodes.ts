@@ -12,7 +12,7 @@ export interface Opcode {
 
 // 45 operations
 export type Operation =
-    "NOP" | "LD" | "INC" | "DEC" | "RLCA" | "ADD" | "RRCA" | "STOP" |
+    "NOP" | "LD" | "LDHL" | "INC" | "DEC" | "RLCA" | "ADD" | "RRCA" | "STOP" |
     "RLA" | "JR" | "RRA" | "DAA" | "CPL" | "SCF" | "CCF" | "HALT" |
     "ADC" | "SUB" | "SBC" | "AND" | "XOR" | "OR" | "CP" | "RET" |
     "POP" | "JP" | "CALL" | "PUSH" | "RST" | "PREFIX" | "RETI" | "LDH" |
@@ -3727,11 +3727,11 @@ export const OPCODES: Array<Opcode | null> = [
         "setCarry": false
     },
     {
-        "label": "LD HL,SP+r8",
-        "operation": "LD",
+        "label": "LDHL SP,r8",
+        "operation": "LDHL",
         "operands": [
-            "HL",
-            "SP+r8"
+            "SP",
+            "r8"
         ],
         "opcode_length": 2,
         "clock_cycles": [
