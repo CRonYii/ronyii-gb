@@ -220,17 +220,6 @@ export default class CPU {
                     get: () => { return this.readImmediateWord(); }
                 };
         }
-        /*      var a = Z80._r.a;
-                var m = MMU.rb(Z80._r.pc);
-                Z80._r.a += m;
-                Z80._r.pc++;
-                Z80._r.f = (Z80._r.a > 255) ? 0x10 : 0;
-                Z80._r.a &= 255;
-                if (!Z80._r.a)
-                    Z80._r.f |= 0x80;
-                if ((Z80._r.a ^ a ^ m) & 0x10)
-                    Z80._r.f |= 0x20;
-                Z80._r.m = 2; */
     }
 
     private static toRegisterOperator(reg: Register): Operator<number> {
