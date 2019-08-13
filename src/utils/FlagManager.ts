@@ -18,7 +18,7 @@ export default class FlagManager<T extends string> {
     }
 
     set(flag: T, value: boolean) {
-        const flagIndex = this.flagAttributes[flag];
+        const flagIndex = 1 << this.flagAttributes[flag];
 
         let byte = this.flagControl.get();
 
@@ -30,7 +30,7 @@ export default class FlagManager<T extends string> {
     }
 
     get(flag: T): boolean {
-        const flagIndex = this.flagAttributes[flag];
+        const flagIndex = 1 << this.flagAttributes[flag];
 
         return (this.flagControl.get() & flagIndex) !== 0;
     }

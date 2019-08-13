@@ -75,8 +75,8 @@ function initCPUInfoDisplayer() {
         return cell;
     });
 
-    const instructionLabel = document.createElement('div');
-    instructionLabel.innerText = `Next Opcode: `;
+    const cpuInfoLabel = document.createElement('div');
+    cpuInfoLabel.innerText = `Next Opcode:\nHALT: `;
 
     const update = () => {
         const info: any = emulator.getCPUInfo();
@@ -86,7 +86,7 @@ function initCPUInfoDisplayer() {
         const code = emulator.getByteAt(info.PC);
         const op = OPCODES[code];
         if (op) {
-            instructionLabel.innerText = `Next Opcode: ${op.label}`;
+            cpuInfoLabel.innerText = `Next Opcode: ${op.label}\nHALT: ${info.halt}`;
         }
     }
 
@@ -121,7 +121,7 @@ function initCPUInfoDisplayer() {
     memoryAddressInput.width = 200;
     memoryAddressInput.oninput = () => {
         const address = Number(memoryAddressInput.value);
-        
+
         if (!isNaN(address)) {
             const val = Helper.toHexText(emulator.getByteAt(address), 2);
             memoryAddressLabel.innerText = `Value at ${memoryAddressInput.value} is ${val}`;
@@ -129,7 +129,7 @@ function initCPUInfoDisplayer() {
     }
 
     cpuInfoDiv.appendChild(table);
-    cpuInfoDiv.appendChild(instructionLabel);
+    cpuInfoDiv.appendChild(cpuInfoLabel);
     cpuInfoDiv.appendChild(startButton);
     cpuInfoDiv.appendChild(stepButton);
     cpuInfoDiv.appendChild(updateButton);

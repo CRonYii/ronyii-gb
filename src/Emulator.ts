@@ -72,6 +72,7 @@ export default class Emulator {
             HL: this.cpu.read('HL'),
             SP: this.cpu.read('SP'),
             PC: this.cpu.read('PC'),
+            halt: this.cpu.isHalt()
         }
     }
 

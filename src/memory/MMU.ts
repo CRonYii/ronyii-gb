@@ -5,11 +5,11 @@ import MemorySegmentDefinitions from "./MemorySegmentDefinitions";
 import FlagManager from "../utils/FlagManager";
 
 const InterruptsFlags = {
-    'VBlank': 1,
-    'LCDC': 1 << 1,
-    'Timer': 1 << 2,
-    'Serial': 1 << 3,
-    'Joypad': 1 << 4,
+    'VBlank': 0,
+    'LCDC': 1,
+    'Timer': 2,
+    'Serial': 3,
+    'Joypad': 4,
 };
 
 export type InterruptFlagsEKey = keyof typeof InterruptsFlags;
