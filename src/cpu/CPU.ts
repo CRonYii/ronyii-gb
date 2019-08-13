@@ -413,10 +413,10 @@ export default class CPU {
 
         let addition: (a: number, b: number) => ALUResult;
 
-        if (source.size === 1) {
-            addition = ALU.add8;
-        } else if (source.size === 2) {
+        if (source.size === 2 || target.size === 2) {
             addition = ALU.add16;
+        } else if (source.size === 1 && target.size === 1) {
+            addition = ALU.add8;
         } else {
             throw new Error('Unsupported Addition building config');
         }
@@ -435,10 +435,10 @@ export default class CPU {
 
         let addition: (a: number, b: number, carry: boolean) => ALUResult;
 
-        if (source.size === 1) {
-            addition = ALU.add8;
-        } else if (source.size === 2) {
+        if (source.size === 2 || target.size === 2) {
             addition = ALU.add16;
+        } else if (source.size === 1 && target.size === 1) {
+            addition = ALU.add8;
         } else {
             throw new Error('Unsupported Addition building config');
         }
@@ -1021,25 +1021,29 @@ export default class CPU {
 
     private toMemoryOperator(type: RegisterType, sign?: '+' | '-'): Operator<number> {
         const reg = this[type];
-        let address = byteBuffer.value(reg.data());
-        if (reg.size() === 1) {
-            address = 0xff00 | address;
+        const getAddress = (): number => {
+            let address = byteBuffer.value(reg.data());
+            if (reg.size() === 1) {
+                address = 0xff00 | address;
+            }
+            return address;
         }
         const handleSign = () => {
+            if (!sign) return;
             if (sign === '+') {
                 this.increment(type);
-            } else {
+            } else if (sign === '-') {
                 this.decrement(type);
             }
         };
         return {
             size: 1,
             set: (byte: number) => {
-                this.mmu.setByte(address, byte);
+                this.mmu.setByte(getAddress(), byte);
                 handleSign();
             },
             get: () => {
-                const val = this.mmu.getByte(address);
+                const val = this.mmu.getByte(getAddress());
                 handleSign();
                 return val;
             }
@@ -1070,7 +1074,7 @@ export default class CPU {
                 return {
                     size: 1,
                     set: (byte: number) => { this.mmu.setByte(this.readImmediateByte() | 0xff00, byte) },
-                    get: () => { return this.readImmediateByte() | 0xff00; }
+                    get: () => { return this.mmu.getByte(this.readImmediateByte() | 0xff00); }
                 };
             case 'a16':
                 return {
@@ -1096,6 +1100,10 @@ export default class CPU {
 
     public isHalt(): boolean {
         return this.haltFlag;
+    }
+
+    public isInterrupsEnabled(): boolean {
+        return this.interruptsMasterEnable;
     }
 
     toString() {

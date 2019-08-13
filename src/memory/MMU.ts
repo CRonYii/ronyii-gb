@@ -65,11 +65,12 @@ export default class MMU extends Memory {
     }
 
     setWord(address: number, data: number) {
-        this.set(address, MMU.WORD_NUM_BYTES, data);
+        this.setByte(address, data & 0xff);
+        this.setByte(address + 1, data >> 8);
     }
 
     getWord(address: number): number {
-        return byteBuffer.value(this.get(address, MMU.WORD_NUM_BYTES));
+        return this.getByte(address) + (this.getByte(address + 1) << 8);
     }
 
     shouldInterrupt(key: InterruptFlagsEKey) {
