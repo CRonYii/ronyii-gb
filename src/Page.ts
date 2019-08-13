@@ -110,7 +110,7 @@ function initCPUInfoDisplayer() {
     memoryAddressInput.oninput = () => {
         const address = Number(memoryAddressInput.value);
         
-        if (address !== NaN) {
+        if (!isNaN(address)) {
             const val = Helper.toHexText(emulator.getByteAt(address), 4);
             memoryAddressLabel.innerText = `Value at ${memoryAddressInput.value} is ${val}`;
         }
