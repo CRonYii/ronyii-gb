@@ -41,8 +41,8 @@ export class CanvasDisplay implements Display {
 
     setPixel(x: number, y: number, color: number) {
         const base = (x * this.scale) + ((y * this.scale) * this.width);
-        for (let r = 1; r <= this.scale; r++) {
-            for (let c = 1; c <= this.scale; c++) {
+        for (let r = 0; r < this.scale; r++) {
+            for (let c = 0; c < this.scale; c++) {
                 this.displayData[base + c + (r * this.width)] = color;
             }
         }
