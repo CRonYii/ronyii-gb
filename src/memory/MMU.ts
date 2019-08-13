@@ -2,7 +2,7 @@ import { MEMORY_SIZE } from "../constants/index";
 import { byteBuffer } from "../utils/ByteBuffer";
 import { Memory } from "./Memory";
 import MemorySegmentDefinitions from "./MemorySegmentDefinitions";
-import FlagManager from "./FlagManager";
+import FlagManager from "../utils/FlagManager";
 
 const InterruptsFlags = {
     'VBlank': 1,

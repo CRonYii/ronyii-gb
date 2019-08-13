@@ -7,7 +7,7 @@ export interface ClockConfig {
 
 export type ClockTaskResult = number | 'pause';
 
-export type ClockTask = () => ClockTaskResult;
+export type ClockTask = (clockCycles: number) => ClockTaskResult;
 
 export default class Clock {
 
@@ -44,7 +44,7 @@ export default class Clock {
             this.clockCycles = 0;
             while (!this.isPaused() && this.clockCycles < this.cyclesPerTick) {
                 for (let task of this.tasks) {
-                    const cyclesTaken = task();
+                    const cyclesTaken = task(this.clockCycles);
                     if (cyclesTaken === 'pause') {
                         this.pause();
                         break;
