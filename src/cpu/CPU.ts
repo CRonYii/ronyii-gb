@@ -1,5 +1,5 @@
 import { debugEnabled } from "../index";
-import MMU from "../memory/MMU";
+import MMU, { InterruptFlagsEKey } from "../memory/MMU";
 import { byteBuffer } from "../utils/ByteBuffer";
 import Helper from "../utils/Helper";
 import ALU, { ALUResult } from "./ALU";
@@ -50,15 +50,21 @@ function parseByteIndex(operand: string): number {
     throw new Error('Expected a number in range [0, 7]');
 }
 
-const specialAddresses = [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38];
+const specialAddresses = [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60];
 
-function parseSpecialAddress(operand: string): number {
+type RSTAddress = 0x00 | 0x08 | 0x10 | 0x18 | 0x20 | 0x28 | 0x30 | 0x38 | 0x40 | 0x48 | 0x50 | 0x58 | 0x60;
+
+function isRSTAddress(arg: number): arg is RSTAddress {
+    return specialAddresses.includes(arg);
+}
+
+function parseRSTAddress(operand: string): RSTAddress {
     operand = '0x' + operand.substring(0, operand.length - 1);
     const val = Number(operand);
-    if (specialAddresses.includes(val)) {
+    if (isRSTAddress(val)) {
         return val;
     };
-    throw new Error('Expected a number one of [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38], got ' + operand);
+    throw new Error('Expected a number one of [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60], got ' + operand);
 }
 
 interface ExecutionResult {
@@ -155,11 +161,37 @@ export default class CPU {
             result = op(); // execute
         }
         if (this.interruptsMasterEnable) {
-            this.halt(false);
-            this.setInterrupts(false);
-            console.warn(`CPU INTERRUPTS => IE: ${Helper.toHexText(this.mmu.getByte(0xffff), 4)}, IF: ${Helper.toHexText(this.mmu.getByte(0xff0f), 4)}`);
+            if (this.mmu.shouldInterrupt('VBlank')) {
+                this.interrupt('VBlank');
+            } else if (this.mmu.shouldInterrupt('LCDC')) {
+                this.interrupt('LCDC');
+            } else if (this.mmu.shouldInterrupt('Timer')) {
+                this.interrupt('Timer');
+            } else if (this.mmu.shouldInterrupt('Serial')) {
+                this.interrupt('Serial');
+            } else if (this.mmu.shouldInterrupt('Joypad')) {
+                this.interrupt('Joypad');
+            }
         }
         return result;
+    }
+
+    private interrupt(type: InterruptFlagsEKey) {
+        this.halt(false); // restore the cpu from HALT to perform interrupts
+        this.setInterrupts(false); // disable master enable because only one interrupt can take place at the same time
+        this.mmu.interruptFlagsManager.set(type, false); // disable the flag since it's in progess
+        if (type === 'VBlank') {
+            this.performRST(0x40);
+        } else if (type === 'LCDC') {
+            this.performRST(0x48);
+        } else if (type === 'Timer') {
+            this.performRST(0x50);
+        } else if (type === 'Serial') {
+            this.performRST(0x58);
+        } else if (type === 'Joypad') {
+            this.performRST(0x60);
+        }
+        console.warn(`CPU INTERRUPTS => ${type}`);
     }
 
     private fetchCode(): number {
@@ -238,6 +270,12 @@ export default class CPU {
     private setInterrupts(flag: boolean) {
         console.warn('CPU SET INTERRUPTS => ' + flag);
         this.interruptsMasterEnable = flag;
+    }
+
+    private performRST(address: RSTAddress) {
+        // TODO: rsv() save the current register values temporarily
+        this.pushStack(this.read('PC'));
+        this.PC.set(address);
     }
 
     private debug(): boolean {
@@ -844,12 +882,10 @@ export default class CPU {
     private buildRSTInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [RST] Insturction:\n' + JSON.stringify(def, null, 4));
 
-        const target = parseSpecialAddress(def.operands[0]);
+        const target = parseRSTAddress(def.operands[0]);
 
         return () => {
-            // TODO: rsv() save the current register values temporarily
-            this.pushStack(this.read('PC'));
-            this.PC.set(target);
+            this.performRST(target);
             return {}
         };
     }
