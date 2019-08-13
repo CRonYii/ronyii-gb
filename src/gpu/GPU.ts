@@ -72,7 +72,7 @@ export default class GPU {
         // start with the top-left corner of the 160 * 144 pixels to be drawn
         for (let i = 0; i < 20; i++) {
             const tilePtr = this.mmu.getByte(tilePtrBaseAddr + i);
-            const tileline = this.getTileline(tilePtr + y);
+            const tileline = this.getTileline(tilePtr + (y * 2));
             for (let j = 0; j < tileline.length; j++) {
                 const color = this.getColor(tileline[x]); // one of the four color
                 this.display.setPixel((i * 8) + j, this.currentLine, color);
@@ -105,11 +105,14 @@ export default class GPU {
     }
 
     public getTileAddress(tileIdx: number) {
-        let address = tileIdx & 0xff;
+        let address = (tileIdx & 0xff);
         if (this.lcdc.get('bg_tile_base')) { // (0x8000 ~ 0x8fff) unsigned size: 2^12 (4096)
+            address <<= 4;
             address += 0x8000;
         } else { // (0x8800 ~ 0x97ff) signed
-            address = Helper.toSigned8(address) + 128 + 0x8800;
+            address = Helper.toSigned8(address) + 128;
+            address <<= 4;
+            address += 0x8800
         }
 
         return address;
@@ -127,11 +130,9 @@ export default class GPU {
     }
 
     // precondition: address % 2 === 0
-    public getTileline(address: number, offset = 0) {
-        address = this.getTileAddress(address);
-
-        const byte1 = this.mmu.getByte(address);
-        const byte2 = this.mmu.getByte(address + 1);
+    public getTileline(tilelinePtr: number, offset = 0) {
+        const byte1 = this.mmu.getByte(tilelinePtr);
+        const byte2 = this.mmu.getByte(tilelinePtr + 1);
         const tiles = new Array<number>(8);
 
         for (let i = 0; i < 8; i++) {
