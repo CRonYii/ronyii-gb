@@ -37,19 +37,58 @@ export default class GPU {
     }
 
     /**
-     * render one line of background
+     * Render one horizontal scanline
      */
     private renderScan() {
-        const mapbaseFlag = this.lcdc.get('bg_map_base');
-        let mapbase = mapbaseFlag ? 0x9c00 : 0x9800; // the tile map to be used based on LCDC flag (0x9800 / 0x9c00)
+        this.renderBackground();
+    }
 
+    /**
+     * render one line of background
+     */
+    private renderBackground() {
+        // SCX/SCY indicates which pixel to start in the 256 * 256 pixels BG map
+        // here we are accessing the pixel by finding the tile first
         const scx = this.mem.getByte('SCX');
         const tileIdx = (scx >> 3) & 31; // which tile in the line [0, 31] 5 bits
-        let x = scx & 7; // where in the tileline to start [0, 7] 3 bits
+        const x = scx & 7; // where in the tileline to start [0, 7] 3 bits
 
         const scy = this.mem.getByte('SCY');
         const lineIdx = (((this.currentLine + scy) & 0xff) >> 3); // which line of tiles to use [0, 31] 5 bits
         const y = (this.currentLine + scy) & 7; // which line of pixels to use in that tile [0, 7] 3 bits
+
+        const bgMapBaseAddr = this.getBGTileAddress(tileIdx, lineIdx);
+
+        this.renderBGScan(bgMapBaseAddr, x, y);
+    }
+
+    /**
+     * 
+     * @param bgMapBaseAddr the absolute memory address of the first background tile reference (top-left corner)
+     * @param x the x pixel offset
+     * @param y the y pixel offset
+     */
+    private renderBGScan(bgMapBaseAddr: number, x: number, y: number) {
+        // start with the top-left corner of the 160 * 144 pixels to be drawn
+        for (let i = 0; i < 20; i++) {
+            const tilePtr = this.mmu.getByte(bgMapBaseAddr + i);
+            const tileline = this.getTileline(tilePtr + y);
+            for (let j = 0; j < tileline.length; j++) {
+                const color = this.getColor(tileline[x]); // one of the four color
+                this.display.setPixel((i * 8) + j, this.currentLine, color);
+                x = (x + 1) & 8;
+            }
+        }
+    }
+
+    /**
+     * Returns the absolute address in the BG map
+     * @param tileIdx [0, 31]
+     * @param lineIdx [0, 31]
+     */
+    private getBGTileAddress(tileIdx: number, lineIdx: number) {
+        const mapbaseFlag = this.lcdc.get('bg_map_base');
+        let mapbase = mapbaseFlag ? 0x9c00 : 0x9800; // the tile map to be used based on LCDC flag (0x9800 / 0x9c00)
 
         /**
          * First 6 bits sets the base address,
@@ -58,19 +97,9 @@ export default class GPU {
          * in other word, the last 10 bits selects one out of 2^10 (1024)
          * [mapbase, lineIdx, tileIdx]
          */
-        mapbase += (lineIdx << 5); // line number is bit 5 ~ 9
+        mapbase += (lineIdx << 5) + tileIdx;
 
-        // start with the top-left corner of the 160 * 144 pixels to be drawn
-        for (let i = 0; i < 20; i++) {
-            const tilePtr = this.mmu.getByte(mapbase + tileIdx + i);
-            const tileline = this.getTileline(tilePtr + y);
-            for (let j = 0; j < tileline.length; j++) {
-                // this.display.setPixel();
-                const color = this.getColor(tileline[x]); // one of the four color
-                this.display.setPixel((i * 8) + j, this.currentLine, color);
-                x = (x + 1) & 8;
-            }
-        }
+        return mapbase;
     }
 
     // precondition: address % 2 === 0
@@ -97,9 +126,16 @@ export default class GPU {
         return tiles;
     }
 
+    static PALETTE = [0xffffffff, 0xffc0c0c0, 0xff606060, 0x00000000];
+
     private getColor(code: number) {
-        // TODO: fetch real color from palettes
-        return [0x222222ff, 0x666666ff, 0xaaaaaaff, 0xffffffff][code];
+        const palette = this.mem.getByte('BGP');
+        return [
+            GPU.PALETTE[(palette >> 6) & 0b11],
+            GPU.PALETTE[(palette >> 4) & 0b11],
+            GPU.PALETTE[(palette >> 2) & 0b11],
+            GPU.PALETTE[(palette) & 0b11],
+        ][code];
     }
 
     /**
