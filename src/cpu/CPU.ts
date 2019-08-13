@@ -192,7 +192,9 @@ export default class CPU {
         } else if (type === 'Joypad') {
             this.performRST(0x60);
         }
-        console.warn(`CPU INTERRUPTS => ${type}`);
+        if (debugEnabled.interrupts) {
+            console.warn(`CPU INTERRUPTS => ${type}`);
+        }
     }
 
     private fetchCode(): number {
@@ -259,7 +261,8 @@ export default class CPU {
     }
 
     private halt(flag: boolean) {
-        console.warn('CPU HALT => ' + flag);
+        if (flag)
+            console.warn('CPU HALT => ' + flag);
         this.haltFlag = flag;
     }
 
@@ -269,7 +272,6 @@ export default class CPU {
     }
 
     private setInterrupts(flag: boolean) {
-        console.warn('CPU SET INTERRUPTS => ' + flag);
         this.interruptsMasterEnable = flag;
     }
 

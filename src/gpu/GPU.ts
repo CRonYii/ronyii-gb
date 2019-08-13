@@ -171,7 +171,8 @@ export default class GPU {
 
         if (this.currentLine === 143) { // done scanning for the 144 lines
             this.linemode = 1; // goes into VBlank (goes back to top-left corner)
-            this.display.requestRefresh(); // TODO: VBlank interrupt
+            this.display.requestRefresh();
+            this.mmu.interruptFlagsManager.set('VBlank', true);
 
         } else {
             this.linemode = 2;

@@ -3,7 +3,8 @@ import { initPage } from "./Page";
 
 export const debugEnabled = {
     printMemory: false,
-    breakpoints: true
+    breakpoints: true,
+    interrupts: true
 };
 
 const { display } = initPage();
