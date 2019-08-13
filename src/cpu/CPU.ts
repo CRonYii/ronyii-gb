@@ -146,6 +146,7 @@ export default class CPU {
             }
             return this.exec();
         });
+        this.initRegisters();
     }
 
     public exec(): number {

@@ -90,6 +90,18 @@ function initCPUInfoDisplayer() {
         }
     }
 
+    const startButton = document.createElement('button');
+    startButton.innerText = 'start';
+    startButton.onclick = () => {
+        if (emulator.isPaused()) {
+            startButton.innerText = 'pause';
+            emulator.start();
+        } else {
+            startButton.innerText = 'start';
+            emulator.pause();
+        }
+    };
+
     const stepButton = document.createElement('button');
     stepButton.innerText = 'step';
     stepButton.onclick = () => {
@@ -102,7 +114,7 @@ function initCPUInfoDisplayer() {
     updateButton.onclick = update;
 
     const memoryAddressLabel = document.createElement('span');
-    memoryAddressLabel.innerText = 'Value at 0xXXXX is 0xXXXX';
+    memoryAddressLabel.innerText = 'Value at 0xXXXX is 0xXX';
 
     const memoryAddressInput = document.createElement('input');
     memoryAddressInput.type = 'text';
@@ -111,13 +123,14 @@ function initCPUInfoDisplayer() {
         const address = Number(memoryAddressInput.value);
         
         if (!isNaN(address)) {
-            const val = Helper.toHexText(emulator.getByteAt(address), 4);
+            const val = Helper.toHexText(emulator.getByteAt(address), 2);
             memoryAddressLabel.innerText = `Value at ${memoryAddressInput.value} is ${val}`;
         }
     }
 
     cpuInfoDiv.appendChild(table);
     cpuInfoDiv.appendChild(instructionLabel);
+    cpuInfoDiv.appendChild(startButton);
     cpuInfoDiv.appendChild(stepButton);
     cpuInfoDiv.appendChild(updateButton);
     cpuInfoDiv.appendChild(document.createElement('br'));

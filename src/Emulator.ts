@@ -23,7 +23,7 @@ export default class Emulator {
             mmu: this.mmu,
             debuggerConfig: {
                 breakpoints: [
-                    { type: 'PC', value: 0x0100 }
+                    // { type: 'PC', value: 0x0100 }
                 ],
                 debugger: (cpu, type, value) => {
                     this.clock.pause();
@@ -43,6 +43,8 @@ export default class Emulator {
             // TODO: load the rom
             const meta = getROMmeta(rom);
             console.log(meta);
+
+            this.mmu.set(0x0000, 0x7fff, rom);
         }
 
         this.clock.start();
@@ -56,6 +58,10 @@ export default class Emulator {
         if (this.clock.isPaused()) {
             this.cpu.exec();
         }
+    }
+
+    isPaused() {
+        return this.clock.isPaused();
     }
 
     getCPUInfo() {
