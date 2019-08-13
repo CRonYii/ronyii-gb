@@ -71,12 +71,12 @@ export default class GPU {
     private renderBGScan(tilePtrBaseAddr: number, x: number, y: number) {
         // start with the top-left corner of the 160 * 144 pixels to be drawn
         for (let i = 0; i < 20; i++) {
-            const tilePtr = this.mmu.getByte(tilePtrBaseAddr + i);
-            const tileline = this.getTileline(tilePtr + (y * 2));
+            const tileIdx = this.mmu.getByte(tilePtrBaseAddr + i);
+            const tileline = this.getTileline(this.getTileAddress(tileIdx) + (y * 2));
             for (let j = 0; j < tileline.length; j++) {
                 const color = this.getColor(tileline[x]); // one of the four color
                 this.display.setPixel((i * 8) + j, this.currentLine, color);
-                x = (x + 1) & 8;
+                x = (x + 1) & 7;
             }
         }
     }
