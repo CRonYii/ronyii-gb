@@ -43,26 +43,12 @@ function initTileViewer() {
     const div = new DivManager(tileViewerDiv);
     div.br();
 
-    const value = { line: 0, tile: 0 };
-    const loadBGTile = () => {
-        const imageData = emulator.getBGTile(value.line, value.tile);
-        display.putImageData(imageData);
-        display.requestRefresh();
-    }
-
-    div.label('Which Line: ');
-    div.input({
-        oninput: (line) => {
-            value.line = Number(line);
-            loadBGTile();
-        }, type: 'number'
-    });
-    div.br();
     div.label('Which Tile: ');
     div.input({
         oninput: (tile) => {
-            value.tile = Number(tile);
-            loadBGTile();
+            const imageData = emulator.getTile(Number(tile));
+            display.putImageData(imageData);
+            display.requestRefresh();
         }, type: 'number'
     });
 }

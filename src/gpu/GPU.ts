@@ -64,14 +64,14 @@ export default class GPU {
 
     /**
      * 
-     * @param bgMapBaseAddr the absolute memory address of the first background tile reference (top-left corner)
+     * @param tilePtrBaseAddr the absolute memory address of the first background tile reference (top-left corner)
      * @param x the x pixel offset
      * @param y the y pixel offset
      */
-    private renderBGScan(bgMapBaseAddr: number, x: number, y: number) {
+    private renderBGScan(tilePtrBaseAddr: number, x: number, y: number) {
         // start with the top-left corner of the 160 * 144 pixels to be drawn
         for (let i = 0; i < 20; i++) {
-            const tilePtr = this.mmu.getByte(bgMapBaseAddr + i);
+            const tilePtr = this.mmu.getByte(tilePtrBaseAddr + i);
             const tileline = this.getTileline(tilePtr + y);
             for (let j = 0; j < tileline.length; j++) {
                 const color = this.getColor(tileline[x]); // one of the four color
@@ -104,23 +104,40 @@ export default class GPU {
         return mapbase;
     }
 
-    // precondition: address % 2 === 0
-    public getTileline(address: number) {
-        address &= 0xff;
+    public getTileAddress(tileIdx: number) {
+        let address = tileIdx & 0xff;
         if (this.lcdc.get('bg_tile_base')) { // (0x8000 ~ 0x8fff) unsigned size: 2^12 (4096)
             address += 0x8000;
         } else { // (0x8800 ~ 0x97ff) signed
             address = Helper.toSigned8(address) + 128 + 0x8800;
         }
 
+        return address;
+    }
+
+    public getTile(tilePtr: number, x = 0, y = 0) {
+        const tile = new Array<number>(64);
+        for (let i = 0; i < 8; i++) {
+            const tileline = this.getTileline(tilePtr + y + (i * 2), x);
+            for (let j = 0; j < tileline.length; j++) {
+                tile[j + i * 8] = this.getColor(tileline[j]); // one of the four color
+            }
+        }
+        return tile;
+    }
+
+    // precondition: address % 2 === 0
+    public getTileline(address: number, offset = 0) {
+        address = this.getTileAddress(address);
+
         const byte1 = this.mmu.getByte(address);
         const byte2 = this.mmu.getByte(address + 1);
         const tiles = new Array<number>(8);
 
         for (let i = 0; i < 8; i++) {
-            const index = 1 << i;
+            const index = (1 << (7 - i));
 
-            tiles[7 - i] =
+            tiles[(i + offset) & 7] =
                 ((byte1 & index) ? 1 : 0) +
                 ((byte2 & index) ? 2 : 0);
         }
@@ -128,7 +145,7 @@ export default class GPU {
         return tiles;
     }
 
-    static PALETTE = [0xffffffff, 0xffc0c0c0, 0xff606060, 0x00000000];
+    static PALETTE = [0xff000000, 0xff606060, 0xffc0c0c0, 0xffffffff];
 
     public getColor(code: number) {
         const palette = this.mem.getByte('BGP');
