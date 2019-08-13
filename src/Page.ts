@@ -101,10 +101,28 @@ function initCPUInfoDisplayer() {
     updateButton.innerText = 'update';
     updateButton.onclick = update;
 
+    const memoryAddressLabel = document.createElement('span');
+    memoryAddressLabel.innerText = 'Value at 0xXXXX is 0xXXXX';
+
+    const memoryAddressInput = document.createElement('input');
+    memoryAddressInput.type = 'text';
+    memoryAddressInput.width = 200;
+    memoryAddressInput.oninput = () => {
+        const address = Number(memoryAddressInput.value);
+        
+        if (address !== NaN) {
+            const val = Helper.toHexText(emulator.getByteAt(address), 4);
+            memoryAddressLabel.innerText = `Value at ${memoryAddressInput.value} is ${val}`;
+        }
+    }
+
     cpuInfoDiv.appendChild(table);
     cpuInfoDiv.appendChild(instructionLabel);
     cpuInfoDiv.appendChild(stepButton);
     cpuInfoDiv.appendChild(updateButton);
+    cpuInfoDiv.appendChild(document.createElement('br'));
+    cpuInfoDiv.appendChild(memoryAddressInput);
+    cpuInfoDiv.appendChild(memoryAddressLabel);
 }
 
 export const initPage = (): {
