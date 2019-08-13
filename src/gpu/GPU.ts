@@ -57,7 +57,7 @@ export default class GPU {
         const lineIdx = (((this.currentLine + scy) & 0xff) >> 3); // which line of tiles to use [0, 31] 5 bits
         const y = (this.currentLine + scy) & 7; // which line of pixels to use in that tile [0, 7] 3 bits
 
-        const bgMapBaseAddr = this.getBGTileAddress(tileIdx, lineIdx);
+        const bgMapBaseAddr = this.getBGTileAddress(lineIdx, tileIdx);
 
         this.renderBGScan(bgMapBaseAddr, x, y);
     }
@@ -86,7 +86,9 @@ export default class GPU {
      * @param tileIdx [0, 31]
      * @param lineIdx [0, 31]
      */
-    private getBGTileAddress(tileIdx: number, lineIdx: number) {
+    public getBGTileAddress(lineIdx: number, tileIdx: number) {
+        lineIdx &= 31;
+        tileIdx &= 31;
         const mapbaseFlag = this.lcdc.get('bg_map_base');
         let mapbase = mapbaseFlag ? 0x9c00 : 0x9800; // the tile map to be used based on LCDC flag (0x9800 / 0x9c00)
 
@@ -103,7 +105,7 @@ export default class GPU {
     }
 
     // precondition: address % 2 === 0
-    private getTileline(address: number) {
+    public getTileline(address: number) {
         address &= 0xff;
         if (this.lcdc.get('bg_tile_base')) { // (0x8000 ~ 0x8fff) unsigned size: 2^12 (4096)
             address += 0x8000;
@@ -128,7 +130,7 @@ export default class GPU {
 
     static PALETTE = [0xffffffff, 0xffc0c0c0, 0xff606060, 0x00000000];
 
-    private getColor(code: number) {
+    public getColor(code: number) {
         const palette = this.mem.getByte('BGP');
         return [
             GPU.PALETTE[(palette >> 6) & 0b11],

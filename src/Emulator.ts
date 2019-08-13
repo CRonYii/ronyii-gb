@@ -23,7 +23,7 @@ export default class Emulator {
             mmu: this.mmu,
             debuggerConfig: {
                 breakpoints: [
-                    // { type: 'PC', value: 0x0100 }
+                    { type: 'PC', value: 0x0100 }
                 ],
                 debugger: (cpu, type, value) => {
                     this.clock.pause();
@@ -72,8 +72,21 @@ export default class Emulator {
             HL: this.cpu.read('HL'),
             SP: this.cpu.read('SP'),
             PC: this.cpu.read('PC'),
-            halt: this.cpu.isHalt()
+            halt: this.cpu.isHalt(),
+            IME: this.cpu.isInterrupsEnabled(),
         }
+    }
+
+    getBGTile(lineIdx: number, tileIdx: number) {
+        const addr = this.gpu.getBGTileAddress(lineIdx, tileIdx);
+        const tile = [];
+        for (let i = 0; i < 8; i++) {
+            const tileline = this.gpu
+                .getTileline(addr + i)
+                .map((code: number) => this.gpu.getColor(code));
+            tile.push(...tileline);
+        }
+        return tile;
     }
 
     getByteAt(address: number) {

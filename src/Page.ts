@@ -3,6 +3,7 @@ import { emulator } from "./index";
 import Helper from "./utils/Helper";
 import { OPCODES } from "./cpu/Opcodes";
 import { Display, CanvasDisplay } from "./gpu/Display";
+import DivManager from "./utils/DivManager";
 
 function initDisplay(): Display {
     const canvas: HTMLCanvasElement | null = document.querySelector('#canvas');
@@ -16,6 +17,53 @@ function initDisplay(): Display {
         width: SCREEN_RESOLUTION.WIDTH,
         height: SCREEN_RESOLUTION.HEIGHT,
         scale: 2
+    });
+}
+
+function initTileViewer() {
+    const canvas: HTMLCanvasElement | null = document.querySelector('#tile-viewer');
+
+    if (!canvas) {
+        throw new Error('Canvas not found');
+    }
+
+    const display = new CanvasDisplay({
+        canvas,
+        width: 8,
+        height: 8,
+        scale: 20
+    });
+
+    const tileViewerDiv: HTMLDivElement | null = document.querySelector('#tile-viewer-block');
+    if (!tileViewerDiv) {
+        throw new Error('tile viewer div not found');
+    }
+
+
+    const div = new DivManager(tileViewerDiv);
+    div.br();
+
+    const value = { line: 0, tile: 0 };
+    const loadBGTile = () => {
+        const imageData = emulator.getBGTile(value.line, value.tile);
+        display.putImageData(imageData);
+        display.requestRefresh();
+    }
+
+    div.label('Which Line: ');
+    div.input({
+        oninput: (line) => {
+            value.line = Number(line);
+            loadBGTile();
+        }, type: 'number'
+    });
+    div.br();
+    div.label('Which Tile: ');
+    div.input({
+        oninput: (tile) => {
+            value.tile = Number(tile);
+            loadBGTile();
+        }, type: 'number'
     });
 }
 
@@ -86,7 +134,7 @@ function initCPUInfoDisplayer() {
         const code = emulator.getByteAt(info.PC);
         const op = OPCODES[code];
         if (op) {
-            cpuInfoLabel.innerText = `Next Opcode: ${op.label}\nHALT: ${info.halt}`;
+            cpuInfoLabel.innerText = `Next Opcode: ${op.label} [0x${code.toString(16)}]\nHALT: ${info.halt}`;
         }
     }
 
@@ -142,6 +190,7 @@ export const initPage = (): {
     display: Display
 } => {
     const display = initDisplay();
+    initTileViewer();
     initROMLoader();
     initCPUInfoDisplayer();
 

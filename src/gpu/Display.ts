@@ -48,6 +48,14 @@ export class CanvasDisplay implements Display {
         }
     }
 
+    putImageData(data: ArrayLike<number>) {
+        for (let i = 0; i < data.length; i++) {
+            const x = i % (this.width / this.scale);
+            const y = Math.floor(i / (this.height / this.scale));
+            this.setPixel(x, y, data[i]);
+        }
+    }
+
     requestRefresh() {
         this.ctx.putImageData(this.imageData, 0, 0);
     }
