@@ -20,7 +20,6 @@ export default class GPU {
     private readonly lcdc: FlagManager<LCDCFlagsKey>;
     private readonly display: Display;
     private clockCycles: number = 0;
-    private currentLine: number = 0;
 
     constructor(configs: GPUConfigs) {
         const { mmu } = configs;
@@ -180,6 +179,14 @@ export default class GPU {
         this.linemode = 0;
 
         this.renderScan(); // write one line to display buffer
+    }
+
+    set currentLine(value: number) {
+        this.mem.setByte('LY', value);
+    }
+
+    get currentLine() {
+        return this.mem.getByte('LY');
     }
 
     set linemode(mode: number) {
