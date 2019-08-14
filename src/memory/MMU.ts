@@ -2,7 +2,7 @@ import FlagManager from "../utils/FlagManager";
 import { InterruptFlagsEKey, InterruptsFlags } from "./IORegisters";
 import { Memory, MemorySegment } from "./Memory";
 import { MemoryDebuggerConfig } from "./MemoryDebugger";
-import Cartridge from "./Cartridge";
+import Cartridge from "../cartridge/Cartridge";
 import { debugEnabled } from "../index";
 import BIOS from "./BIOS";
 
@@ -13,11 +13,10 @@ export interface MMUConfig {
 // Memory Management Unit
 export default class MMU implements Memory {
 
-    private ROM: Memory = new MemorySegment({ size: 0x0000 }); // The Cartridge, not loaded by default
+    private CARTRIDGE: Memory = new MemorySegment({ size: 0x0000 }); // The Cartridge, not loaded by default
 
     private readonly BIOS: Memory = BIOS;
     private readonly VRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0x8000, readable: true, writable: true }); // 8kB Video RAM
-    private readonly ERAM: Memory = new MemorySegment({ size: 0x2000, offset: 0xA000, readable: true, writable: true }); // 8kB External RAM, switchable if any
     private readonly WRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0xC000, readable: true, writable: true }); // 8kB Working RAM
     private readonly ECHO_RAM: Memory = new MemorySegment({ size: 0x1E00, offset: 0xE000, readable: true, writable: true }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF TODO: implement a ECHO_RAM class
     private readonly OAM: Memory = new MemorySegment({ size: 0x00A0, offset: 0xFE00, readable: true, writable: true }); // 160 bytes Sprite attribute table (OAM)
@@ -44,8 +43,10 @@ export default class MMU implements Memory {
     }
 
     load(cartridge: Cartridge) {
-        this.ROM = cartridge;
+        this.CARTRIDGE = cartridge;
         this.reset();
+
+        console.log('Loaded Cartridge => ', cartridge);
     }
 
     reset() {
@@ -79,16 +80,16 @@ export default class MMU implements Memory {
     }
 
     getSegment(address: number): Memory {
+        address &= 0xFFFF;
+        if (address <= 0x7FFF) {
+            // TODO: handle BIOS 
+            return this.CARTRIDGE;
+        }
         switch (address & 0xF000) {
-            case 0x0000: case 0x1000: case 0x2000: case 0x3000: // 16KB ROM bank 0
-            case 0x4000: case 0x5000: case 0x6000: case 0x7000: // switchable 16KB ROM bank 01~NN
-                // TODO: handle BIOS 
-                // TODO: handle MBC logics
-                return this.ROM;
             case 0x8000: case 0x9000:
                 return this.VRAM;
             case 0xA000: case 0xB000:
-                return this.ERAM;
+                return this.CARTRIDGE;
             case 0xC000: case 0xD000:
                 return this.WRAM;
             case 0xE000:

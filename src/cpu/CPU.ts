@@ -1,5 +1,5 @@
 import { debugEnabled } from "../index";
-import MMU, { InterruptFlagsEKey } from "../memory/MMU";
+import MMU from "../memory/MMU";
 import { byteBuffer } from "../utils/ByteBuffer";
 import Helper from "../utils/Helper";
 import ALU, { ALUResult } from "./ALU";
@@ -8,6 +8,7 @@ import { CombinedRegister } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { CB_OPCODES, FlagAffection, Opcode, OPCODES } from "./Opcodes";
 import { Register16 } from "./Register16";
+import { InterruptFlagsEKey } from "../memory/IORegisters";
 
 export interface CPUConfig {
     mmu: MMU,

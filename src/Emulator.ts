@@ -4,7 +4,7 @@ import { Display } from "./gpu/Display";
 import GPU from "./gpu/GPU";
 import MMU from "./memory/MMU";
 import Helper from "./utils/Helper";
-import Cartridge from "./memory/Cartridge";
+import Cartridge from "./cartridge/Cartridge";
 
 export interface EmulatorConfig {
     display: Display

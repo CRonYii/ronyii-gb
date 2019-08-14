@@ -1,10 +1,10 @@
 import { SCREEN_RESOLUTION } from "./constants/index";
-import { emulator } from "./index";
-import Helper from "./utils/Helper";
 import { OPCODES } from "./cpu/Opcodes";
-import { Display, CanvasDisplay } from "./gpu/Display";
+import { CanvasDisplay, Display } from "./gpu/Display";
+import { emulator } from "./index";
 import DivManager from "./utils/DivManager";
-import Cartridge from "./memory/Cartridge";
+import Helper from "./utils/Helper";
+import { loadCartridge } from "./cartridge/CartridgeLoader";
 
 function initDisplay(): Display {
     const canvas: HTMLCanvasElement | null = document.querySelector('#canvas');
@@ -80,7 +80,7 @@ function initROMLoader() {
         }
         if (romUpload.files && romUpload.files.length >= 1) {
             const rom = await loadROMFile(romUpload.files[0]);
-            emulator.start(new Cartridge(rom));
+            emulator.start(loadCartridge(rom));
         }
     }
 
