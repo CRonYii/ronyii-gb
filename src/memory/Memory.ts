@@ -4,14 +4,8 @@ import { debugEnabled } from "../index";
 
 export interface MemoryOptions {
     size: number,
-    controllers?: MemoryController[]
-}
-
-export interface MemoryController {
-    start: number,
-    end: number,
-    set: (mem: Memory, address: number, byte: number) => void,
-    defaultValues?: Uint8Array
+    controllers?: MemoryController[],
+    debuggerConfig?: MemoryDebuggerConfig
 }
 
 export class Memory {
@@ -21,11 +15,13 @@ export class Memory {
     private readonly _size: number;
 
     private readonly memoryControllers: MemoryController[] = [];
+    private readonly debuggerConfig?: MemoryDebuggerConfig;
 
     constructor(options: MemoryOptions) {
-        const { size, controllers } = options;
+        const { size, controllers, debuggerConfig } = options;
         this._size = size;
         this._data = byteBuffer.from(0, size);
+        this.debuggerConfig = debuggerConfig;
         if (controllers) {
             for (let controller of controllers) {
                 this.addController(controller);
@@ -38,10 +34,30 @@ export class Memory {
         if (controller) {
             controller.set(this, address, data);
         }
-        if (debugEnabled.printMemory) {
-            console.log(`${Helper.toHexText(address, 4)} => ${Helper.toHexText(data, 4)}`);
-        }
         this._data[address] = data;
+        this.debug(address, data);
+    }
+
+    private debug(address: number, data: number) {
+        if (debugEnabled.printMemory) {
+            if (this.debuggerConfig) {
+                for (let bp of this.debuggerConfig.breakpoints) {
+                    switch (bp.type) {
+                        case 'ADDR':
+                            if (address !== bp.value) {
+                                continue;
+                            }
+                            break;
+                        case 'VAL':
+                            if (data !== bp.value) {
+                                continue;
+                            }
+                            break;
+                    }
+                    this.debuggerConfig.debugger(this, address, data);
+                }
+            }
+        }
     }
 
     public getByte(address: number): number {
@@ -92,4 +108,25 @@ export class Memory {
     public size() {
         return this._size;
     }
+}
+
+type BreakPointType = 'ADDR' | 'VAL';
+
+interface Breakpoint {
+    type: BreakPointType,
+    value: number
+};
+
+type MemoryDebugger = (cpu: Memory, address: number, value: number) => void;
+
+export interface MemoryDebuggerConfig {
+    breakpoints: Breakpoint[],
+    debugger: MemoryDebugger
+}
+
+export interface MemoryController {
+    start: number,
+    end: number,
+    set: (mem: Memory, address: number, byte: number) => void,
+    defaultValues?: Uint8Array
 }

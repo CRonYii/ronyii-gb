@@ -1,8 +1,8 @@
 import { MEMORY_SIZE } from "../constants/index";
-import { byteBuffer } from "../utils/ByteBuffer";
-import { Memory } from "./Memory";
-import MemorySegmentDefinitions from "./MemorySegmentDefinitions";
 import FlagManager from "../utils/FlagManager";
+import Helper from "../utils/Helper";
+import { Memory, MemoryDebuggerConfig } from "./Memory";
+import MemorySegmentDefinitions from "./MemorySegmentDefinitions";
 
 const InterruptsFlags = {
     'VBlank': 0,
@@ -10,6 +10,15 @@ const InterruptsFlags = {
     'Timer': 2,
     'Serial': 3,
     'Joypad': 4,
+};
+
+const debuggerConfig: MemoryDebuggerConfig = {
+    debugger: (mem, address, data) => {
+        console.log(`${Helper.toHexText(address, 4)} => ${Helper.toHexText(data, 2)}`);
+    },
+    breakpoints: [
+        // { type: 'ADDR', value: 0xff43 }
+    ],
 };
 
 export type InterruptFlagsEKey = keyof typeof InterruptsFlags;
@@ -30,7 +39,11 @@ export default class MMU extends Memory {
     }, InterruptsFlags);
 
     constructor() {
-        super({ size: MEMORY_SIZE, controllers: MemorySegmentDefinitions });
+        super({
+            size: MEMORY_SIZE,
+            controllers: MemorySegmentDefinitions,
+            debuggerConfig
+        });
         this.setByte(0xFF05, 0x00); // TIMA
         this.setByte(0xFF06, 0x00); // TMA
         this.setByte(0xFF07, 0x00); // TAC
