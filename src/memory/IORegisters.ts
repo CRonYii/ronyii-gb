@@ -14,3 +14,13 @@ export const IORegisterControls = {
 }
 
 export type IORegisterControlsKeys = keyof typeof IORegisterControls;
+
+export const InterruptsFlags = {
+    'VBlank': 0,
+    'LCDC': 1,
+    'Timer': 2,
+    'Serial': 3,
+    'Joypad': 4,
+};
+
+export type InterruptFlagsEKey = keyof typeof InterruptsFlags;

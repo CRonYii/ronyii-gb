@@ -3,8 +3,8 @@ import CPU from "./cpu/CPU";
 import { Display } from "./gpu/Display";
 import GPU from "./gpu/GPU";
 import MMU from "./memory/MMU";
-import getROMmeta from "./memory/ROM";
 import Helper from "./utils/Helper";
+import Cartridge from "./memory/Cartridge";
 
 export interface EmulatorConfig {
     display: Display
@@ -12,18 +12,21 @@ export interface EmulatorConfig {
 
 export default class Emulator {
 
-    private readonly mmu: MMU = new MMU();
-    private readonly clock: Clock = Z80Clock();
+    private readonly mmu: MMU;
+    private readonly clock: Clock;
     private readonly cpu: CPU;
     private readonly gpu: GPU;
 
     constructor(configs: EmulatorConfig) {
+        this.mmu = new MMU({});
+        this.clock = Z80Clock();
         this.cpu = new CPU({
             clock: this.clock,
             mmu: this.mmu,
             debuggerConfig: {
                 breakpoints: [
                     // { type: 'PC', value: 0x0100 }
+                    // { type: 'OPCODE', value: 0xE0 }
                 ],
                 debugger: (cpu, type, value) => {
                     this.clock.pause();
@@ -38,16 +41,17 @@ export default class Emulator {
         });
     }
 
-    start(rom?: Uint8Array) {
+    start(rom?: Cartridge) {
         if (rom) {
-            // TODO: load the rom
-            const meta = getROMmeta(rom);
-            console.log(meta);
-
-            this.mmu.set(0x0000, 0x7fff, rom);
+            this.reset();
+            this.mmu.load(rom);
         }
 
         this.clock.start();
+    }
+
+    reset() {
+        // TODO
     }
 
     pause() {

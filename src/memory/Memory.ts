@@ -1,105 +1,51 @@
-import { ByteBuffer, byteBuffer, ByteBufferable } from "../utils/ByteBuffer";
-import Helper from "../utils/Helper";
-import { debugEnabled } from "../index";
+
+export interface Memory {
+    setByte: (address: number, data: number) => void,
+    getByte: (address: number) => number,
+    size(): number,
+}
 
 export interface MemoryOptions {
     size: number,
-    controllers?: MemoryController[],
-    debuggerConfig?: MemoryDebuggerConfig
+    offset?: number,
+    readable?: boolean,
+    writable?: boolean,
+    defaultValues?: ArrayLike<number>
 }
 
-export class Memory {
+export class MemorySegment implements Memory {
 
-    private readonly _data: ByteBuffer;
+    private readonly data: Uint8Array;
 
     private readonly _size: number;
+    private readonly offset: number;
+    private readonly readable: boolean;
+    private readonly writable: boolean;
 
-    private readonly memoryControllers: MemoryController[] = [];
-    private readonly debuggerConfig?: MemoryDebuggerConfig;
 
     constructor(options: MemoryOptions) {
-        const { size, controllers, debuggerConfig } = options;
+        const { size, offset = 0, readable = true, writable = false, defaultValues } = options;
         this._size = size;
-        this._data = byteBuffer.from(0, size);
-        this.debuggerConfig = debuggerConfig;
-        if (controllers) {
-            for (let controller of controllers) {
-                this.addController(controller);
-            }
+        this.offset = offset;
+        this.readable = readable;
+        this.writable = writable;
+        this.data = new Uint8Array(size);
+        if (defaultValues) {
+            this.data.set(defaultValues);
         }
     }
 
     public setByte(address: number, data: number) {
-        const controller = this.getController(address);
-        if (controller) {
-            controller.set(this, address, data);
-        }
-        this._data[address] = data;
-        this.debug(address, data);
-    }
-
-    private debug(address: number, data: number) {
-        if (debugEnabled.printMemory) {
-            if (this.debuggerConfig) {
-                for (let bp of this.debuggerConfig.breakpoints) {
-                    switch (bp.type) {
-                        case 'ADDR':
-                            if (address !== bp.value) {
-                                continue;
-                            }
-                            break;
-                        case 'VAL':
-                            if (data !== bp.value) {
-                                continue;
-                            }
-                            break;
-                    }
-                    this.debuggerConfig.debugger(this, address, data);
-                }
-            }
+        if (this.writable) {
+            this.data[address - this.offset] = data;
         }
     }
 
     public getByte(address: number): number {
-        return this._data[address];
-    }
-
-    public set(address: number, numBytes: number, data: ByteBufferable) {
-        const values = byteBuffer.from(data, numBytes);
-        for (let i = 0; i < numBytes; i++) {
-            this.setByte(address + i, values[i]);
+        if (this.readable) {
+            return this.data[address - this.offset];
         }
-    }
-
-    public get(address: number, numBytes: number) {
-        return this._data.slice(address, address + numBytes);
-    }
-
-    private getController(address: number): MemoryController | undefined {
-        for (let controller of this.memoryControllers) {
-            if (address >= controller.start && address <= controller.end) {
-                return controller;
-            }
-        }
-    }
-
-    private addController(controller: MemoryController) {
-        const { start, end, defaultValues } = controller;
-        if (!this.accepts(start) || !this.accepts(end)) {
-            throw new Error(`Unacceptable memory controller range ${start} ~ ${end}`);
-        }
-        if (defaultValues) {
-            const size = end - start + 1;
-            if (defaultValues.length >= size) {
-                throw new Error(`Incompatiable default value size, expect ${size} but got ${defaultValues.length}`);
-            }
-            this._data.set(defaultValues, start);
-        }
-        this.memoryControllers.push(controller);
-    }
-
-    public accepts(address: number): boolean {
-        return address >= 0 && address < this._size;
+        return 0xFF;
     }
 
     /**
@@ -108,25 +54,5 @@ export class Memory {
     public size() {
         return this._size;
     }
-}
 
-type BreakPointType = 'ADDR' | 'VAL';
-
-interface Breakpoint {
-    type: BreakPointType,
-    value: number
-};
-
-type MemoryDebugger = (cpu: Memory, address: number, value: number) => void;
-
-export interface MemoryDebuggerConfig {
-    breakpoints: Breakpoint[],
-    debugger: MemoryDebugger
-}
-
-export interface MemoryController {
-    start: number,
-    end: number,
-    set: (mem: Memory, address: number, byte: number) => void,
-    defaultValues?: Uint8Array
 }
