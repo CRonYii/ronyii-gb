@@ -9,98 +9,10 @@ import FlagRegister from "./FlagRegister";
 import { CB_OPCODES, FlagAffection, Opcode, OPCODES } from "./Opcodes";
 import { Register16 } from "./Register16";
 
-type OpcodeExecutor = (() => number);
-
-type InstructionSet = (OpcodeExecutor | null)[];
-
-type DataType = 'd8' | 'd16' | 'r8' | 'a8' | 'a16';
-
-function isDataType(arg: string): arg is DataType {
-    return arg === 'd8' || arg === 'd16' || arg === 'r8' || arg === 'a8' || arg === 'a16';
-}
-
-type RegisterType =
-    'AF' | 'BC' | 'DE' | 'HL' |
-    'A' | 'F' | 'B' | 'C' |
-    'D' | 'E' | 'H' | 'L' |
-    'SP' | 'PC';
-
-const registerTypes = [
-    'AF', 'BC', 'DE', 'HL',
-    'A', 'F', 'B', 'C',
-    'D', 'E', 'H', 'L',
-    'SP', 'PC'
-];
-
-function isRegisterType(arg: string): arg is RegisterType {
-    return registerTypes.includes(arg);
-}
-
-type FlagMode = 'Z' | 'NZ' | 'C' | 'NC';
-
-function isFlagMode(arg: string): arg is FlagMode {
-    return arg === 'Z' || arg === 'NZ' || arg === 'C' || arg === 'NC';
-}
-
-function parseByteIndex(operand: string): number {
-    const val = Number(operand);
-    if (val >= 0 && val <= 7) {
-        return val;
-    }
-    throw new Error('Expected a number in range [0, 7]');
-}
-
-const specialAddresses = [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60];
-
-type RSTAddress = 0x00 | 0x08 | 0x10 | 0x18 | 0x20 | 0x28 | 0x30 | 0x38 | 0x40 | 0x48 | 0x50 | 0x58 | 0x60;
-
-function isRSTAddress(arg: number): arg is RSTAddress {
-    return specialAddresses.includes(arg);
-}
-
-function parseRSTAddress(operand: string): RSTAddress {
-    operand = '0x' + operand.substring(0, operand.length - 1);
-    const val = Number(operand);
-    if (isRSTAddress(val)) {
-        return val;
-    };
-    throw new Error('Expected a number one of [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60], got ' + operand);
-}
-
-interface ExecutionResult {
-    cycles?: number;
-    zero?: boolean;
-    subtract?: boolean;
-    halfCarry?: boolean;
-    carry?: boolean;
-}
-
-interface Operator<T> {
-    size: number,
-    set: (value: T) => void;
-    get: () => T;
-}
-
-interface InstructionBuilderMap {
-    [key: string]: (def: Opcode) => () => ExecutionResult
-}
-
 export interface CPUConfig {
     mmu: MMU,
     clock: Clock,
     debuggerConfig?: CPUDebuggerConfig
-}
-
-interface Breakpoint {
-    type: 'PC' | 'OPCODE',
-    value: number
-};
-
-type CPUDebugger = (cpu: CPU, type: 'PC' | 'OPCODE', value: number) => void;
-
-export interface CPUDebuggerConfig {
-    breakpoints: Breakpoint[],
-    debugger: CPUDebugger
 }
 
 export default class CPU {
@@ -1112,4 +1024,92 @@ export default class CPU {
         return `AF: ${Helper.toHexText(this.AF, 4)}, BC: ${Helper.toHexText(this.BC, 4)}, DE: ${Helper.toHexText(this.DE, 4)}, HL: ${Helper.toHexText(this.HL, 4)}, SP: ${Helper.toHexText(this.SP, 4)}, PC: ${Helper.toHexText(this.PC, 4)}\n${this.F.toString()} `;
     }
 
+}
+
+type OpcodeExecutor = (() => number);
+
+type InstructionSet = (OpcodeExecutor | null)[];
+
+type DataType = 'd8' | 'd16' | 'r8' | 'a8' | 'a16';
+
+function isDataType(arg: string): arg is DataType {
+    return arg === 'd8' || arg === 'd16' || arg === 'r8' || arg === 'a8' || arg === 'a16';
+}
+
+type RegisterType =
+    'AF' | 'BC' | 'DE' | 'HL' |
+    'A' | 'F' | 'B' | 'C' |
+    'D' | 'E' | 'H' | 'L' |
+    'SP' | 'PC';
+
+const registerTypes = [
+    'AF', 'BC', 'DE', 'HL',
+    'A', 'F', 'B', 'C',
+    'D', 'E', 'H', 'L',
+    'SP', 'PC'
+];
+
+function isRegisterType(arg: string): arg is RegisterType {
+    return registerTypes.includes(arg);
+}
+
+type FlagMode = 'Z' | 'NZ' | 'C' | 'NC';
+
+function isFlagMode(arg: string): arg is FlagMode {
+    return arg === 'Z' || arg === 'NZ' || arg === 'C' || arg === 'NC';
+}
+
+function parseByteIndex(operand: string): number {
+    const val = Number(operand);
+    if (val >= 0 && val <= 7) {
+        return val;
+    }
+    throw new Error('Expected a number in range [0, 7]');
+}
+
+const specialAddresses = [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60];
+
+type RSTAddress = 0x00 | 0x08 | 0x10 | 0x18 | 0x20 | 0x28 | 0x30 | 0x38 | 0x40 | 0x48 | 0x50 | 0x58 | 0x60;
+
+function isRSTAddress(arg: number): arg is RSTAddress {
+    return specialAddresses.includes(arg);
+}
+
+function parseRSTAddress(operand: string): RSTAddress {
+    operand = '0x' + operand.substring(0, operand.length - 1);
+    const val = Number(operand);
+    if (isRSTAddress(val)) {
+        return val;
+    };
+    throw new Error('Expected a number one of [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60], got ' + operand);
+}
+
+interface ExecutionResult {
+    cycles?: number;
+    zero?: boolean;
+    subtract?: boolean;
+    halfCarry?: boolean;
+    carry?: boolean;
+}
+
+interface Operator<T> {
+    size: number,
+    set: (value: T) => void;
+    get: () => T;
+}
+
+interface InstructionBuilderMap {
+    [key: string]: (def: Opcode) => () => ExecutionResult
+}
+
+interface Breakpoint {
+    type: 'PC' | 'OPCODE',
+    value: number
+};
+
+type CPUDebugger = (cpu: CPU, type: 'PC' | 'OPCODE', value: number) => void;
+
+export interface CPUDebuggerConfig {
+    breakpoints: Breakpoint[],
+    debugger: CPUDebugger
 }
