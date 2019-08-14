@@ -196,9 +196,11 @@ export default class GPU {
 
         if (this.currentLine === 143) { // done scanning for the 144 lines
             this.linemode = 1; // goes into VBlank (goes back to top-left corner)
+            if (this.stat.get('mode01_interrupt')) {
+                this.mmu.interruptFlagsManager.set('LCDC', true);
+            }
             this.display.requestRefresh();
             this.mmu.interruptFlagsManager.set('VBlank', true);
-
         } else {
             this.linemode = 2;
         }
@@ -218,6 +220,9 @@ export default class GPU {
         // V-Blank takes 10 lines (10 plus the 143 previous H-Blank)
         if (this.currentLine > 153) {
             this.linemode = 2;
+            if (this.stat.get('mode10_interrupt')) {
+                this.mmu.interruptFlagsManager.set('LCDC', true);
+            }
             this.currentLine = 0;
         }
     }
@@ -239,6 +244,10 @@ export default class GPU {
         this.clockCycles = 0;
         this.linemode = 0;
 
+        if (this.stat.get('mode00_interrupt')) {
+            this.mmu.interruptFlagsManager.set('LCDC', true);
+        }
+
         this.renderScan(); // write one line to display buffer
     }
 
@@ -248,6 +257,10 @@ export default class GPU {
         // Compare LYC and LY and set the STAT coincidence flag bit 6
         const LYCflag = this.mem.getByte('LYC') === value;
         this.stat.set('coincidence', LYCflag);
+
+        if (this.stat.get('coincidence_interrupt') && LYCflag === true) {
+            this.mmu.interruptFlagsManager.set('LCDC', true);
+        }
     }
 
     get currentLine() {
@@ -262,17 +275,5 @@ export default class GPU {
     get linemode() {
         return this.mem.getByte('STAT') & 0b11;
     }
-
-    // TODO: 0xFF41 (STAT) bits 6~3
-    // get interruptSelection() {
-    //     const STAT = this.STAT;
-    //     if (ALU.bitSet(STAT, 5)) {
-    //         return 0b10;
-    //     } else if (ALU.bitSet(STAT, 4)) {
-    //         return 0b01;
-    //     } else if (ALU.bitSet(STAT, 3)) {
-    //         return 0b00;
-    //     }
-    // }
 
 }
