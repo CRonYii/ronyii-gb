@@ -3,7 +3,7 @@ import MMU from "../memory/MMU";
 import MemoryManager from "../utils/MemoryManager";
 import { Display } from "./Display";
 import { IORegisterControls, IORegisterControlsKeys } from "../memory/IORegisters";
-import { LCDCManager, LCDCFlagsKey } from "./GPUFlags";
+import { LCDCManager, LCDCFlagsKey, STATFlagsKey, STATManager } from "./GPUFlags";
 import FlagManager from "../utils/FlagManager";
 import Helper from "../utils/Helper";
 
@@ -18,6 +18,7 @@ export default class GPU {
     private readonly mmu: MMU;
     private readonly mem: MemoryManager<IORegisterControlsKeys>;
     private readonly lcdc: FlagManager<LCDCFlagsKey>;
+    private readonly stat: FlagManager<STATFlagsKey>;
     private readonly display: Display;
     private clockCycles: number = 0;
 
@@ -28,6 +29,10 @@ export default class GPU {
         this.lcdc = LCDCManager({
             set: (flag: number) => mmu.setByte(0xff40, flag),
             get: () => mmu.getByte(0xff40)
+        });
+        this.stat = STATManager({
+            set: (flag: number) => mmu.setByte(0xff41, flag),
+            get: () => mmu.getByte(0xff41)
         });
         this.display = configs.display;
         configs.clock.add((clockCycles) => {
@@ -59,7 +64,7 @@ export default class GPU {
 
         const bgMapBaseAddr = this.getBGTileAddress(lineIdx, tileIdx);
 
-        this.renderBGScan(bgMapBaseAddr, x, y);
+        this.renderBGScan(this.currentLine, bgMapBaseAddr, x, y);
     }
 
     /**
@@ -68,14 +73,14 @@ export default class GPU {
      * @param x the x pixel offset
      * @param y the y pixel offset
      */
-    private renderBGScan(tilePtrBaseAddr: number, x: number, y: number) {
+    private renderBGScan(line: number, tilePtrBaseAddr: number, x: number, y: number) {
         // start with the top-left corner of the 160 * 144 pixels to be drawn
         for (let i = 0; i < 20; i++) {
             const tileIdx = this.mmu.getByte(tilePtrBaseAddr + i);
             const tileline = this.getTileline(this.getTileAddress(tileIdx) + (y * 2));
             for (let j = 0; j < tileline.length; j++) {
                 const color = this.getColor(tileline[x]); // one of the four color
-                this.display.setPixel((i * 8) + j, this.currentLine, color);
+                this.display.setPixel((i * 8) + j, line, color);
                 x = (x + 1) & 7;
             }
         }
@@ -207,15 +212,14 @@ export default class GPU {
             return;
         }
 
+        this.clockCycles = 0;
+        this.currentLine++;
+
         // V-Blank takes 10 lines (10 plus the 143 previous H-Blank)
         if (this.currentLine > 153) {
             this.linemode = 2;
             this.currentLine = 0;
         }
-
-        // TODO: inc LY, cp LYC set STAT bit 6
-        this.clockCycles = 0;
-        this.currentLine++;
     }
 
     private checklineOAMMode() {
@@ -239,7 +243,11 @@ export default class GPU {
     }
 
     set currentLine(value: number) {
+        value &= 0xff;
         this.mem.setByte('LY', value);
+        // Compare LYC and LY and set the STAT coincidence flag bit 6
+        const LYCflag = this.mem.getByte('LYC') === value;
+        this.stat.set('coincidence', LYCflag);
     }
 
     get currentLine() {
@@ -247,7 +255,7 @@ export default class GPU {
     }
 
     set linemode(mode: number) {
-        const value = this.mem.getByte('STAT') & 0b00 | mode;
+        const value = (this.mem.getByte('STAT') & 0b00) | mode;
         this.mem.setByte('STAT', value);
     }
 
