@@ -46,27 +46,31 @@ export default class Clock {
         try {
             this.clockCycles = 0;
             while (!this.isPaused() && this.clockCycles < this.cyclesPerTick) {
-                let totalCyclesTaken = 0;
-                for (let task of this.tasks) {
-                    const cyclesTaken = task(totalCyclesTaken);
-                    if (cyclesTaken === 'pause') {
-                        this.pause();
-                        break;
-                    }
-                    totalCyclesTaken += cyclesTaken;
-                }
-                this.clockCycles += totalCyclesTaken;
-                if (debugEnabled.pauseEveryTick) {
-                    if (++this.cycles === debugEnabled.pauseEveryTick) {
-                        this.pause();
-                        this.cycles = 0;
-                        console.warn('Paused');
-                    }
-                }
+                this.step();
             }
         } catch (err) {
             console.error(err);
             this.pause();
+        }
+    }
+
+    public step() {
+        let totalCyclesTaken = 0;
+        for (let task of this.tasks) {
+            const cyclesTaken = task(totalCyclesTaken);
+            if (cyclesTaken === 'pause') {
+                this.pause();
+                break;
+            }
+            totalCyclesTaken += cyclesTaken;
+        }
+        this.clockCycles += totalCyclesTaken;
+        if (debugEnabled.pauseEveryTick) {
+            if (++this.cycles === debugEnabled.pauseEveryTick) {
+                this.pause();
+                this.cycles = 0;
+                console.warn('Paused');
+            }
         }
     }
 

@@ -63,7 +63,7 @@ export default class Emulator {
 
     step() {
         if (this.clock.isPaused()) {
-            this.cpu.exec();
+            this.clock.step();
         }
     }
 
