@@ -42,17 +42,16 @@ export default class MBC1 extends Cartridge {
     }
 
     private get romOffset() {
+        let offset = this.romBank;
         if (this.mode === 0) {
-            let offset = (this.romBank | (this.ramBank << 5));
-            switch (offset) {
-                case 0x00: case 0x20: case 0x40: case 0x60:
-                    offset += 1;
-                    break;
-            }
-            return offset * MBC1.ROM_BANK_SIZE;
-        } else {
-            return this.romBank * MBC1.ROM_BANK_SIZE;
+            offset |= (this.ramBank << 5);
         }
+        switch (offset) {
+            case 0x00: case 0x20: case 0x40: case 0x60:
+                offset += 1;
+                break;
+        }
+        return offset * MBC1.ROM_BANK_SIZE;
     }
 
     private get ramOffset() {
@@ -70,6 +69,7 @@ export default class MBC1 extends Cartridge {
 
     private setRomBank(value: number) {
         value &= 31; // 5 bits
+        console.warn('ROM Bank => ' + value);
         this.romBank = value;
     }
 

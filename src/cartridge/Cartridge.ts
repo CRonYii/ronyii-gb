@@ -36,7 +36,7 @@ export default abstract class Cartridge implements Memory {
         if (address <= 0x3FFF) {
             return this.rom[address];
         } else if (address <= 0x7FFF) {
-            return this.getROMByte(address);
+            return this.getROMByte(address - 0x4000);
         } else {
             return this.getRAMByte(address);
         }
