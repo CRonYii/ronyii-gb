@@ -5,6 +5,7 @@ import GPU from "./gpu/GPU";
 import MMU from "./memory/MMU";
 import Helper from "./utils/Helper";
 import Cartridge from "./cartridge/Cartridge";
+import { memorydebuggerConfig } from "./memory/MemoryDebugger";
 
 export interface EmulatorConfig {
     display: Display
@@ -18,7 +19,9 @@ export default class Emulator {
     private readonly gpu: GPU;
 
     constructor(configs: EmulatorConfig) {
-        this.mmu = new MMU({});
+        this.mmu = new MMU({
+            debuggerConfig: memorydebuggerConfig
+        });
         this.clock = Z80Clock();
         this.cpu = new CPU({
             clock: this.clock,

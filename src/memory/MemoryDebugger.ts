@@ -14,11 +14,11 @@ export interface Breakpoint {
 
 export type MemoryDebugger = (address: number, value: number) => void;
 
-export const debuggerConfig: MemoryDebuggerConfig = {
+export const memorydebuggerConfig: MemoryDebuggerConfig = {
     debugger: (address, data) => {
         console.log(`${Helper.toHexText(address, 4)} => ${Helper.toHexText(data, 2)}`);
     },
     breakpoints: [
-        // { type: 'ADDR', value: 0xff43 }
+        // { type: 'ADDR', value: 0xff40 }
     ],
 };
