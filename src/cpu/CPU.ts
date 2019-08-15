@@ -21,23 +21,6 @@ export default class CPU {
     private readonly instructionSet: InstructionSet;
     private readonly cbInstructionSet: InstructionSet;
 
-    // private readonly AF = new CombinedRegister();
-    // private readonly BC = new CombinedRegister();
-    // private readonly DE = new CombinedRegister();
-    // private readonly HL = new CombinedRegister();
-
-    // private readonly A = this.AF.high;
-    // private readonly F = new FlagRegister(this.AF.low);
-
-    // private readonly B = this.BC.high;
-    // private readonly C = this.BC.low;
-
-    // private readonly D = this.DE.high;
-    // private readonly E = this.DE.low;
-
-    // private readonly H = this.HL.high;
-    // private readonly L = this.HL.low;
-
     private readonly A = new Register8();
     private readonly F = new FlagRegister();
 

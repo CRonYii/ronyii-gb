@@ -1,5 +1,12 @@
-import { CARRY_FLAG, HALF_CARRY_FLFG, OPERATION_FLAG as SUBTRACT_FLAG, ZERO_FLAG } from "../constants/index";
 import { Register8 } from "./Register";
+
+const ZERO_FLAG = 0x80;
+
+const SUBTRACT_FLAG = 0x40;
+
+const HALF_CARRY_FLFG = 0x20;
+
+const CARRY_FLAG = 0X10;
 
 export default class FlagRegister extends Register8 {
 
@@ -49,10 +56,6 @@ export default class FlagRegister extends Register8 {
 
     get carry(): boolean {
         return (this.get() & CARRY_FLAG) !== 0;
-    }
-
-    public toString() {
-        return `zero: ${this.zero}, subtract: ${this.subtract}, half-carry: ${this.halfCarry}, carry: ${this.carry}`;
     }
 
 }
