@@ -290,14 +290,10 @@ export default class CPU {
         const [SP, n] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
-            const a = SP.get();
-            const b = n.get();
-            const sum = a + b;
-            this.HL.set(sum);
-            return {
-                carry: sum > 0xffff,
-                halfCarry: ((SP.get() ^ b ^ a) & 0x100) !== 0
-            };
+            const result = ALU.add16(SP.get(), n.get());
+            this.HL.set(result.result);
+
+            return result;
         };
     }
 
@@ -498,14 +494,15 @@ export default class CPU {
         return () => {
             let a = this.read('A');
             let carry = false;
-            if (this.F.halfCarry || (this.read('A') & 0xf) > 0x9) {
+            if (this.F.halfCarry || (!this.F.subtract && (this.read('A') & 0xf) > 0x9)) {
                 a += 0x6;
             }
-            if (this.F.halfCarry || this.read('A') > 0x99) {
+            if (this.F.carry || (!this.F.subtract && this.read('A') > 0x99)) {
                 a += 0x60;
                 carry = true;
             }
             a &= 0xff;
+            this.A.set(a);
 
             return { zero: a === 0, carry };
         };
@@ -1005,7 +1002,7 @@ export default class CPU {
                 };
             case 'a16':
                 return {
-                    size: 2,
+                    size: 1,
                     set: (byte: number) => { this.mmu.setByte(this.readImmediateWord(), byte) },
                     get: () => { return this.mmu.getByte(this.readImmediateWord()); }
                 };
