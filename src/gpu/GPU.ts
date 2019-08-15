@@ -192,7 +192,7 @@ export default class GPU {
             return;
         }
 
-        if (this.currentLine === 144) { // done scanning for the 144 lines
+        if (this.currentLine === 143) { // done scanning for the 144 lines
             this.linemode = 1; // goes into VBlank (goes back to top-left corner)
             if (this.stat.get('mode01_interrupt')) {
                 this.mmu.interruptFlagsManager.set('LCDC', true);
