@@ -1,26 +1,26 @@
-import { ByteBufferable, ByteBuffer } from "../utils/ByteBuffer";
-import { Register } from "./Register";
-import { Register16 } from "./Register16";
+import { Register, Register8 } from "./Register";
 
-export class InnerRegister8 extends Register {
-    
-    constructor(buffer: ByteBuffer, offset: number) {
-        super({
-            size: 1,
-            offset,
-            buffer
-        });
+export class CombinedRegister16 implements Register {
+
+    private readonly high: Register8;
+    private readonly low: Register8;
+
+    constructor(high: Register8, low: Register8) {
+        this.high = high;
+        this.low = low;
     }
 
-}
+    set(data: number) {
+        this.high.set((data & 0xff00) >> 8);
+        this.low.set(data & 0x00ff);
+    }
 
-export class CombinedRegister extends Register16 {
+    get() {
+        return (this.high.get() << 8) | this.low.get();
+    }
 
-    public readonly low = new InnerRegister8(this._data, 1);
-    public readonly high = new InnerRegister8(this._data, 0);
-
-    constructor(initialValue?: ByteBufferable) {
-        super(initialValue);
+    size() {
+        return 2;
     }
 
 }

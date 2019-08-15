@@ -1,14 +1,13 @@
 import { debugEnabled } from "../index";
+import { InterruptFlagsEKey } from "../memory/IORegisters";
 import MMU from "../memory/MMU";
-import { byteBuffer } from "../utils/ByteBuffer";
 import Helper from "../utils/Helper";
 import ALU, { ALUResult } from "./ALU";
 import Clock from "./Clock";
-import { CombinedRegister } from "./CombinedRegister";
+import { CombinedRegister16 } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { CB_OPCODES, FlagAffection, Opcode, OPCODES } from "./Opcodes";
-import { Register16 } from "./Register16";
-import { InterruptFlagsEKey } from "../memory/IORegisters";
+import { Register16, Register8 } from "./Register";
 
 export interface CPUConfig {
     mmu: MMU,
@@ -22,22 +21,39 @@ export default class CPU {
     private readonly instructionSet: InstructionSet;
     private readonly cbInstructionSet: InstructionSet;
 
-    private readonly AF = new CombinedRegister();
-    private readonly BC = new CombinedRegister();
-    private readonly DE = new CombinedRegister();
-    private readonly HL = new CombinedRegister();
+    // private readonly AF = new CombinedRegister();
+    // private readonly BC = new CombinedRegister();
+    // private readonly DE = new CombinedRegister();
+    // private readonly HL = new CombinedRegister();
 
-    private readonly A = this.AF.high;
-    private readonly F = new FlagRegister(this.AF.low);
+    // private readonly A = this.AF.high;
+    // private readonly F = new FlagRegister(this.AF.low);
 
-    private readonly B = this.BC.high;
-    private readonly C = this.BC.low;
+    // private readonly B = this.BC.high;
+    // private readonly C = this.BC.low;
 
-    private readonly D = this.DE.high;
-    private readonly E = this.DE.low;
+    // private readonly D = this.DE.high;
+    // private readonly E = this.DE.low;
 
-    private readonly H = this.HL.high;
-    private readonly L = this.HL.low;
+    // private readonly H = this.HL.high;
+    // private readonly L = this.HL.low;
+
+    private readonly A = new Register8();
+    private readonly F = new FlagRegister();
+
+    private readonly B = new Register8();
+    private readonly C = new Register8();
+
+    private readonly D = new Register8();
+    private readonly E = new Register8();
+
+    private readonly H = new Register8();
+    private readonly L = new Register8();
+
+    private readonly AF = new CombinedRegister16(this.A, this.F);
+    private readonly BC = new CombinedRegister16(this.B, this.C);
+    private readonly DE = new CombinedRegister16(this.D, this.E);
+    private readonly HL = new CombinedRegister16(this.H, this.L);
 
     private readonly SP = new Register16();
     private readonly PC = new Register16();
@@ -140,7 +156,7 @@ export default class CPU {
     }
 
     public read(type: RegisterType): number {
-        return byteBuffer.value(this[type].data());
+        return this[type].get();
     }
 
     private updatePC(length: number) {
@@ -149,12 +165,12 @@ export default class CPU {
     }
 
     private increment(type: RegisterType) {
-        const val = byteBuffer.value(this[type].data()) + 1;
+        const val = this[type].get() + 1;
         this[type].set(val);
     }
 
     private decrement(type: RegisterType) {
-        const val = byteBuffer.value(this[type].data()) - 1;
+        const val = this[type].get() - 1;
         this[type].set(val);
     }
 
@@ -935,7 +951,7 @@ export default class CPU {
     private toMemoryOperator(type: RegisterType, sign?: '+' | '-'): Operator<number> {
         const reg = this[type];
         const getAddress = (): number => {
-            let address = byteBuffer.value(reg.data());
+            let address = reg.get();
             if (reg.size() === 1) {
                 address = 0xff00 | address;
             }
@@ -1017,7 +1033,7 @@ export default class CPU {
                 reg.set(byte);
             },
             get() {
-                return byteBuffer.value(reg.data());
+                return reg.get();
             }
         };
     }
@@ -1028,10 +1044,6 @@ export default class CPU {
 
     public isInterrupsEnabled(): boolean {
         return this.interruptsMasterEnable;
-    }
-
-    toString() {
-        return `AF: ${Helper.toHexText(this.AF, 4)}, BC: ${Helper.toHexText(this.BC, 4)}, DE: ${Helper.toHexText(this.DE, 4)}, HL: ${Helper.toHexText(this.HL, 4)}, SP: ${Helper.toHexText(this.SP, 4)}, PC: ${Helper.toHexText(this.PC, 4)}\n${this.F.toString()} `;
     }
 
 }

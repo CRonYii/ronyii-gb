@@ -1,20 +1,19 @@
-import { ByteBufferable, byteBuffer } from "./ByteBuffer";
-import { OPCODES, CB_OPCODES } from "../cpu/Opcodes";
+import { CB_OPCODES, OPCODES } from "../cpu/Opcodes";
 
 const decoder = new TextDecoder();
 
 export default {
+    toUnsigned32(num: number) {
+        return new Uint32Array([num])[0]
+    },
     toSigned8(num: number) {
         return new Int8Array([num])[0];
     },
     toText(buffer: ArrayBuffer, start: number, end: number) {
         return decoder.decode(buffer.slice(start, end));
     },
-    toHexText(buffer: ByteBufferable, precision: number) {
-        return byteBuffer.toPrecision(
-            byteBuffer.toHex(byteBuffer.from(buffer, precision)),
-            precision
-        );
+    toHexText(value: number, precision: number) {
+        return '0x' + value.toString(16).padStart(precision, '0').toUpperCase();
     },
     parseParentheses(value: string): string | null {
         if (value[0] === '(' && value[value.length - 1] === ')') {
