@@ -53,11 +53,12 @@ export default class CPU {
         this.cbInstructionSet = this.buildInstructionSet(CB_OPCODES);
         this.debuggerConfig = configs.debuggerConfig;
         configs.clock.add(() => {
+            const cyclesTaken = this.exec();
             const pause = this.debug();
             if (pause) {
                 return 'pause';
             }
-            return this.exec();
+            return cyclesTaken;
         });
         this.initRegisters();
     }
