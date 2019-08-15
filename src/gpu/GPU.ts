@@ -20,7 +20,7 @@ export default class GPU {
     private readonly lcdc: FlagManager<LCDCFlagsKey>;
     private readonly stat: FlagManager<STATFlagsKey>;
     private readonly display: Display;
-    private clockCycles: number = 0;
+    private dots: number = 0;
 
     constructor(configs: GPUConfigs) {
         const { mmu } = configs;
@@ -35,10 +35,7 @@ export default class GPU {
             get: () => mmu.getByte(0xff41)
         });
         this.display = configs.display;
-        configs.clock.add((clockCycles) => {
-            this.clockCycles += clockCycles;
-            return this.checkline();
-        });
+        configs.clock.add(this.checkline.bind(this));
     }
 
     /**
@@ -170,7 +167,8 @@ export default class GPU {
      *  H-Blank    │   └─────────────────────────────────────┘
      *             └──────→ V-Blank ===> goes back to (start)
      */
-    private checkline(): number {
+    private checkline(clockCycles: number): number {
+        this.dots += clockCycles;
         switch (this.linemode) {
             case 2:
                 this.checklineOAMMode();
@@ -190,7 +188,7 @@ export default class GPU {
 
     private checklineHBlank() {
         // H-Blank (mode 00) takes 204 clock cyles to finish
-        if (this.clockCycles < 204) {
+        if (this.dots < 204) {
             return;
         }
 
@@ -205,16 +203,16 @@ export default class GPU {
             this.linemode = 2;
         }
 
-        this.clockCycles = 0;
+        this.dots = 0;
         this.currentLine++;
     }
 
     private checklineVBlank() {
-        if (this.clockCycles < 456) {
+        if (this.dots < 456) {
             return;
         }
 
-        this.clockCycles = 0;
+        this.dots = 0;
         this.currentLine++;
 
         // V-Blank takes 10 lines (10 plus the 143 previous H-Blank)
@@ -228,20 +226,20 @@ export default class GPU {
     }
 
     private checklineOAMMode() {
-        if (this.clockCycles < 80) {
+        if (this.dots < 80) {
             return;
         }
 
-        this.clockCycles = 0;
+        this.dots = 0;
         this.linemode = 3;
     }
 
     private checklineVRAMMode() {
-        if (this.clockCycles < 172) {
+        if (this.dots < 172) {
             return;
         }
 
-        this.clockCycles = 0;
+        this.dots = 0;
         this.linemode = 0;
 
         if (this.stat.get('mode00_interrupt')) {

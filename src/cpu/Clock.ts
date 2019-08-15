@@ -1,4 +1,5 @@
 import { CPU_CLOCK_SPEED, TICKS_PER_SECOND } from "../constants/index";
+import { debugEnabled } from "../index";
 
 export interface ClockConfig {
     ticksPerSecond: number,
@@ -17,6 +18,8 @@ export default class Clock {
     private readonly tasks: ClockTask[] = [];
     private clockCycles: number = 0;
     private intervalID: number = 0;
+
+    private cycles: number = 0;
 
     constructor(configs: ClockConfig) {
         const { ticksPerSecond, clockSpeed } = configs;
@@ -43,13 +46,22 @@ export default class Clock {
         try {
             this.clockCycles = 0;
             while (!this.isPaused() && this.clockCycles < this.cyclesPerTick) {
+                let totalCyclesTaken = 0;
                 for (let task of this.tasks) {
-                    const cyclesTaken = task(this.clockCycles);
+                    const cyclesTaken = task(totalCyclesTaken);
                     if (cyclesTaken === 'pause') {
                         this.pause();
                         break;
                     }
-                    this.clockCycles += cyclesTaken;
+                    totalCyclesTaken += cyclesTaken;
+                }
+                this.clockCycles += totalCyclesTaken;
+                if (debugEnabled.pauseEveryTick) {
+                    if (++this.cycles === debugEnabled.pauseEveryTick) {
+                        this.pause();
+                        this.cycles = 0;
+                        console.warn('Paused');
+                    }
                 }
             }
         } catch (err) {
