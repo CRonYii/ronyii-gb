@@ -909,10 +909,10 @@ export default class CPU {
         let mem = Helper.parseParentheses(operand);
         if (mem) {
             if (mem === 'a16') {
-                return this.toImmediateMemoryOperator('a16');
+                return this.toImmediateAddressMemoryOperator('a16');
             }
             if (mem === 'a8') {
-                return this.toImmediateMemoryOperator('a8');
+                return this.toImmediateAddressMemoryOperator('a8');
             }
             const lastChar = mem[mem.length - 1];
             let sign: '+' | '-' | undefined;
@@ -985,6 +985,17 @@ export default class CPU {
                     set: (byte: number) => { throw new Error('Unsupported operation'); },
                     get: () => { return Helper.toSigned8(this.readImmediateByte()); }
                 };
+            case 'a16':
+                return {
+                    size: 2,
+                    set: (byte: number) => { throw new Error('Unsupported operation'); },
+                    get: () => { return this.readImmediateWord(); }
+                };
+        }
+    }
+
+    private toImmediateAddressMemoryOperator(type: 'a8' | 'a16'): Operator<number> {
+        switch (type) {
             case 'a8':
                 return {
                     size: 1,
@@ -994,8 +1005,8 @@ export default class CPU {
             case 'a16':
                 return {
                     size: 2,
-                    set: (byte: number) => { this.mmu.setWord(this.readImmediateWord(), byte) },
-                    get: () => { return this.readImmediateWord(); }
+                    set: (byte: number) => { this.mmu.setByte(this.readImmediateWord(), byte) },
+                    get: () => { return this.mmu.getByte(this.readImmediateWord()); }
                 };
         }
     }
@@ -1031,10 +1042,10 @@ type OpcodeExecutor = (() => number);
 
 type InstructionSet = (OpcodeExecutor | null)[];
 
-type DataType = 'd8' | 'd16' | 'r8' | 'a8' | 'a16';
+type DataType = 'd8' | 'd16' | 'r8' | 'a16';
 
 function isDataType(arg: string): arg is DataType {
-    return arg === 'd8' || arg === 'd16' || arg === 'r8' || arg === 'a8' || arg === 'a16';
+    return arg === 'd8' || arg === 'd16' || arg === 'r8' || arg === 'a16';
 }
 
 type RegisterType =
