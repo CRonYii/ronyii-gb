@@ -66,7 +66,7 @@ export class NoneMBCCartridge extends Cartridge {
     }
 
     getROMByte(address: number): number {
-        return this.rom[address];
+        return this.rom[address + 0x4000];
     }
 
     getRAMByte(address: number): number {
