@@ -3561,7 +3561,7 @@ export const OPCODES: Array<Opcode | null> = [
         "label": "JP (HL)",
         "operation": "JP",
         "operands": [
-            "(HL)"
+            "HL"
         ],
         "opcode_length": 1,
         "clock_cycles": [
