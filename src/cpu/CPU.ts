@@ -8,11 +8,14 @@ import { CombinedRegister16 } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { CB_OPCODES, FlagAffection, Opcode, OPCODES } from "./Opcodes";
 import { Register16, Register8 } from "./Register";
+import { MemoryDebuggerConfig } from "../memory/MemoryDebugger";
+import { RSTAddress, RegisterType, parseByteIndex, parseRSTAddress, isFlagMode, isDataType, isRegisterType, DataType } from "../utils/OpcodeTypes";
 
 export interface CPUConfig {
     mmu: MMU,
     clock: Clock,
-    debuggerConfig?: CPUDebuggerConfig
+    debuggerConfig?: CPUDebuggerConfig,
+    memoryDebuggerConfig?: MemoryDebuggerConfig,
 }
 
 export default class CPU {
@@ -45,22 +48,29 @@ export default class CPU {
     private interruptsMasterEnable: boolean = false;
 
     private debuggerConfig?: CPUDebuggerConfig;
+    private memoryDebuggerConfig?: MemoryDebuggerConfig;
+    private shouldPause: boolean = false;
 
     constructor(configs: CPUConfig) {
         this.mmu = configs.mmu;
         this.instructionSet = this.buildInstructionSet(OPCODES);
         this.cbInstructionSet = this.buildInstructionSet(CB_OPCODES);
         this.debuggerConfig = configs.debuggerConfig;
+        this.memoryDebuggerConfig = configs.memoryDebuggerConfig;
         configs.clock.add(() => {
+            const result = this.debug();
             const cyclesTaken = this.exec();
-            const pause = this.debug();
-            if (pause) {
+            this.shouldPause = this.shouldPause || result;
+            if (this.shouldPause) {
+                this.shouldPause = false;
                 return 'pause';
             }
             return cyclesTaken;
         });
         this.initRegisters();
     }
+
+    public execSet = new Set();
 
     public exec(): number {
         let result: number;
@@ -71,6 +81,7 @@ export default class CPU {
         } else {
             // fetch-decode-excute
             const code = this.fetchCode(); // fetch
+            this.execSet.add(code);
             const op = this.decodeToOp(code); // decode
             result = op(); // execute
         }
@@ -142,6 +153,43 @@ export default class CPU {
         return this[type].get();
     }
 
+    private setByte(address: number, data: number) {
+        this.mmu.setByte(address, data);
+        const result = this.debugMemory(address, data);
+
+        this.shouldPause = this.shouldPause || result;
+    }
+
+    private setWord(address: number, data: number) {
+        this.mmu.setWord(address, data);
+        const result = this.debugMemory(address, data);
+        this.shouldPause = this.shouldPause || result;
+    }
+
+    private debugMemory(address: number, data: number): boolean {
+        if (debugEnabled.printMemory) {
+            if (this.memoryDebuggerConfig) {
+                for (let bp of this.memoryDebuggerConfig.breakpoints) {
+                    switch (bp.type) {
+                        case 'ADDR':
+                            if (address !== bp.value) {
+                                continue;
+                            }
+                            break;
+                        case 'VAL':
+                            if (data !== bp.value) {
+                                continue;
+                            }
+                            break;
+                    }
+                    this.memoryDebuggerConfig.debugger(address, data);
+                    return bp.pasue === true;
+                }
+            }
+        }
+        return false;
+    }
+
     private updatePC(length: number) {
         const result = this.read('PC') + length;
         this.PC.set(result);
@@ -161,7 +209,7 @@ export default class CPU {
         // decrement SP twice for 2 bytes of data
         this.decrement('SP');
         this.decrement('SP');
-        this.mmu.setWord(this.read('SP'), data);
+        this.setWord(this.read('SP'), data);
     }
 
     private popStack(): number {
@@ -951,7 +999,7 @@ export default class CPU {
         return {
             size: 1,
             set: (byte: number) => {
-                this.mmu.setByte(getAddress(), byte);
+                this.setByte(getAddress(), byte);
                 handleSign();
             },
             get: () => {
@@ -996,13 +1044,13 @@ export default class CPU {
             case 'a8':
                 return {
                     size: 1,
-                    set: (byte: number) => { this.mmu.setByte(this.readImmediateByte() | 0xff00, byte) },
+                    set: (byte: number) => { this.setByte(this.readImmediateByte() | 0xff00, byte) },
                     get: () => { return this.mmu.getByte(this.readImmediateByte() | 0xff00); }
                 };
             case 'a16':
                 return {
                     size: 1,
-                    set: (byte: number) => { this.mmu.setByte(this.readImmediateWord(), byte) },
+                    set: (byte: number) => { this.setByte(this.readImmediateWord(), byte) },
                     get: () => { return this.mmu.getByte(this.readImmediateWord()); }
                 };
         }
@@ -1034,60 +1082,6 @@ export default class CPU {
 type OpcodeExecutor = (() => number);
 
 type InstructionSet = (OpcodeExecutor | null)[];
-
-type DataType = 'd8' | 'd16' | 'r8' | 'a16';
-
-function isDataType(arg: string): arg is DataType {
-    return arg === 'd8' || arg === 'd16' || arg === 'r8' || arg === 'a16';
-}
-
-type RegisterType =
-    'AF' | 'BC' | 'DE' | 'HL' |
-    'A' | 'F' | 'B' | 'C' |
-    'D' | 'E' | 'H' | 'L' |
-    'SP' | 'PC';
-
-const registerTypes = [
-    'AF', 'BC', 'DE', 'HL',
-    'A', 'F', 'B', 'C',
-    'D', 'E', 'H', 'L',
-    'SP', 'PC'
-];
-
-function isRegisterType(arg: string): arg is RegisterType {
-    return registerTypes.includes(arg);
-}
-
-type FlagMode = 'Z' | 'NZ' | 'C' | 'NC';
-
-function isFlagMode(arg: string): arg is FlagMode {
-    return arg === 'Z' || arg === 'NZ' || arg === 'C' || arg === 'NC';
-}
-
-function parseByteIndex(operand: string): number {
-    const val = Number(operand);
-    if (val >= 0 && val <= 7) {
-        return val;
-    }
-    throw new Error('Expected a number in range [0, 7]');
-}
-
-const specialAddresses = [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60];
-
-type RSTAddress = 0x00 | 0x08 | 0x10 | 0x18 | 0x20 | 0x28 | 0x30 | 0x38 | 0x40 | 0x48 | 0x50 | 0x58 | 0x60;
-
-function isRSTAddress(arg: number): arg is RSTAddress {
-    return specialAddresses.includes(arg);
-}
-
-function parseRSTAddress(operand: string): RSTAddress {
-    operand = '0x' + operand.substring(0, operand.length - 1);
-    const val = Number(operand);
-    if (isRSTAddress(val)) {
-        return val;
-    };
-    throw new Error('Expected a number one of [0x00, 0x08, 0x10, 0x18, 0x20, 0x28, 0x30, 0x38, 0x40, 0x48, 0x50, 0x58, 0x60], got ' + operand);
-}
 
 interface ExecutionResult {
     cycles?: number;

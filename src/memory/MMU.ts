@@ -1,13 +1,12 @@
+import Cartridge from "../cartridge/Cartridge";
 import FlagManager from "../utils/FlagManager";
+import BIOS from "./BIOS";
 import { InterruptFlagsEKey, InterruptsFlags } from "./IORegisters";
 import { Memory, MemorySegment } from "./Memory";
 import { MemoryDebuggerConfig } from "./MemoryDebugger";
-import Cartridge from "../cartridge/Cartridge";
-import { debugEnabled } from "../index";
-import BIOS from "./BIOS";
 
 export interface MMUConfig {
-    debuggerConfig?: MemoryDebuggerConfig,
+    
 }
 
 // Memory Management Unit
@@ -24,6 +23,7 @@ export default class MMU implements Memory {
     private readonly IO_REGS: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF00, readable: true, writable: true }); // I/O Registers
     private readonly HRAM: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF80, readable: true, writable: true }); // High RAM - Zero Page Memory
 
+    private inBIOS: boolean = true;
     private debuggerConfig?: MemoryDebuggerConfig;
 
     public readonly interruptEnableManager = new FlagManager<InterruptFlagsEKey>({
@@ -36,9 +36,7 @@ export default class MMU implements Memory {
         set: (byte) => this.setByte(0xff0f, byte)
     }, InterruptsFlags);
 
-    constructor(configs: MMUConfig) {
-        const { debuggerConfig } = configs;
-        this.debuggerConfig = debuggerConfig;
+    constructor() {
         this.reset();
     }
 
@@ -66,13 +64,12 @@ export default class MMU implements Memory {
             // LYC               BGP           OBP0            OBP1
             [0xFF45, 0x00], [0xFF47, 0xFC], [0xFF48, 0xFF], [0xFF49, 0xFF],
             // WY                WX            IE
-            [0xFF4A, 0x00], [0xFF4B, 0x00], [0xFFFF, 0x00],
+            [0xFF4A, 0x00], [0xFF4B, 0x00], [0xFFFF, 0x00]
         ]);
     }
 
     setByte(address: number, data: number) {
         this.getSegment(address).setByte(address, data);
-        this.debug(address, data);
     }
 
     getByte(address: number): number {
@@ -138,30 +135,6 @@ export default class MMU implements Memory {
     getWord(address: number): number {
         return this.getByte(address) + (this.getByte(address + 1) << 8);
     }
-
-
-    private debug(address: number, data: number) {
-        if (debugEnabled.printMemory) {
-            if (this.debuggerConfig) {
-                for (let bp of this.debuggerConfig.breakpoints) {
-                    switch (bp.type) {
-                        case 'ADDR':
-                            if (address !== bp.value) {
-                                continue;
-                            }
-                            break;
-                        case 'VAL':
-                            if (data !== bp.value) {
-                                continue;
-                            }
-                            break;
-                    }
-                    this.debuggerConfig.debugger(address, data);
-                }
-            }
-        }
-    }
-
 
     shouldInterrupt(key: InterruptFlagsEKey) {
         return this.interruptEnableManager.get(key)

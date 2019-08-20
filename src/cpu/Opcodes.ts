@@ -3485,7 +3485,7 @@ export const OPCODES: Array<Opcode | null> = [
             "(C)",
             "A"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],
@@ -3659,7 +3659,7 @@ export const OPCODES: Array<Opcode | null> = [
             "A",
             "(C)"
         ],
-        "opcode_length": 2,
+        "opcode_length": 1,
         "clock_cycles": [
             8
         ],

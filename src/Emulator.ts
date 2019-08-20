@@ -19,23 +19,24 @@ export default class Emulator {
     private readonly gpu: GPU;
 
     constructor(configs: EmulatorConfig) {
-        this.mmu = new MMU({
-            debuggerConfig: memorydebuggerConfig
-        });
+        this.mmu = new MMU();
         this.clock = Z80Clock();
         this.cpu = new CPU({
             clock: this.clock,
             mmu: this.mmu,
             debuggerConfig: {
                 breakpoints: [
-                    // { type: 'PC', value: 0x0100 }
-                    // { type: 'OPCODE', value: 0xE0 }
+                    // FIXME: never reach 0x036a
+                    // { type: 'PC', value: 0x0434 },
+                    { type: 'PC', value: 0x0100 }
+                    // { type: 'OPCODE', value: 0xe6 }
                 ],
                 debugger: (cpu, type, value) => {
                     this.clock.pause();
                     console.warn(`Paused at breakpoint [${type}] => ${Helper.toHexText(value, 4)}`);
                 }
-            }
+            },
+            memoryDebuggerConfig: memorydebuggerConfig
         })
         this.gpu = new GPU({
             clock: this.clock,
