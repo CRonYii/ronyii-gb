@@ -73,32 +73,35 @@ export default class CPU {
     private cpuLogs: string[] = [];
 
     public exec(): number {
-        let result: number;
-
-        if (this.isHalt()) {
-            // one halt takes 4 clock cycles
-            result = 4;
+        const result = this.handleInterrupt();
+        if (result !== 0) {
+            return result;
+        } else if (this.isHalt()) {
+            return 4;
         } else {
             this.log(false);
             // fetch-decode-excute
             const code = this.fetchCode(); // fetch
             const op = this.decodeToOp(code); // decode
-            result = op(); // execute
+            return op(); // execute
         }
+    }
+
+    private handleInterrupt() {
         if (this.interruptsMasterEnable) {
             if (this.mmu.shouldInterrupt('VBlank')) {
-                this.interrupt('VBlank');
+                return this.interrupt('VBlank');
             } else if (this.mmu.shouldInterrupt('LCDC')) {
-                this.interrupt('LCDC');
+                return this.interrupt('LCDC');
             } else if (this.mmu.shouldInterrupt('Timer')) {
-                this.interrupt('Timer');
+                return this.interrupt('Timer');
             } else if (this.mmu.shouldInterrupt('Serial')) {
-                this.interrupt('Serial');
+                return this.interrupt('Serial');
             } else if (this.mmu.shouldInterrupt('Joypad')) {
-                this.interrupt('Joypad');
+                return this.interrupt('Joypad');
             }
         }
-        return result;
+        return 0;
     }
 
     private log(isCB: boolean) {
@@ -122,6 +125,9 @@ export default class CPU {
 
     private interrupt(type: InterruptFlagsEKey) {
         this.halt(false); // restore the cpu from HALT to perform interrupts
+        if (debugEnabled.interrupts) {
+            console.warn(`CPU INTERRUPTS => ${type}`);
+        }
         this.setInterrupts(false); // disable master enable because only one interrupt can take place at the same time
         this.mmu.interruptFlagsManager.set(type, false); // disable the flag since it's in progess
         if (type === 'VBlank') {
@@ -135,9 +141,7 @@ export default class CPU {
         } else if (type === 'Joypad') {
             this.performRST(0x60);
         }
-        if (debugEnabled.interrupts) {
-            console.warn(`CPU INTERRUPTS => ${type}`);
-        }
+        return 16;
     }
 
     private fetchCode(): number {
@@ -256,7 +260,6 @@ export default class CPU {
     }
 
     private performRST(address: RSTAddress) {
-        // TODO: rsv() save the current register values temporarily
         this.pushStack(this.read('PC'));
         this.PC.set(address);
     }
