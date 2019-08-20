@@ -4434,7 +4434,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SRA C",
@@ -4449,7 +4449,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SRA D",
@@ -4464,7 +4464,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SRA E",
@@ -4479,7 +4479,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SRA H",
@@ -4494,7 +4494,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SRA L",
@@ -4509,7 +4509,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SRA (HL)",
@@ -4524,7 +4524,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SRA A",
@@ -4539,7 +4539,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         "setZero": true,
         "setSubtract": 0,
         "setHalfCarry": 0,
-        "setCarry": 0
+        "setCarry": true
     },
     {
         "label": "SWAP B",
