@@ -559,18 +559,25 @@ export default class CPU {
     private buildDAAInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
             let a = this.read('A');
-            let carry = false;
-            if (this.F.halfCarry || (!this.F.subtract && (this.read('A') & 0xf) > 0x9)) {
-                a += 0x6;
+            let adjust = this.F.carry ? 0x60 : 0x00;
+            if (this.F.halfCarry) {
+                adjust |= 0x06;
             }
-            if (this.F.carry || (!this.F.subtract && this.read('A') > 0x99)) {
-                a += 0x60;
-                carry = true;
+            if (!this.F.subtract) {
+                if ((a & 0xf) > 0x9) {
+                    adjust |= 0x06;
+                }
+                if (a > 0x99) {
+                    adjust |= 0x60;
+                }
+                a = a + adjust;
+            } else {
+                a = a - adjust;
             }
             a &= 0xff;
             this.A.set(a);
 
-            return { zero: a === 0, carry };
+            return { zero: a === 0, carry: adjust >= 0x60 };
         };
     }
 
