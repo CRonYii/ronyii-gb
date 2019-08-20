@@ -59,18 +59,18 @@ export default class CPU {
         this.memoryDebuggerConfig = configs.memoryDebuggerConfig;
         configs.clock.add(() => {
             const result = this.debug();
-            const cyclesTaken = this.exec();
             this.shouldPause = this.shouldPause || result;
             if (this.shouldPause) {
                 this.shouldPause = false;
                 return 'pause';
             }
+            const cyclesTaken = this.exec();
             return cyclesTaken;
         });
         this.initRegisters();
     }
 
-    public execSet = new Set();
+    private cpuLogs: string[] = [];
 
     public exec(): number {
         let result: number;
@@ -79,9 +79,9 @@ export default class CPU {
             // one halt takes 4 clock cycles
             result = 4;
         } else {
+            this.log(false);
             // fetch-decode-excute
             const code = this.fetchCode(); // fetch
-            this.execSet.add(code);
             const op = this.decodeToOp(code); // decode
             result = op(); // execute
         }
@@ -99,6 +99,25 @@ export default class CPU {
             }
         }
         return result;
+    }
+
+    private log(isCB: boolean) {
+        if (debugEnabled.cpuLogs) {
+            let opcode;
+            if (isCB) {
+                opcode = CB_OPCODES[this.fetchCode()];
+            } else {
+                opcode = OPCODES[this.fetchCode()];
+            }
+            if (!opcode) {
+                return;
+            }
+            this.cpuLogs.push(`PC: ${Helper.toHexText(this.PC.get(), 4)} AF: ${Helper.toHexText(this.AF.get(), 4)} BC: ${Helper.toHexText(this.BC.get(), 4)} DE: ${Helper.toHexText(this.DE.get(), 4)} HL: ${Helper.toHexText(this.HL.get(), 4)} SP: ${Helper.toHexText(this.SP.get(), 4)} ${opcode.label}`);
+        }
+    }
+
+    public getLog() {
+        return this.cpuLogs.slice(0);
     }
 
     private interrupt(type: InterruptFlagsEKey) {
@@ -881,6 +900,7 @@ export default class CPU {
 
     private buildCBInstruction = (def: Opcode): () => ExecutionResult => {
         return () => {
+            this.log(true);
             const code = this.fetchCode(); // fetch
             const op = this.decodeToCBOp(code); // op
             const cycles = op(); // execute
