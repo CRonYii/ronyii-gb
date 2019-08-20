@@ -19,16 +19,16 @@ export default class Emulator {
     private readonly gpu: GPU;
 
     constructor(configs: EmulatorConfig) {
-        this.mmu = new MMU();
         this.clock = Z80Clock();
+        this.mmu = new MMU(this.clock);
         this.cpu = new CPU({
             clock: this.clock,
             mmu: this.mmu,
             debuggerConfig: {
                 breakpoints: [
                     // FIXME: never reach 0x036a
-                    // { type: 'PC', value: 0x0434 },
-                    { type: 'PC', value: 0x0100 }
+                    // { type: 'PC', value: 0xc0c6 },
+                    // { type: 'PC', value: 0x0100 },
                     // { type: 'OPCODE', value: 0xe6 }
                 ],
                 debugger: (cpu, type, value) => {

@@ -4,9 +4,11 @@ import BIOS from "./BIOS";
 import { InterruptFlagsEKey, InterruptsFlags } from "./IORegisters";
 import { Memory, MemorySegment } from "./Memory";
 import { MemoryDebuggerConfig } from "./MemoryDebugger";
+import { Timer } from "./Timer";
+import Clock from "../cpu/Clock";
 
 export interface MMUConfig {
-    
+
 }
 
 // Memory Management Unit
@@ -20,6 +22,7 @@ export default class MMU implements Memory {
     private readonly ECHO_RAM: Memory = new MemorySegment({ size: 0x1E00, offset: 0xE000, readable: true, writable: true }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF TODO: implement a ECHO_RAM class
     private readonly OAM: Memory = new MemorySegment({ size: 0x00A0, offset: 0xFE00, readable: true, writable: true }); // 160 bytes Sprite attribute table (OAM)
     private readonly UNUSABLE: Memory = new MemorySegment({ size: 0x0060, readable: false, writable: false }); // 96 bytes of UNSABLE Memory (0xFEA0 ~ 0xFEFF)
+    private readonly TIMER: Memory; // Timer
     private readonly IO_REGS: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF00, readable: true, writable: true }); // I/O Registers
     private readonly HRAM: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF80, readable: true, writable: true }); // High RAM - Zero Page Memory
 
@@ -36,7 +39,8 @@ export default class MMU implements Memory {
         set: (byte) => this.setByte(0xff0f, byte)
     }, InterruptsFlags);
 
-    constructor() {
+    constructor(clock: Clock) {
+        this.TIMER = new Timer(clock, this.interruptFlagsManager);
         this.reset();
     }
 
@@ -104,6 +108,9 @@ export default class MMU implements Memory {
                         }
                     case 0xF00:
                         if ((address & 0x00FF) <= 0x7F) {
+                            if ((address & 0x00FF) >= 0x04 && (address & 0x00FF) <= 0x07) {
+                                return this.TIMER;
+                            }
                             return this.IO_REGS;
                         } else {
                             return this.HRAM;

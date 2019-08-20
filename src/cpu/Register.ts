@@ -55,6 +55,26 @@ export class NumberRegister implements Register {
         return this._size;
     }
 
+    public inc(): boolean {
+        this.data++;
+        let overflow = false;
+        if (this.data > this.bitmask) {
+            overflow = true;
+            this.data = 0;
+        }
+        return overflow;
+    }
+
+    public dec(): boolean {
+        this.data--;
+        let overflow = false;
+        if (this.data < 0) {
+            overflow = true;
+            this.data = this.bitmask;
+        }
+        return overflow;
+    }
+
 }
 
 export class Register8 extends NumberRegister {
