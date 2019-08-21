@@ -39,7 +39,7 @@ export default class Clock {
     }
 
     public add(task: ClockTask) {
-        this.tasks.push(task);
+        this.tasks.unshift(task);
     }
 
     private tick() {
@@ -56,7 +56,7 @@ export default class Clock {
 
     public step() {
         let totalCyclesTaken = 0;
-        for (let task of this.tasks) {
+        for (const task of this.tasks) {
             const cyclesTaken = task(totalCyclesTaken);
             if (cyclesTaken === 'pause') {
                 this.pause();

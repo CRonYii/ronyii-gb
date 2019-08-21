@@ -21,13 +21,18 @@ export default class Emulator {
     constructor(configs: EmulatorConfig) {
         this.clock = Z80Clock();
         this.mmu = new MMU(this.clock);
+        this.gpu = new GPU({
+            clock: this.clock,
+            display: configs.display,
+            mmu: this.mmu
+        });
         this.cpu = new CPU({
             clock: this.clock,
             mmu: this.mmu,
             debuggerConfig: {
                 breakpoints: [
                     // FIXME: never reach 0x036a
-                    // { type: 'PC', value: 0xc0c6 },
+                    // { type: 'PC', value: 0xc007 },
                     // { type: 'PC', value: 0x0100 },
                     // { type: 'OPCODE', value: 0xe6 }
                 ],
@@ -38,11 +43,6 @@ export default class Emulator {
             },
             memoryDebuggerConfig: memorydebuggerConfig
         })
-        this.gpu = new GPU({
-            clock: this.clock,
-            display: configs.display,
-            mmu: this.mmu
-        });
     }
 
     start(rom?: Cartridge) {
