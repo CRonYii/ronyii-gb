@@ -322,24 +322,10 @@ export default class CPU {
                 const { cycles, zero, subtract, halfCarry, carry } = executor();
 
                 // Update the Flag Register
-                const setFlag = (flag: 'zero' | 'subtract' | 'halfCarry' | 'carry', affection: FlagAffection, value?: boolean): void => {
-                    if (affection === false) {
-                        return;
-                    }
-                    let flagValue: boolean;
-                    if (affection === true) {
-                        if (value === undefined) throw new Error('Expected Flag value but got none: \n' + JSON.stringify(def, null, 4));
-                        flagValue = value;
-                    } else {
-                        flagValue = affection === 1;
-                    }
-                    this.F[flag] = flagValue;
-                }
-
-                setFlag('zero', def.setZero, zero);
-                setFlag('subtract', def.setSubtract, subtract);
-                setFlag('halfCarry', def.setHalfCarry, halfCarry);
-                setFlag('carry', def.setCarry, carry);
+                this.setFlag('zero', def.setZero, zero);
+                this.setFlag('subtract', def.setSubtract, subtract);
+                this.setFlag('halfCarry', def.setHalfCarry, halfCarry);
+                this.setFlag('carry', def.setCarry, carry);
 
                 // Update the CPU clock
                 if (cycles) {
@@ -349,6 +335,20 @@ export default class CPU {
                 }
             };
         });
+    }
+
+    private setFlag(flag: 'zero' | 'subtract' | 'halfCarry' | 'carry', affection: FlagAffection, value?: boolean): void {
+        if (affection === false) {
+            return;
+        }
+        let flagValue: boolean;
+        if (affection === true) {
+            if (value === undefined) throw new Error('Expected Flag value but got none');
+            flagValue = value;
+        } else {
+            flagValue = affection === 1;
+        }
+        this.F[flag] = flagValue;
     }
 
     private buildNOPInstruction = (def: Opcode): () => ExecutionResult => {
@@ -380,7 +380,7 @@ export default class CPU {
     private buildPUSHInstruction = (def: Opcode): () => ExecutionResult => {
         if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
         const [source] = def.operands.map((operand) => this.parseOperator(operand));
-        
+
         return () => {
 
             this.pushStack(source.get());
