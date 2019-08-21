@@ -37,7 +37,6 @@ export class NumberRegister implements Register {
     }
 
     public set(value: number) {
-        value = Helper.toUnsigned32(value);
         this.data = value & this.bitmask;
     }
 
