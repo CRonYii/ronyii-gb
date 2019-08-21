@@ -51,35 +51,22 @@ export default class GPU {
     private renderBackground() {
         // SCX/SCY indicates which pixel to start in the 256 * 256 pixels BG map
         // here we are accessing the pixel by finding the tile first
-        const scx = this.mem.getByte('SCX');
-        const tileIdx = (scx >> 3) & 31; // which tile in the line [0, 31] 5 bits
-        const x = scx & 7; // where in the tileline to start [0, 7] 3 bits
-
         const scy = this.mem.getByte('SCY');
         const lineIdx = (((this.currentLine + scy) & 0xff) >> 3); // which line of tiles to use [0, 31] 5 bits
         const y = (this.currentLine + scy) & 7; // which line of pixels to use in that tile [0, 7] 3 bits
 
-        const bgMapBaseAddr = this.getBGTileAddress(lineIdx, tileIdx);
-
-        this.renderBGScan(this.currentLine, bgMapBaseAddr, x, y);
-    }
-
-    /**
-     * 
-     * @param tilePtrBaseAddr the absolute memory address of the first background tile reference (top-left corner)
-     * @param x the x pixel offset
-     * @param y the y pixel offset
-     */
-    private renderBGScan(line: number, tilePtrBaseAddr: number, x: number, y: number) {
         // start with the top-left corner of the 160 * 144 pixels to be drawn
-        for (let i = 0; i < 20; i++) {
-            const tileIdx = this.mmu.getByte(tilePtrBaseAddr + i);
-            const tileline = this.getTileline(this.getTileAddress(tileIdx) + (y * 2));
-            for (let j = 0; j < tileline.length; j++) {
-                const color = this.getColor(tileline[x]); // one of the four color
-                this.display.setPixel((i * 8) + j, line, color);
-                x = (x + 1) & 7;
-            }
+        for (let i = 0; i < 160; i++) {
+            const scx = this.mem.getByte('SCX') + i;
+            const tileIdx = (scx >> 3) & 31; // which tile in the line [0, 31] 5 bits
+            const x = scx & 7; // where in the tileline to start [0, 7] 3 bits
+
+            const bgMapBaseAddr = this.getBGTileAddress(lineIdx, tileIdx);
+            const tileNumber = this.mmu.getByte(bgMapBaseAddr);
+
+            const pixel = this.getTilePixel(this.getTileAddress(tileNumber) + (y * 2), x);
+            const color = this.getColor(pixel); // one of the four color
+            this.display.setPixel(i, this.currentLine, color);
         }
     }
 
@@ -146,6 +133,15 @@ export default class GPU {
         }
 
         return tiles;
+    }
+
+    public getTilePixel(tilelinePtr: number, offset: number) {
+        const byte1 = this.mmu.getByte(tilelinePtr);
+        const byte2 = this.mmu.getByte(tilelinePtr + 1);
+
+        const index = 0x80 >> offset;
+        return ((byte1 & index) ? 1 : 0) |
+            ((byte2 & index) ? 2 : 0);
     }
 
     static PALETTE = [0xff000000, 0xff606060, 0xffc0c0c0, 0xffffffff];
