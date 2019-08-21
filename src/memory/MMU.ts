@@ -121,7 +121,7 @@ export default class MMU implements Memory {
     }
 
     setBytes(kvPairs: number[][]) {
-        for (let [addr, data] of kvPairs) {
+        for (const [addr, data] of kvPairs) {
             this.setByte(addr, data);
         }
     }
