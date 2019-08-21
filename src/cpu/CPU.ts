@@ -378,9 +378,10 @@ export default class CPU {
     }
 
     private buildPUSHInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [source] = def.operands.map((operand) => this.parseOperator(operand));
+        
         return () => {
-            if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
             this.pushStack(source.get());
 
@@ -389,9 +390,10 @@ export default class CPU {
     }
 
     private buildPOPInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [target] = def.operands.map((operand) => this.parseOperator(operand));
+
         return () => {
-            if (!def.operands) throw new Error('Expected one operands when building [PUSH] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [target] = def.operands.map((operand) => this.parseOperator(operand));
 
             target.set(this.popStack());
 
@@ -468,9 +470,9 @@ export default class CPU {
     }
 
     private buildANDInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [source] = def.operands.map((operand) => this.parseOperator(operand));
         return () => {
-            if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
             const result = ALU.and(this.read('A'), source.get());
             this.A.set(result.result);
@@ -480,9 +482,9 @@ export default class CPU {
     }
 
     private buildORInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [source] = def.operands.map((operand) => this.parseOperator(operand));
         return () => {
-            if (!def.operands) throw new Error('Expected one operands when building [OR] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
             const result = ALU.or(this.read('A'), source.get());
             this.A.set(result.result);
@@ -492,9 +494,9 @@ export default class CPU {
     }
 
     private buildXORInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected one operands when building [XOR] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [source] = def.operands.map((operand) => this.parseOperator(operand));
         return () => {
-            if (!def.operands) throw new Error('Expected one operands when building [XOR] Insturction:\n' + JSON.stringify(def, null, 4));
-            const [source] = def.operands.map((operand) => this.parseOperator(operand));
 
             const result = ALU.xor(this.read('A'), source.get());
             this.A.set(result.result);
