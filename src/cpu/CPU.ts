@@ -57,20 +57,22 @@ export default class CPU {
         this.cbInstructionSet = this.buildInstructionSet(CB_OPCODES);
         this.debuggerConfig = configs.debuggerConfig;
         this.memoryDebuggerConfig = configs.memoryDebuggerConfig;
-        configs.clock.add(() => {
-            const result = this.debug();
-            this.shouldPause = this.shouldPause || result;
-            if (this.shouldPause) {
-                this.shouldPause = false;
-                return 'pause';
-            }
-            const cyclesTaken = this.exec();
-            return cyclesTaken;
-        });
         this.initRegisters();
+        configs.clock.add(this.next.bind(this));
     }
 
     private cpuLogs: string[] = [];
+
+    private next() {
+        const result = this.debug();
+        const cyclesTaken = this.exec();
+        this.shouldPause = this.shouldPause || result;
+        if (this.shouldPause) {
+            this.shouldPause = false;
+            return 'pause';
+        }
+        return cyclesTaken;
+    }
 
     public exec(): number {
         const result = this.handleInterrupt();
@@ -88,43 +90,33 @@ export default class CPU {
     }
 
     private handleInterrupt() {
-        if (this.interruptsMasterEnable) {
-            if (this.mmu.shouldInterrupt('VBlank')) {
-                return this.interrupt('VBlank');
-            } else if (this.mmu.shouldInterrupt('LCDC')) {
-                return this.interrupt('LCDC');
-            } else if (this.mmu.shouldInterrupt('Timer')) {
-                return this.interrupt('Timer');
-            } else if (this.mmu.shouldInterrupt('Serial')) {
-                return this.interrupt('Serial');
-            } else if (this.mmu.shouldInterrupt('Joypad')) {
-                return this.interrupt('Joypad');
-            }
+        if (!this.isHalt() && !this.interruptsMasterEnable) {
+            return 0;
         }
+        if ((this.mmu.interruptEnableManager.flag() & this.mmu.interruptFlagsManager.flag()) === 0) {
+            return 0;
+        }
+        this.halt(false);
+        if (!this.interruptsMasterEnable) {
+            return 0;
+        }
+
+        if (this.mmu.shouldInterrupt('VBlank')) {
+            return this.interrupt('VBlank');
+        } else if (this.mmu.shouldInterrupt('LCDC')) {
+            return this.interrupt('LCDC');
+        } else if (this.mmu.shouldInterrupt('Timer')) {
+            return this.interrupt('Timer');
+        } else if (this.mmu.shouldInterrupt('Serial')) {
+            return this.interrupt('Serial');
+        } else if (this.mmu.shouldInterrupt('Joypad')) {
+            return this.interrupt('Joypad');
+        }
+
         return 0;
     }
 
-    private log(isCB: boolean) {
-        if (debugEnabled.cpuLogs) {
-            let opcode;
-            if (isCB) {
-                opcode = CB_OPCODES[this.fetchCode()];
-            } else {
-                opcode = OPCODES[this.fetchCode()];
-            }
-            if (!opcode) {
-                return;
-            }
-            this.cpuLogs.push(`PC: ${Helper.toHexText(this.PC.get(), 4)} AF: ${Helper.toHexText(this.AF.get(), 4)} BC: ${Helper.toHexText(this.BC.get(), 4)} DE: ${Helper.toHexText(this.DE.get(), 4)} HL: ${Helper.toHexText(this.HL.get(), 4)} SP: ${Helper.toHexText(this.SP.get(), 4)} ${opcode.label}`);
-        }
-    }
-
-    public getLog() {
-        return this.cpuLogs.slice(0);
-    }
-
     private interrupt(type: InterruptFlagsEKey) {
-        this.halt(false); // restore the cpu from HALT to perform interrupts
         if (debugEnabled.interrupts) {
             console.warn(`CPU INTERRUPTS => ${type}`);
         }
@@ -164,6 +156,25 @@ export default class CPU {
         return op;
     }
 
+    private log(isCB: boolean) {
+        if (debugEnabled.cpuLogs) {
+            let opcode;
+            if (isCB) {
+                opcode = CB_OPCODES[this.fetchCode()];
+            } else {
+                opcode = OPCODES[this.fetchCode()];
+            }
+            if (!opcode) {
+                return;
+            }
+            this.cpuLogs.push(`PC: ${Helper.toHexText(this.PC.get(), 4)} AF: ${Helper.toHexText(this.AF.get(), 4)} BC: ${Helper.toHexText(this.BC.get(), 4)} DE: ${Helper.toHexText(this.DE.get(), 4)} HL: ${Helper.toHexText(this.HL.get(), 4)} SP: ${Helper.toHexText(this.SP.get(), 4)} ${opcode.label}`);
+        }
+    }
+
+    public getLog() {
+        return this.cpuLogs.slice(0);
+    }
+
     private readImmediateByte(): number {
         return this.mmu.getByte(this.read('PC') - 1);
     }
@@ -192,7 +203,7 @@ export default class CPU {
     private debugMemory(address: number, data: number): boolean {
         if (debugEnabled.printMemory) {
             if (this.memoryDebuggerConfig) {
-                for (let bp of this.memoryDebuggerConfig.breakpoints) {
+                for (const bp of this.memoryDebuggerConfig.breakpoints) {
                     switch (bp.type) {
                         case 'ADDR':
                             if (address !== bp.value) {
@@ -267,7 +278,7 @@ export default class CPU {
     private debug(): boolean {
         if (debugEnabled.breakpoints) {
             if (this.debuggerConfig) {
-                for (let bp of this.debuggerConfig.breakpoints) {
+                for (const bp of this.debuggerConfig.breakpoints) {
                     if (bp.type === 'PC') {
                         if (this.read('PC') !== bp.value) {
                             continue;
