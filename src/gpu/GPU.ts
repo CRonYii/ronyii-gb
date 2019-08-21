@@ -144,16 +144,20 @@ export default class GPU {
             ((byte2 & index) ? 2 : 0);
     }
 
-    static PALETTE = [0xff000000, 0xff606060, 0xffc0c0c0, 0xffffffff];
+    static WHITE = 0xffffffff;
+    static LIGHT = 0xffc0c0c0;
+    static DARK = 0xff606060;
+    static BLACK = 0xff000000;
 
     public getColor(code: number) {
         const palette = this.mem.getByte('BGP');
-        return [
-            GPU.PALETTE[(palette >> 6) & 0b11],
-            GPU.PALETTE[(palette >> 4) & 0b11],
-            GPU.PALETTE[(palette >> 2) & 0b11],
-            GPU.PALETTE[(palette) & 0b11],
-        ][code];
+        switch (palette >> (2 * code) & 0b11) {
+            case 0b00: return GPU.WHITE;
+            case 0b01: return GPU.LIGHT;
+            case 0b10: return GPU.DARK;
+            case 0b11: return GPU.BLACK;
+            default: throw new Error('Invalid color code');
+        }
     }
 
     /**
