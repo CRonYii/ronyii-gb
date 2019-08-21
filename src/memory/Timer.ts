@@ -55,10 +55,10 @@ export class Timer implements Memory {
             case 0xff06: return this.TMA.set(data);
             case 0xff07:
                 switch (data & 0b11) {
-                    case 0b00: this.timaFreq = CPU_CLOCK_SPEED / 4_096;
-                    case 0b01: this.timaFreq = CPU_CLOCK_SPEED / 262_144;
-                    case 0b10: this.timaFreq = CPU_CLOCK_SPEED / 65_536;
-                    case 0b11: this.timaFreq = CPU_CLOCK_SPEED / 16_384;
+                    case 0b00: this.timaFreq = CPU_CLOCK_SPEED / 4_096; break;
+                    case 0b01: this.timaFreq = CPU_CLOCK_SPEED / 262_144; break;
+                    case 0b10: this.timaFreq = CPU_CLOCK_SPEED / 65_536; break;
+                    case 0b11: this.timaFreq = CPU_CLOCK_SPEED / 16_384; break;
                 }
                 return this.TAC.set(data);
             default: throw new Error('Invalid Timer register address');
