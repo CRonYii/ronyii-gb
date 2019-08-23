@@ -3,7 +3,6 @@ import FlagManager from "../utils/FlagManager";
 import BIOS from "./BIOS";
 import { InterruptFlagsEKey, InterruptsFlags } from "./IORegisters";
 import { Memory, MemorySegment } from "./Memory";
-import { MemoryDebuggerConfig } from "./MemoryDebugger";
 import { Timer } from "./Timer";
 import Clock from "../cpu/Clock";
 
@@ -27,7 +26,6 @@ export default class MMU implements Memory {
     private readonly HRAM: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF80, readable: true, writable: true }); // High RAM - Zero Page Memory
 
     private inBIOS: boolean = true;
-    private debuggerConfig?: MemoryDebuggerConfig;
 
     public readonly interruptEnableManager = new FlagManager<InterruptFlagsEKey>({
         get: () => this.getByte(0xffff),
