@@ -1016,6 +1016,9 @@ export default class CPU {
             if (mem === 'a8') {
                 return this.toImmediateAddressMemoryOperator('a8');
             }
+            if (mem === 'a16d16') {
+                return this.toImmediateAddressMemoryOperator('a16d16');
+            }
             const lastChar = mem[mem.length - 1];
             let sign: '+' | '-' | undefined;
             if (lastChar === '+' || lastChar === '-') {
@@ -1096,7 +1099,7 @@ export default class CPU {
         }
     }
 
-    private toImmediateAddressMemoryOperator(type: 'a8' | 'a16'): Operator<number> {
+    private toImmediateAddressMemoryOperator(type: 'a8' | 'a16' | 'a16d16'): Operator<number> {
         switch (type) {
             case 'a8':
                 return {
@@ -1107,14 +1110,14 @@ export default class CPU {
             case 'a16':
                 return {
                     size: 1,
-                    set: (data: number) => {
-                        if (data <= 0xff) {
-                            this.setByte(this.readImmediateWord(), data);
-                        } else {
-                            this.setWord(this.readImmediateWord(), data);
-                        }
-                    },
+                    set: (data: number) => { this.setByte(this.readImmediateWord(), data); },
                     get: () => { return this.mmu.getByte(this.readImmediateWord()); }
+                };
+            case 'a16d16':
+                return {
+                    size: 1,
+                    set: (data: number) => { this.setWord(this.readImmediateWord(), data); },
+                    get: () => { return this.mmu.getWord(this.readImmediateWord()); }
                 };
         }
     }

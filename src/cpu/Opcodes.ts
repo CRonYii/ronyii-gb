@@ -143,7 +143,7 @@ export const OPCODES: Array<Opcode | null> = [
         "label": "LD (a16),SP",
         "operation": "LD",
         "operands": [
-            "(a16)",
+            "(a16d16)",
             "SP"
         ],
         "opcode_length": 3,
