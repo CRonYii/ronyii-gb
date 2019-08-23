@@ -4885,7 +4885,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
@@ -5013,7 +5013,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
@@ -5141,7 +5141,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
@@ -5269,7 +5269,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
@@ -5397,7 +5397,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
@@ -5525,7 +5525,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
@@ -5653,7 +5653,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
@@ -5781,7 +5781,7 @@ export const CB_OPCODES: Array<Opcode | null> = [
         ],
         "opcode_length": 1,
         "clock_cycles": [
-            16
+            12
         ],
         "setZero": true,
         "setSubtract": 0,
