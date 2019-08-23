@@ -6,7 +6,7 @@ export const loadCartridge = (rom: ArrayLike<number>): Cartridge => {
     switch (rom[CARTRIDGE_TYPE]) {
         case 0x00:
             return new NoneMBCCartridge(rom);
-        case 0x01:
+        case 0x01: case 0x02: case 0x03:
             return new MBC1(rom);
         default:
             throw new Error('Unsupported Cartridge type => ' + rom[CARTRIDGE_TYPE]);
