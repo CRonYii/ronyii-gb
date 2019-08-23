@@ -63,14 +63,14 @@ export default class CPU {
 
     private cpuLogs: string[] = [];
 
-    private next() {
+    private next(_: number, doStop: boolean) {
         const result = this.debug();
-        const cyclesTaken = this.exec();
         this.shouldPause = this.shouldPause || result;
-        if (this.shouldPause) {
+        if (doStop && this.shouldPause) {
             this.shouldPause = false;
             return 'pause';
         }
+        const cyclesTaken = this.exec();
         return cyclesTaken;
     }
 

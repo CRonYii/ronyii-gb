@@ -32,12 +32,11 @@ export default class Emulator {
             debuggerConfig: {
                 breakpoints: [
                     // FIXME: never reach 0x036a
-                    // { type: 'PC', value: 0xc007 },
+                    // { type: 'PC', value: 0xc221 },
                     // { type: 'PC', value: 0x0100 },
-                    // { type: 'OPCODE', value: 0xe6 }
+                    { type: 'OPCODE', value: 0x31 }
                 ],
                 debugger: (cpu, type, value) => {
-                    this.clock.pause();
                     console.warn(`Paused at breakpoint [${type}] => ${Helper.toHexText(value, 4)}`);
                 }
             },
@@ -64,7 +63,7 @@ export default class Emulator {
 
     step() {
         if (this.clock.isPaused()) {
-            this.clock.step();
+            this.clock.step(false);
         }
     }
 

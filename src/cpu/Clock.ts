@@ -8,7 +8,7 @@ export interface ClockConfig {
 
 export type ClockTaskResult = number | 'pause';
 
-export type ClockTask = (clockCycles: number) => ClockTaskResult;
+export type ClockTask = (clockCycles: number, doStop: boolean) => ClockTaskResult;
 
 export default class Clock {
 
@@ -54,10 +54,10 @@ export default class Clock {
         }
     }
 
-    public step() {
+    public step(doStop = true) {
         let totalCyclesTaken = 0;
         for (const task of this.tasks) {
-            const cyclesTaken = task(totalCyclesTaken);
+            const cyclesTaken = task(totalCyclesTaken, doStop);
             if (cyclesTaken === 'pause') {
                 this.pause();
                 break;
@@ -89,6 +89,6 @@ export default class Clock {
 }
 
 export const Z80Clock = () => new Clock({
-    clockSpeed: CPU_CLOCK_SPEED,
+    clockSpeed: CPU_CLOCK_SPEED * 8,
     ticksPerSecond: TICKS_PER_SECOND
 });
