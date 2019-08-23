@@ -89,6 +89,6 @@ export default class Clock {
 }
 
 export const Z80Clock = () => new Clock({
-    clockSpeed: CPU_CLOCK_SPEED * 8,
+    clockSpeed: CPU_CLOCK_SPEED,
     ticksPerSecond: TICKS_PER_SECOND
 });
