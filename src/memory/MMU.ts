@@ -81,7 +81,9 @@ export default class MMU implements Memory {
     getSegment(address: number): Memory {
         address &= 0xFFFF;
         if (address <= 0x7FFF) {
-            // TODO: handle BIOS 
+            if (this.inBIOS && address < 0x0100) {
+                return this.BIOS;
+            }
             return this.CARTRIDGE;
         }
         switch (address & 0xF000) {
@@ -139,6 +141,10 @@ export default class MMU implements Memory {
 
     getWord(address: number): number {
         return this.getByte(address) + (this.getByte(address + 1) << 8);
+    }
+
+    detachBIOS() {
+        this.inBIOS = false;
     }
 
     shouldInterrupt(key: InterruptFlagsEKey) {

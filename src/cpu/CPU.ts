@@ -82,6 +82,9 @@ export default class CPU {
             return 4;
         } else {
             this.log(false);
+            if (this.read('PC') === 0x0100) {
+                this.mmu.detachBIOS();
+            }
             // fetch-decode-excute
             const code = this.fetchCode(); // fetch
             const op = this.decodeToOp(code); // decode
@@ -303,7 +306,7 @@ export default class CPU {
         this.DE.set(0x00d8);
         this.HL.set(0x014d);
         this.SP.set(0xfffe);
-        this.PC.set(0x0100);
+        this.PC.set(0x0000);
     }
 
     private buildInstructionSet(defs: Array<Opcode | null>): InstructionSet {
