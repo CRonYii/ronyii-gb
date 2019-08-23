@@ -48,10 +48,8 @@ export default abstract class Cartridge implements Memory {
     };
 
     getByte(address: number): number {
-        if (address <= 0x3FFF) {
-            return this.rom[address];
-        } else if (address <= 0x7FFF) {
-            return this.getROMByte(address - 0x4000);
+        if (address <= 0x7FFF) {
+            return this.getROMByte(address);
         } else {
             return this.getRAMByte(address);
         }
@@ -81,7 +79,7 @@ export class NoneMBCCartridge extends Cartridge {
     }
 
     getROMByte(address: number): number {
-        return this.rom[address + 0x4000];
+        return this.rom[address];
     }
 
     getRAMByte(address: number): number {

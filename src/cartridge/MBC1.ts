@@ -31,7 +31,16 @@ export default class MBC1 extends Cartridge {
     }
 
     getROMByte(address: number): number {
-        return this.rom[this.romOffset + address];
+        if (address <= 0x3fff) {
+            let offset = 0;
+            if (this.mode === 1) {
+                offset |= this.ramBank << 5;
+            }
+            offset = (offset % this.romBanks) * MBC1.ROM_BANK_SIZE;
+            return this.rom[offset + address];
+        } else {
+            return this.rom[this.romOffset + (address - 0x4000)];
+        }
     }
 
     getRAMByte(address: number): number {
@@ -43,9 +52,7 @@ export default class MBC1 extends Cartridge {
 
     private get romOffset() {
         let offset = this.romBank;
-        if (this.mode === 0) {
-            offset |= (this.ramBank << 5);
-        }
+        offset |= (this.ramBank << 5);
         return (offset % this.romBanks) * MBC1.ROM_BANK_SIZE;
     }
 
