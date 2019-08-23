@@ -17,7 +17,7 @@ export type Operation =
     "ADC" | "SUB" | "SBC" | "AND" | "XOR" | "OR" | "CP" | "RET" |
     "POP" | "JP" | "CALL" | "PUSH" | "RST" | "PREFIX" | "RETI" | "LDH" |
     "DI" | "EI" | "RLC" | "RRC" | "RL" | "RR" | "SLA" | "SRA" |
-    "SWAP" | "SRL" | "BIT" | "RES" | "SET";
+    "SWAP" | "SRL" | "BIT" | "RES" | "SET" | "ADDSP";
 
 export type FlagAffection = boolean | 1 | 0;
 
@@ -3542,11 +3542,10 @@ export const OPCODES: Array<Opcode | null> = [
         "setCarry": false
     },
     {
-        "label": "ADD SP,r8",
-        "operation": "ADD",
+        "label": "ADDSP,r8",
+        "operation": "ADDSP",
         "operands": [
-            "SP",
-            "r8"
+            "d8"
         ],
         "opcode_length": 2,
         "clock_cycles": [
@@ -3731,7 +3730,7 @@ export const OPCODES: Array<Opcode | null> = [
         "operation": "LDHL",
         "operands": [
             "SP",
-            "r8"
+            "d8"
         ],
         "opcode_length": 2,
         "clock_cycles": [

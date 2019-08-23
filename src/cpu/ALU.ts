@@ -1,3 +1,5 @@
+import Helper from "../utils/Helper";
+
 export interface ALUResult {
     result: number,
     zero?: boolean,
@@ -32,6 +34,15 @@ export default {
             zero: result === 0,
             carry: raw > 0xffff,
             halfCarry: ((result ^ b ^ a) & 0x1000) !== 0
+        };
+    },
+    addSP(a: number, b: number): ALUResult {
+        const result = (a + Helper.toSigned8(b)) & 0xffff;
+
+        return {
+            result,
+            carry: (a & 0x00ff) + (b & 0x00ff) > 0x00ff,
+            halfCarry: (a & 0x000f) + (b & 0x000f) > 0x000f
         };
     },
     sub8(a: number, b: number, carry?: boolean): ALUResult {

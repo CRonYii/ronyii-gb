@@ -289,8 +289,8 @@ export default class CPU {
                             continue;
                         }
                     }
-                    this.debuggerConfig.debugger(this, bp.type, bp.value);
-                    return true;
+                    this.debuggerConfig.debugger(bp.type, bp.value);
+                    return bp.pause === true;
                 }
             }
         }
@@ -371,7 +371,7 @@ export default class CPU {
         const [SP, n] = def.operands.map((operand) => this.parseOperator(operand));
 
         return () => {
-            const result = ALU.add16(SP.get(), n.get());
+            const result = ALU.addSP(SP.get(), n.get());
             this.HL.set(result.result);
 
             return result;
@@ -419,6 +419,18 @@ export default class CPU {
         return () => {
             const result = addition(target.get(), source.get());
             target.set(result.result);
+
+            return result;
+        };
+    }
+
+    private buildADDSPInstruction = (def: Opcode): () => ExecutionResult => {
+        if (!def.operands) throw new Error('Expected two operands when building [ADD] Insturction:\n' + JSON.stringify(def, null, 4));
+        const [source] = def.operands.map((operand) => this.parseOperator(operand));
+
+        return () => {
+            const result = ALU.addSP(this.read('SP'), source.get());
+            this.SP.set(result.result);
 
             return result;
         };
@@ -940,6 +952,7 @@ export default class CPU {
         'PUSH': this.buildPUSHInstruction,
         'POP': this.buildPOPInstruction,
         'ADD': this.buildADDInstruction,
+        'ADDSP': this.buildADDSPInstruction,
         'ADC': this.buildADCInstruction,
         'SUB': this.buildSUBInstruction,
         'SBC': this.buildSBCInstruction,
@@ -1153,10 +1166,11 @@ interface InstructionBuilderMap {
 
 interface Breakpoint {
     type: 'PC' | 'OPCODE',
-    value: number
+    value: number,
+    pause?: boolean
 };
 
-type CPUDebugger = (cpu: CPU, type: 'PC' | 'OPCODE', value: number) => void;
+type CPUDebugger = (type: 'PC' | 'OPCODE', value: number) => void;
 
 export interface CPUDebuggerConfig {
     breakpoints: Breakpoint[],

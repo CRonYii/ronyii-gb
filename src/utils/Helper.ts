@@ -13,6 +13,9 @@ export default {
     toUnsigned8(num: number) {
         return new Uint8Array([num])[0]
     },
+    toUnsigned16(num: number) {
+        return new Uint16Array([num])[0]
+    },
     toText(buffer: ArrayBuffer, start: number, end: number) {
         return decoder.decode(buffer.slice(start, end));
     },
