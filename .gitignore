@@ -1,3 +1,4 @@
 node_modules
 dist/bundle.js
 rom
+debug_options.json
