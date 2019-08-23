@@ -196,6 +196,7 @@ export default class CPU {
 
     private setWord(address: number, data: number) {
         this.mmu.setWord(address, data);
+
         const result = this.debugMemory(address, data);
         this.shouldPause = this.shouldPause || result;
     }
@@ -1093,7 +1094,13 @@ export default class CPU {
             case 'a16':
                 return {
                     size: 1,
-                    set: (byte: number) => { this.setByte(this.readImmediateWord(), byte) },
+                    set: (data: number) => {
+                        if (data <= 0xff) {
+                            this.setByte(this.readImmediateWord(), data);
+                        } else {
+                            this.setWord(this.readImmediateWord(), data);
+                        }
+                    },
                     get: () => { return this.mmu.getByte(this.readImmediateWord()); }
                 };
         }
