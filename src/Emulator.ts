@@ -1,11 +1,10 @@
+import Cartridge from "./cartridge/Cartridge";
 import Clock, { Z80Clock } from "./cpu/Clock";
 import CPU from "./cpu/CPU";
 import { Display } from "./gpu/Display";
 import GPU from "./gpu/GPU";
 import MMU from "./memory/MMU";
-import Helper from "./utils/Helper";
-import Cartridge from "./cartridge/Cartridge";
-import { memorydebuggerConfig } from "./memory/MemoryDebugger";
+import { cpuDebugger, memorydebuggerConfig } from "./utils/Debuggers";
 
 export interface EmulatorConfig {
     display: Display
@@ -29,17 +28,7 @@ export default class Emulator {
         this.cpu = new CPU({
             clock: this.clock,
             mmu: this.mmu,
-            debuggerConfig: {
-                breakpoints: [
-                    // FIXME: never reach 0x036a
-                    // { type: 'PC', value: 0xc221 },
-                    // { type: 'PC', value: 0x0100 },
-                    { type: 'OPCODE', value: 0x31 }
-                ],
-                debugger: (cpu, type, value) => {
-                    console.warn(`Paused at breakpoint [${type}] => ${Helper.toHexText(value, 4)}`);
-                }
-            },
+            cpuDebuggerConfig: cpuDebugger,
             memoryDebuggerConfig: memorydebuggerConfig
         })
     }

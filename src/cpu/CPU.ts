@@ -2,19 +2,19 @@ import { debugEnabled } from "../index";
 import { InterruptFlagsEKey } from "../memory/IORegisters";
 import MMU from "../memory/MMU";
 import Helper from "../utils/Helper";
+import { DataType, isDataType, isFlagMode, isRegisterType, parseByteIndex, parseRSTAddress, RegisterType, RSTAddress } from "../utils/OpcodeTypes";
 import ALU, { ALUResult } from "./ALU";
 import Clock from "./Clock";
 import { CombinedRegister16 } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { CB_OPCODES, FlagAffection, Opcode, OPCODES } from "./Opcodes";
 import { Register16, Register8 } from "./Register";
-import { MemoryDebuggerConfig } from "../memory/MemoryDebugger";
-import { RSTAddress, RegisterType, parseByteIndex, parseRSTAddress, isFlagMode, isDataType, isRegisterType, DataType } from "../utils/OpcodeTypes";
+import { CPUDebuggerConfig, MemoryDebuggerConfig } from "../utils/Debuggers";
 
 export interface CPUConfig {
     mmu: MMU,
     clock: Clock,
-    debuggerConfig?: CPUDebuggerConfig,
+    cpuDebuggerConfig?: CPUDebuggerConfig,
     memoryDebuggerConfig?: MemoryDebuggerConfig,
 }
 
@@ -55,7 +55,7 @@ export default class CPU {
         this.mmu = configs.mmu;
         this.instructionSet = this.buildInstructionSet(OPCODES);
         this.cbInstructionSet = this.buildInstructionSet(CB_OPCODES);
-        this.debuggerConfig = configs.debuggerConfig;
+        this.debuggerConfig = configs.cpuDebuggerConfig;
         this.memoryDebuggerConfig = configs.memoryDebuggerConfig;
         this.initRegisters();
         configs.clock.add(this.next.bind(this));
@@ -1165,17 +1165,4 @@ interface Operator<T> {
 
 interface InstructionBuilderMap {
     [key: string]: (def: Opcode) => () => ExecutionResult
-}
-
-interface Breakpoint {
-    type: 'PC' | 'OPCODE',
-    value: number,
-    pause?: boolean
-};
-
-type CPUDebugger = (type: 'PC' | 'OPCODE', value: number) => void;
-
-export interface CPUDebuggerConfig {
-    breakpoints: Breakpoint[],
-    debugger: CPUDebugger
 }
