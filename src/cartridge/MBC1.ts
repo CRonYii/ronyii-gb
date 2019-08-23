@@ -10,7 +10,7 @@ export default class MBC1 extends Cartridge {
     protected ram = new MemorySegment({ size: 0x8000, offset: 0xA000, readable: true, writable: true });
 
     private ramEnabled: boolean = false;
-    private romBank: number = 0;
+    private romBank: number = 1;
     private ramBank: number = 0;
     private mode: number = 0;
 
@@ -46,12 +46,7 @@ export default class MBC1 extends Cartridge {
         if (this.mode === 0) {
             offset |= (this.ramBank << 5);
         }
-        switch (offset) {
-            case 0x00: case 0x20: case 0x40: case 0x60:
-                offset += 1;
-                break;
-        }
-        return offset * MBC1.ROM_BANK_SIZE;
+        return (offset % this.romBanks) * MBC1.ROM_BANK_SIZE;
     }
 
     private get ramOffset() {
@@ -69,6 +64,9 @@ export default class MBC1 extends Cartridge {
 
     private setRomBank(value: number) {
         value &= 31; // 5 bits
+        if (value === 0) {
+            value = 1
+        };
         console.warn('ROM Bank => ' + value);
         this.romBank = value;
     }
