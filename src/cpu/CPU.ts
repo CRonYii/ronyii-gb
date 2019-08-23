@@ -943,7 +943,7 @@ export default class CPU {
             const code = this.fetchCode(); // fetch
             const op = this.decodeToCBOp(code); // op
             const cycles = op(); // execute
-            return { cycles: def.clock_cycles[0] + cycles }
+            return { cycles }
         };
     }
 
