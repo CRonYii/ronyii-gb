@@ -15,16 +15,10 @@ export default class Emulator {
     private readonly mmu: MMU;
     private readonly clock: Clock;
     private readonly cpu: CPU;
-    private readonly gpu: GPU;
 
     constructor(configs: EmulatorConfig) {
         this.clock = Z80Clock();
-        this.mmu = new MMU(this.clock);
-        this.gpu = new GPU({
-            clock: this.clock,
-            display: configs.display,
-            mmu: this.mmu
-        });
+        this.mmu = new MMU(this.clock, configs.display);
         this.cpu = new CPU({
             clock: this.clock,
             mmu: this.mmu,
@@ -74,8 +68,8 @@ export default class Emulator {
     }
 
     getTile(tileIdx: number) {
-        const addr = this.gpu.getTileAddress(tileIdx);
-        return this.gpu.getTile(addr);
+        const addr = this.mmu.gpu.getTileAddress(tileIdx);
+        return this.mmu.gpu.getTile(addr);
     }
 
     getByteAt(address: number) {

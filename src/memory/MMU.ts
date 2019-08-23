@@ -6,6 +6,8 @@ import { Memory, MemorySegment } from "./Memory";
 import { Timer } from "./Timer";
 import Clock from "../cpu/Clock";
 import DMA from "./DMA";
+import GPU from "../gpu/GPU";
+import { Display } from "../gpu/Display";
 
 export interface MMUConfig {
 
@@ -17,7 +19,6 @@ export default class MMU implements Memory {
     private CARTRIDGE: Memory = new MemorySegment({ size: 0x0000 }); // The Cartridge, not loaded by default
 
     private readonly BIOS: Memory = BIOS;
-    private readonly VRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0x8000, readable: true, writable: true }); // 8kB Video RAM
     private readonly WRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0xC000, readable: true, writable: true }); // 8kB Working RAM
     private readonly ECHO_RAM: Memory = new MemorySegment({ size: 0x1E00, offset: 0xE000, readable: true, writable: true }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF TODO: implement a ECHO_RAM class
     private readonly OAM: Memory = new MemorySegment({ size: 0x00A0, offset: 0xFE00, readable: true, writable: true }); // 160 bytes Sprite attribute table (OAM)
@@ -26,21 +27,29 @@ export default class MMU implements Memory {
     private readonly DMA: DMA = new DMA(this); // DMA Transfer
     private readonly IO_REGS: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF00, readable: true, writable: true }); // I/O Registers
     private readonly HRAM: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF80, readable: true, writable: true }); // High RAM - Zero Page Memory
+    public readonly gpu: GPU;
 
     private inBIOS: boolean = true;
 
-    public readonly interruptEnableManager = new FlagManager<InterruptFlagsEKey>({
-        get: () => this.getByte(0xffff),
-        set: (byte) => this.setByte(0xffff, byte)
-    }, InterruptsFlags);
+    public readonly interruptEnableManager = new FlagManager<InterruptFlagsEKey>(
+        InterruptsFlags,
+        {
+            get: () => this.getByte(0xffff),
+            set: (byte) => this.setByte(0xffff, byte)
+        }
+    );
 
-    public readonly interruptFlagsManager = new FlagManager<InterruptFlagsEKey>({
-        get: () => this.getByte(0xff0f),
-        set: (byte) => this.setByte(0xff0f, byte)
-    }, InterruptsFlags);
+    public readonly interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(
+        InterruptsFlags,
+        {
+            get: () => this.getByte(0xff0f),
+            set: (byte) => this.setByte(0xff0f, byte)
+        }
+    );
 
-    constructor(clock: Clock) {
+    constructor(clock: Clock, display: Display) {
         this.TIMER = new Timer(clock, this.interruptFlagsManager);
+        this.gpu = new GPU({ clock, display, interruptFlagsManager: this.interruptFlagsManager });
         this.reset();
     }
 
@@ -90,7 +99,7 @@ export default class MMU implements Memory {
         }
         switch (address & 0xF000) {
             case 0x8000: case 0x9000:
-                return this.VRAM;
+                return this.gpu;
             case 0xA000: case 0xB000:
                 return this.CARTRIDGE;
             case 0xC000: case 0xD000:
@@ -115,6 +124,9 @@ export default class MMU implements Memory {
                             }
                             if (address === 0xff46) {
                                 return this.DMA;
+                            }
+                            if (address >= 0xff40 && address <= 0xff4B) {
+                                return this.gpu;
                             }
                             return this.IO_REGS;
                         } else {

@@ -1,5 +1,6 @@
 export interface Display {
     setPixel: (x: number, y: number, color: number) => void,
+    putImageData: (data: ArrayLike<number>) => void,
     requestRefresh: () => void
 }
 

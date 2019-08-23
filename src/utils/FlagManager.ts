@@ -9,11 +9,17 @@ export type FlagAttributes<T extends string> = {
 
 export default class FlagManager<T extends string> {
 
-    private readonly flagControl: FlagControl;
+    private data: number = 0;
     private readonly flagAttributes: FlagAttributes<T>;
+    private readonly flagControl: FlagControl;
 
-    constructor(flagControl: FlagControl, flagAttributes: FlagAttributes<T>) {
-        this.flagControl = flagControl;
+    constructor(flagAttributes: FlagAttributes<T>, flagControl?: FlagControl) {
+        this.flagControl = flagControl || {
+            set: (flag: number) => {
+                this.data = flag & 0xff;
+            },
+            get: () => this.data
+        };
         this.flagAttributes = flagAttributes;
     }
 
@@ -33,6 +39,10 @@ export default class FlagManager<T extends string> {
         const flagIndex = 1 << this.flagAttributes[flag];
 
         return (this.flagControl.get() & flagIndex) !== 0;
+    }
+
+    setValue(value: number) {
+        this.flagControl.set(value);
     }
 
     flag(): number {

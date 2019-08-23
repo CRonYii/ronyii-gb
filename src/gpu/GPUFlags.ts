@@ -11,7 +11,7 @@ const LCDCFlags = {
 
 export type LCDCFlagsKey = keyof typeof LCDCFlags;
 
-export const LCDCManager = (flagControl: FlagControl) => new FlagManager<LCDCFlagsKey>(flagControl, LCDCFlags);
+export const LCDCManager = () => new FlagManager<LCDCFlagsKey>(LCDCFlags);
 
 const STATFlags = {
     'coincidence': 2,
@@ -23,4 +23,4 @@ const STATFlags = {
 
 export type STATFlagsKey = keyof typeof STATFlags;
 
-export const STATManager = (flagControl: FlagControl) => new FlagManager<STATFlagsKey>(flagControl, STATFlags);
+export const STATManager = () => new FlagManager<STATFlagsKey>(STATFlags);
