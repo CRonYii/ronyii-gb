@@ -68,8 +68,8 @@ export default class Emulator {
     }
 
     getTile(tileIdx: number) {
-        const addr = this.mmu.gpu.getTileAddress(tileIdx);
-        return this.mmu.gpu.getTile(addr);
+        const addr = this.mmu.GPU.getTileAddress(tileIdx);
+        return this.mmu.GPU.getTile(addr);
     }
 
     getByteAt(address: number) {

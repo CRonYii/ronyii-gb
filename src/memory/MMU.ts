@@ -8,6 +8,7 @@ import Clock from "../cpu/Clock";
 import DMA from "./DMA";
 import GPU from "../gpu/GPU";
 import { Display } from "../gpu/Display";
+import { JoyPad } from "./JoyPad";
 
 export interface MMUConfig {
 
@@ -27,7 +28,9 @@ export default class MMU implements Memory {
     private readonly DMA: DMA = new DMA(this); // DMA Transfer
     private readonly IO_REGS: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF00, readable: true, writable: true }); // I/O Registers
     private readonly HRAM: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF80, readable: true, writable: true }); // High RAM - Zero Page Memory
-    public readonly gpu: GPU;
+
+    public readonly JOYPAD: JoyPad;
+    public readonly GPU: GPU;
 
     private inBIOS: boolean = true;
 
@@ -49,7 +52,8 @@ export default class MMU implements Memory {
 
     constructor(clock: Clock, display: Display) {
         this.TIMER = new Timer(clock, this.interruptFlagsManager);
-        this.gpu = new GPU({ clock, display, interruptFlagsManager: this.interruptFlagsManager });
+        this.GPU = new GPU({ clock, display, interruptFlagsManager: this.interruptFlagsManager });
+        this.JOYPAD = new JoyPad(this.interruptEnableManager);
         this.reset();
     }
 
@@ -99,7 +103,7 @@ export default class MMU implements Memory {
         }
         switch (address & 0xF000) {
             case 0x8000: case 0x9000:
-                return this.gpu;
+                return this.GPU;
             case 0xA000: case 0xB000:
                 return this.CARTRIDGE;
             case 0xC000: case 0xD000:
@@ -119,6 +123,9 @@ export default class MMU implements Memory {
                         }
                     case 0xF00:
                         if ((address & 0x00FF) <= 0x7F) {
+                            if (address === 0xff00) {
+                                return this.JOYPAD;
+                            }
                             if ((address & 0x00FF) >= 0x04 && (address & 0x00FF) <= 0x07) {
                                 return this.TIMER;
                             }
@@ -126,7 +133,7 @@ export default class MMU implements Memory {
                                 return this.DMA;
                             }
                             if (address >= 0xff40 && address <= 0xff4B) {
-                                return this.gpu;
+                                return this.GPU;
                             }
                             return this.IO_REGS;
                         } else {
