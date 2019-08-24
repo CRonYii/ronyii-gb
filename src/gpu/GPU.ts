@@ -136,7 +136,7 @@ export default class GPU implements Memory {
                 }
                 for (let j = 0; j < 8; j++) {
                     const scrnX = j + x;
-                    if (scrnX >= 0) {
+                    if (scrnX >= 0 && scrnX < 160) {
                         if (tileline[j] && (priority === 'above' || this.scanrow[scrnX] === 0)) {
                             const color = this.getColor(tileline[j], palette);
                             this.display.setPixel(scrnX, this.currentLine, color);
