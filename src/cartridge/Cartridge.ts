@@ -19,6 +19,15 @@ export default abstract class Cartridge implements Memory {
         0x54: 96
     };
 
+    static RAM_BANKS: any = {
+        0x0: 0,
+        0x1: 1,
+        0x2: 1,
+        0x3: 4,
+        0x4: 16,
+        0x5: 8
+    };
+
     protected rom: Uint8Array;
     protected abstract ram: Memory;
 
@@ -36,13 +45,13 @@ export default abstract class Cartridge implements Memory {
         this.title = Helper.toText(this.rom, TITLE_START, TITLE_END);
         this.type = this.rom[CARTRIDGE_TYPE];
         this.romBanks = Cartridge.ROM_BANKS[this.rom[ROM_BANKS]];
-        this.ramBanks = this.rom[RAM_BANKS];
+        this.ramBanks = Cartridge.RAM_BANKS[this.rom[RAM_BANKS]];
     }
 
     setByte(address: number, data: number): void {
         if (address <= 0x7FFF) {
             this.setChipRegister(address, data);
-        } else {
+        } else if (this.ramBanks > 0) {
             this.setRAMByte(address, data);
         }
     };
@@ -50,9 +59,10 @@ export default abstract class Cartridge implements Memory {
     getByte(address: number): number {
         if (address <= 0x7FFF) {
             return this.getROMByte(address);
-        } else {
+        } else if (this.ramBanks > 0) {
             return this.getRAMByte(address);
         }
+        return 0xff;
     }
 
     abstract setChipRegister(address: number, value: number): void;

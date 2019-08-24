@@ -27,7 +27,9 @@ export default class MBC1 extends Cartridge {
     }
 
     setRAMByte(address: number, data: number) {
-        this.ram.setByte(this.ramOffset + address, data);
+        if (this.ramEnabled) {
+            this.ram.setByte(this.ramOffset + address, data);
+        }
     }
 
     getROMByte(address: number): number {
@@ -60,7 +62,7 @@ export default class MBC1 extends Cartridge {
         if (this.mode === 0) {
             return 0x0000;
         } else {
-            return this.ramBank * MBC1.RAM_BANK_SIZE;
+            return (this.ramBank % this.ramBanks) * MBC1.RAM_BANK_SIZE;
         }
     }
 
