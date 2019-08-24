@@ -130,8 +130,10 @@ export default class GPU implements Memory {
                 // }
                 const tilePtr = this.getTileAddress(tileIdx, true);
                 // TODO: handle y-flip
-                const tileline = this.getTileline(tilePtr + (tileY % 8) * 2);
-                // TODO: handle x-flip
+                let tileline = this.getTileline(tilePtr + (tileY % 8) * 2);
+                if (xFlip) {
+                    tileline = tileline.reverse();
+                }
                 for (let j = 0; j < 8; j++) {
                     const scrnX = j + x;
                     if (scrnX >= 0) {
