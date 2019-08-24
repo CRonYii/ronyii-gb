@@ -116,21 +116,17 @@ export default class GPU implements Memory {
             if (x === -8 || x >= 160 || y === -16 || y >= 144) { // out of screen
                 continue;
             }
-            // TODO: 8x16 sprites
-            // const objHeight = this.lcdc.get('obj_size') ? 16 : 8;
-            const objHeight = 8;
+            const objHeight = this.lcdc.get('obj_size') ? 16 : 8;
             if (this.currentLine >= y && this.currentLine < (y + objHeight)) { // if the sprite is on the current line
-                const tileY = (this.currentLine - y);
-                // if (objHeight === 16) {
-                //     if (tileY < 8) {
-                //         tileIdx &= 0xfe;
-                //     } else {
-                //         tileIdx |= 1;
-                //     }
-                // }
+                let tileY = (this.currentLine - y);
+                if (objHeight === 16) {
+                    tileIdx &= 0xfe;
+                }
                 const tilePtr = this.getTileAddress(tileIdx, true);
-                // TODO: handle y-flip
-                let tileline = this.getTileline(tilePtr + (tileY % 8) * 2);
+                if (yFlip) {
+                    tileY = objHeight - 1 - tileY;
+                }
+                let tileline = this.getTileline(tilePtr + tileY * 2);
                 if (xFlip) {
                     tileline = tileline.reverse();
                 }
