@@ -74,7 +74,6 @@ export default class MBC1 extends Cartridge {
         if (value === 0) {
             value = 1
         };
-        console.warn('ROM Bank => ' + value);
         this.romBank = value;
     }
 
