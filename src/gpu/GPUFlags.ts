@@ -6,6 +6,8 @@ const LCDCFlags = {
     'obj_size': 2,
     'bg_map_base': 3,
     'bg_tile_base': 4,
+    'win_on': 5,
+    'win_map_base': 6,
     'lcd_on': 7,
 };
 

@@ -50,6 +50,9 @@ export default class GPU implements Memory {
     private renderScan() {
         if (this.lcdc.get('bg_on')) {
             this.renderBackground();
+            if (this.lcdc.get('win_on') && this.wy.get() <= this.currentLine) {
+                this.renderWindow();
+            }
         }
         if (this.lcdc.get('obj_on')) {
             this.renderSprites();
@@ -108,9 +111,63 @@ export default class GPU implements Memory {
     }
 
     /**
+     * render one line of window
+     */
+    private renderWindow() {
+        // SCX/SCY indicates which pixel to start in the 256 * 256 pixels BG map
+        // here we are accessing the pixel by finding the tile first
+        const ly = this.ly.get();
+        const wy = this.wy.get();
+        const wx = this.wx.get() - 7;
+        const lineIdx = (((ly - wy) & 0xff) >> 3); // which line of tiles to use [0, 31] 5 bits
+        const y = (ly - wy) & 7; // which line of pixels to use in that tile [0, 7] 3 bits
+
+        // start with the top-left corner of the 160 * 144 pixels to be drawn
+        for (let i = 0; i < 160; i++) {
+            if (i < wx) {
+                continue;
+            }
+            const winx = i - wx;
+            const tileIdx = (winx >> 3) & 31; // which tile in the line [0, 31] 5 bits
+            const x = winx & 7; // where in the tileline to start [0, 7] 3 bits
+
+            const winMapBaseAddr = this.getWinTileAddress(lineIdx, tileIdx);
+            const tileNumber = this.getByte(winMapBaseAddr);
+
+            const pixel = this.getTilePixel(this.getTileAddress(tileNumber) + (y * 2), x);
+            this.scanrow[i] = pixel; // store for bg-sprite priority
+            const color = this.getColor(pixel); // one of the four color
+            this.display.setPixel(i, this.currentLine, color);
+        }
+    }
+
+    /**
+     * Returns the absolute address in the BG map
+     * @param tileIdx [0, 31]
+     * @param lineIdx [0, 31]
+     */
+    public getWinTileAddress(lineIdx: number, tileIdx: number) {
+        lineIdx &= 31;
+        tileIdx &= 31;
+        const mapbaseFlag = this.lcdc.get('win_map_base');
+        let mapbase = mapbaseFlag ? 0x9c00 : 0x9800; // the tile map to be used based on LCDC flag (0x9800 / 0x9c00)
+
+        /**
+         * First 6 bits sets the base address,
+         * the following 5 bits ranges [0, 31] is the line number wher the tile is at,
+         * the last 5 bits ranges [0, 31] is the index of the tile in the line 
+         * in other word, the last 10 bits selects one out of 2^10 (1024)
+         * [mapbase, lineIdx, tileIdx]
+         */
+        mapbase += (lineIdx << 5) + tileIdx;
+
+        return mapbase;
+    }
+
+    /**
      * render one line of sprites
      */
-    public renderSprites() {
+    private renderSprites() {
         for (let i = 0; i < 40; i++) {
             let { x, y, tileIdx, priority, xFlip, yFlip, palette } = this.getObjectAttribute(i);
             if (x === -8 || x >= 160 || y === -16 || y >= 144) { // out of screen
