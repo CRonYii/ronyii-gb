@@ -22,7 +22,6 @@ export default class MMU implements Memory {
     private readonly BIOS: Memory = BIOS;
     private readonly WRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0xC000, readable: true, writable: true }); // 8kB Working RAM
     private readonly ECHO_RAM: Memory = new MemorySegment({ size: 0x1E00, offset: 0xE000, readable: true, writable: true }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF TODO: implement a ECHO_RAM class
-    private readonly OAM: Memory = new MemorySegment({ size: 0x00A0, offset: 0xFE00, readable: true, writable: true }); // 160 bytes Sprite attribute table (OAM)
     private readonly UNUSABLE: Memory = new MemorySegment({ size: 0x0060, readable: false, writable: false }); // 96 bytes of UNSABLE Memory (0xFEA0 ~ 0xFEFF)
     private readonly TIMER: Memory; // Timer
     private readonly DMA: DMA = new DMA(this); // DMA Transfer
@@ -117,7 +116,7 @@ export default class MMU implements Memory {
                 switch (address & 0x0F00) {
                     case 0xE00:
                         if ((address & 0x00FF) <= 0x9F) {
-                            return this.OAM;
+                            return this.GPU;
                         } else {
                             return this.UNUSABLE;
                         }

@@ -17,6 +17,7 @@ export interface GPUConfigs {
 export default class GPU implements Memory {
 
     private readonly VRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0x8000, readable: true, writable: true }); // 8kB Video RAM
+    private readonly OAM: Memory = new MemorySegment({ size: 0x00A0, offset: 0xFE00, readable: true, writable: true }); // 160 bytes Sprite attribute table (OAM)
 
     private readonly lcdc: FlagManager<LCDCFlagsKey>;
     private readonly stat: FlagManager<STATFlagsKey>;
@@ -51,7 +52,7 @@ export default class GPU implements Memory {
             this.renderBackground();
         }
         if (this.lcdc.get('obj_on')) {
-            // TODO: render Sprites
+            this.renderSprites();
         }
     }
 
@@ -101,6 +102,10 @@ export default class GPU implements Memory {
         mapbase += (lineIdx << 5) + tileIdx;
 
         return mapbase;
+    }
+
+    public renderSprites() {
+        // TODO: render Sprites
     }
 
     public getTileAddress(tileIdx: number) {
@@ -289,8 +294,10 @@ export default class GPU implements Memory {
 
     setByte(address: number, data: number): void {
         if (address >= 0x8000 && address <= 0x9fff) {
-            this.VRAM.setByte(address, data);
-            return;
+            return this.VRAM.setByte(address, data);
+        }
+        if (address >= 0xfe00 && address <= 0xfe9f) {
+            return this.OAM.setByte(address, data);
         }
         switch (address) {
             case 0xff40:
@@ -319,6 +326,9 @@ export default class GPU implements Memory {
     getByte(address: number): number {
         if (address >= 0x8000 && address <= 0x9fff) {
             return this.VRAM.getByte(address);
+        }
+        if (address >= 0xfe00 && address <= 0xfe9f) {
+            return this.OAM.getByte(address);
         }
         switch (address) {
             case 0xff40: return this.lcdc.flag();
