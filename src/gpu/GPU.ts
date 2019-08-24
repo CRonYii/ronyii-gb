@@ -56,6 +56,8 @@ export default class GPU implements Memory {
         }
     }
 
+    private scanrow: number[] = new Array(160).fill(0);
+
     /**
      * render one line of background
      */
@@ -76,6 +78,7 @@ export default class GPU implements Memory {
             const tileNumber = this.getByte(bgMapBaseAddr);
 
             const pixel = this.getTilePixel(this.getTileAddress(tileNumber) + (y * 2), x);
+            this.scanrow[i] = pixel; // store for bg-sprite priority
             const color = this.getColor(pixel); // one of the four color
             this.display.setPixel(i, this.currentLine, color);
         }
@@ -113,28 +116,29 @@ export default class GPU implements Memory {
             if (x === -8 || x >= 160 || y === -16 || y >= 144) { // out of screen
                 continue;
             }
-            const objHeight = this.lcdc.get('obj_size') ? 16 : 8;
+            // TODO: 8x16 sprites
+            // const objHeight = this.lcdc.get('obj_size') ? 16 : 8;
+            const objHeight = 8;
             if (this.currentLine >= y && this.currentLine < (y + objHeight)) { // if the sprite is on the current line
                 const tileY = (this.currentLine - y);
-                if (objHeight === 16) {
-                    if (tileY < 8) {
-                        tileIdx &= 0xfe;
-                    } else {
-                        tileIdx |= 1;
-                    }
-                }
-                const tilePtr = this.getTileAddress(tileIdx);
+                // if (objHeight === 16) {
+                //     if (tileY < 8) {
+                //         tileIdx &= 0xfe;
+                //     } else {
+                //         tileIdx |= 1;
+                //     }
+                // }
+                const tilePtr = this.getTileAddress(tileIdx, true);
                 // TODO: handle y-flip
                 const tileline = this.getTileline(tilePtr + (tileY % 8) * 2);
                 // TODO: handle x-flip
                 for (let j = 0; j < 8; j++) {
                     const scrnX = j + x;
                     if (scrnX >= 0) {
-                        if (priority === 'below' && this.display.getPixel(scrnX, this.currentLine) !== GPU.WHITE) {
-                            continue;
+                        if (tileline[j] && (priority === 'above' || this.scanrow[scrnX] === 0)) {
+                            const color = this.getColor(tileline[j], palette);
+                            this.display.setPixel(scrnX, this.currentLine, color);
                         }
-                        const color = this.getColor(tileline[j], palette);
-                        this.display.setPixel(scrnX, this.currentLine, color);
                     }
                 }
             }
@@ -156,9 +160,9 @@ export default class GPU implements Memory {
         };
     }
 
-    public getTileAddress(tileIdx: number) {
+    public getTileAddress(tileIdx: number, isSprite?: boolean) {
         let address = (tileIdx & 0xff);
-        if (this.lcdc.get('bg_tile_base')) { // (0x8000 ~ 0x8fff) unsigned size: 2^12 (4096)
+        if (isSprite || this.lcdc.get('bg_tile_base')) { // (0x8000 ~ 0x8fff) unsigned size: 2^12 (4096)
             address <<= 4;
             address += 0x8000;
         } else { // (0x8800 ~ 0x97ff) signed
