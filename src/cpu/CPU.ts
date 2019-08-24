@@ -260,8 +260,6 @@ export default class CPU {
     }
 
     private halt(flag: boolean) {
-        if (flag)
-            console.warn('CPU HALT => ' + flag);
         this.haltFlag = flag;
     }
 
