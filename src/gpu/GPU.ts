@@ -104,8 +104,46 @@ export default class GPU implements Memory {
         return mapbase;
     }
 
+    /**
+     * render one line of sprites
+     */
     public renderSprites() {
-        // TODO: render Sprites
+        for (let i = 0; i < 40; i++) {
+            const { x, y, tileIdx, priority, xFlip, yFlip, palette } = this.getObjectAttribute(i);
+            if (x === -8 || x >= 160 || y === -16 || y >= 144) { // out of screen
+                continue;
+            }
+            if (this.currentLine >= y && this.currentLine < (y + 8)) { // if the sprite is on the current line
+                // TODO: hanlde 8x16 sprites (lcdc bit2)
+                const tilePtr = this.getTileAddress(tileIdx);
+                // TODO: handle y-flip
+                const tileline = this.getTileline(tilePtr + (this.currentLine - y) * 2);
+                // TODO: handle x-flip
+                for (let j = 0; j < 8; j++) {
+                    const scrnX = j + x;
+                    if (scrnX >= 0) {
+                        const color = this.getColor(tileline[j], palette);
+                        // TODO: handle priority
+                        this.display.setPixel(scrnX, this.currentLine, color);
+                    }
+                }
+            }
+        }
+    }
+
+    public getObjectAttribute(index: number): ObjectAttribute {
+        index *= 4;
+        const y = this.OAM.getByte(0xfe00 + index) - 16;
+        const x = this.OAM.getByte(0xfe00 + index + 1) - 8;
+        const tileIdx = this.OAM.getByte(0xfe00 + index + 2);
+        const options = this.OAM.getByte(0xfe00 + index + 3);
+        return {
+            x, y, tileIdx,
+            priority: (options & 0x80) ? 'below' : 'above',
+            yFlip: (options & 0x40) ? true : false,
+            xFlip: (options & 0x20) ? true : false,
+            palette: (options & 0x10) ? 1 : 0,
+        };
     }
 
     public getTileAddress(tileIdx: number) {
@@ -164,8 +202,15 @@ export default class GPU implements Memory {
     static DARK = 0xff606060;
     static BLACK = 0xff000000;
 
-    public getColor(code: number) {
-        const palette = this.bgp.get();
+    public getColor(code: number, paletteSelection?: number) {
+        let palette;
+        if (paletteSelection === 0) {
+            palette = this.obp0.get();
+        } else if (paletteSelection === 1) {
+            palette = this.obp1.get();
+        } else {
+            palette = this.bgp.get();
+        }
         switch (palette >> (2 * code) & 0b11) {
             case 0b00: return GPU.WHITE;
             case 0b01: return GPU.LIGHT;
@@ -350,4 +395,14 @@ export default class GPU implements Memory {
         return 0x2000 + 2;
     }
 
+}
+
+interface ObjectAttribute {
+    x: number;
+    y: number;
+    tileIdx: number;
+    priority: 'below' | 'above';
+    yFlip: boolean;
+    xFlip: boolean;
+    palette: 0 | 1;
 }
