@@ -1,5 +1,6 @@
 export interface Display {
     setPixel: (x: number, y: number, color: number) => void,
+    getPixel: (x: number, y: number) => number,
     putImageData: (data: ArrayLike<number>) => void,
     requestRefresh: () => void
 }
@@ -47,6 +48,11 @@ export class CanvasDisplay implements Display {
                 this.displayData[base + c + (r * this.width)] = color;
             }
         }
+    }
+
+    getPixel(x: number, y: number) {
+        const base = (x * this.scale) + ((y * this.scale) * this.width);
+        return this.displayData[base];
     }
 
     putImageData(data: ArrayLike<number>) {

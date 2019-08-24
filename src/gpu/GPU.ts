@@ -109,21 +109,31 @@ export default class GPU implements Memory {
      */
     public renderSprites() {
         for (let i = 0; i < 40; i++) {
-            const { x, y, tileIdx, priority, xFlip, yFlip, palette } = this.getObjectAttribute(i);
+            let { x, y, tileIdx, priority, xFlip, yFlip, palette } = this.getObjectAttribute(i);
             if (x === -8 || x >= 160 || y === -16 || y >= 144) { // out of screen
                 continue;
             }
-            if (this.currentLine >= y && this.currentLine < (y + 8)) { // if the sprite is on the current line
-                // TODO: hanlde 8x16 sprites (lcdc bit2)
+            const objHeight = this.lcdc.get('obj_size') ? 16 : 8;
+            if (this.currentLine >= y && this.currentLine < (y + objHeight)) { // if the sprite is on the current line
+                const tileY = (this.currentLine - y);
+                if (objHeight === 16) {
+                    if (tileY < 8) {
+                        tileIdx &= 0xfe;
+                    } else {
+                        tileIdx |= 1;
+                    }
+                }
                 const tilePtr = this.getTileAddress(tileIdx);
                 // TODO: handle y-flip
-                const tileline = this.getTileline(tilePtr + (this.currentLine - y) * 2);
+                const tileline = this.getTileline(tilePtr + (tileY % 8) * 2);
                 // TODO: handle x-flip
                 for (let j = 0; j < 8; j++) {
                     const scrnX = j + x;
                     if (scrnX >= 0) {
+                        if (priority === 'below' && this.display.getPixel(scrnX, this.currentLine) !== GPU.WHITE) {
+                            continue;
+                        }
                         const color = this.getColor(tileline[j], palette);
-                        // TODO: handle priority
                         this.display.setPixel(scrnX, this.currentLine, color);
                     }
                 }
