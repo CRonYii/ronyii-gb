@@ -1,5 +1,5 @@
 import { SCREEN_RESOLUTION } from "../constants/index";
-import Clock from "../cpu/Clock";
+import Clock, { ClockTask } from "../cpu/Clock";
 import { Register8 } from "../cpu/Register";
 import { InterruptFlagsEKey } from "../memory/IORegisters";
 import { Memory, MemorySegment } from "../memory/Memory";
@@ -9,12 +9,11 @@ import { Display } from "./Display";
 import { LCDCFlagsKey, LCDCManager, STATFlagsKey, STATManager } from "./GPUFlags";
 
 export interface GPUConfigs {
-    clock: Clock,
     display: Display,
     interruptFlagsManager: FlagManager<InterruptFlagsEKey>
 }
 
-export default class GPU implements Memory {
+export default class GPU implements Memory, ClockTask {
 
     private readonly VRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0x8000, readable: true, writable: true }); // 8kB Video RAM
     private readonly OAM: Memory = new MemorySegment({ size: 0x00A0, offset: 0xFE00, readable: true, writable: true }); // 160 bytes Sprite attribute table (OAM)
@@ -36,12 +35,11 @@ export default class GPU implements Memory {
     private dots: number = 0;
 
     constructor(configs: GPUConfigs) {
-        const { display, clock, interruptFlagsManager } = configs;
+        const { display, interruptFlagsManager } = configs;
         this.display = display;
         this.interruptFlagsManager = interruptFlagsManager;
         this.lcdc = LCDCManager();
         this.stat = STATManager();
-        clock.add(this.checkline.bind(this));
     }
 
     /**
@@ -296,7 +294,7 @@ export default class GPU implements Memory {
      *  H-Blank    │   └─────────────────────────────────────┘
      *             └──────→ V-Blank ===> goes back to (start)
      */
-    private checkline(clockCycles: number): number {
+    public tick(clockCycles: number): number {
         if (!this.lcdc.get('lcd_on')) {
             return 0;
         }

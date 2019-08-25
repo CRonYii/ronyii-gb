@@ -3,13 +3,14 @@ import { Memory } from "../memory/Memory";
 import NoiseChannel from "./NoiseChannel";
 import SquareChannel from "./SquareChannel";
 import WaveChannel from "./WaveChannel";
+import { ClockTask } from "../cpu/Clock";
 
 export interface SoundUnit extends Memory {
     powerOff(): void,
     isOn(): boolean,
 }
 
-export default class APU implements SoundUnit {
+export default class APU implements SoundUnit, ClockTask {
 
     private readonly audioCtx: AudioContext;
 
@@ -28,6 +29,11 @@ export default class APU implements SoundUnit {
         this.toneChannel2 = new SquareChannel(this.audioCtx, false);
         this.waveChannel = new WaveChannel(this.audioCtx);
         this.noiseChannel = new NoiseChannel(this.audioCtx);
+    }
+
+    tick(cyclesTaken: number) {
+        // TODO: implement audio play here
+        return 0;
     }
 
     setByte(address: number, data: number) {

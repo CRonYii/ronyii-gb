@@ -36,10 +36,10 @@ export default class Emulator {
         this.clock = Z80Clock();
         this.interruptEnableManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
         this.interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
-        this.gpu = new GPU({ clock: this.clock, display: this.display, interruptFlagsManager: this.interruptFlagsManager });
+        this.gpu = new GPU({ display: this.display, interruptFlagsManager: this.interruptFlagsManager });
         this.apu = new APU();
         this.joypad = new JoyPad(this.interruptEnableManager);
-        this.timer = new Timer(this.clock, this.interruptFlagsManager);
+        this.timer = new Timer(this.interruptFlagsManager);
         this.mmu = new MMU({
             gpu: this.gpu,
             apu: this.apu,
@@ -49,11 +49,11 @@ export default class Emulator {
             interruptFlagsManager: this.interruptFlagsManager
         });
         this.cpu = new CPU({
-            clock: this.clock,
             mmu: this.mmu,
             cpuDebuggerConfig: cpuDebugger,
             memoryDebuggerConfig: memorydebuggerConfig
         });
+        this.clock.add([this.cpu, this.gpu, this.apu, this.timer]);
     }
 
     start(rom?: Cartridge) {
@@ -70,10 +70,10 @@ export default class Emulator {
         this.clock = Z80Clock();
         this.interruptEnableManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
         this.interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
-        this.gpu = new GPU({ clock: this.clock, display: this.display, interruptFlagsManager: this.interruptFlagsManager });
+        this.gpu = new GPU({ display: this.display, interruptFlagsManager: this.interruptFlagsManager });
         this.apu = new APU();
         this.joypad = new JoyPad(this.interruptEnableManager);
-        this.timer = new Timer(this.clock, this.interruptFlagsManager);
+        this.timer = new Timer(this.interruptFlagsManager);
         this.mmu = new MMU({
             gpu: this.gpu,
             apu: this.apu,
@@ -83,11 +83,11 @@ export default class Emulator {
             interruptFlagsManager: this.interruptFlagsManager
         });
         this.cpu = new CPU({
-            clock: this.clock,
             mmu: this.mmu,
             cpuDebuggerConfig: cpuDebugger,
             memoryDebuggerConfig: memorydebuggerConfig
         });
+        this.clock.add([this.cpu, this.gpu, this.apu, this.timer]);
     }
 
     pause() {

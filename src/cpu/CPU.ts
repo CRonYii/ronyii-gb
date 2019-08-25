@@ -4,7 +4,7 @@ import MMU from "../memory/MMU";
 import Helper from "../utils/Helper";
 import { DataType, isDataType, isFlagMode, isRegisterType, parseByteIndex, parseRSTAddress, RegisterType, RSTAddress } from "../utils/OpcodeTypes";
 import ALU, { ALUResult } from "./ALU";
-import Clock from "./Clock";
+import Clock, { ClockTask } from "./Clock";
 import { CombinedRegister16 } from "./CombinedRegister";
 import FlagRegister from "./FlagRegister";
 import { CB_OPCODES, FlagAffection, Opcode, OPCODES } from "./Opcodes";
@@ -13,12 +13,11 @@ import { CPUDebuggerConfig, MemoryDebuggerConfig } from "../utils/Debuggers";
 
 export interface CPUConfig {
     mmu: MMU,
-    clock: Clock,
     cpuDebuggerConfig?: CPUDebuggerConfig,
     memoryDebuggerConfig?: MemoryDebuggerConfig,
 }
 
-export default class CPU {
+export default class CPU implements ClockTask {
 
     private readonly mmu: MMU;
     private readonly instructionSet: InstructionSet;
@@ -58,12 +57,11 @@ export default class CPU {
         this.debuggerConfig = configs.cpuDebuggerConfig;
         this.memoryDebuggerConfig = configs.memoryDebuggerConfig;
         this.initRegisters();
-        configs.clock.add(this.next.bind(this));
     }
 
     private cpuLogs: string[] = [];
 
-    private next(_: number, doStop: boolean) {
+    public tick(_: number, doStop: boolean) {
         const result = this.debug();
         this.shouldPause = this.shouldPause || result;
         if (doStop && this.shouldPause) {
@@ -303,7 +301,7 @@ export default class CPU {
         this.DE.set(0x00d8);
         this.HL.set(0x014d);
         this.SP.set(0xfffe);
-        this.PC.set(0x0000);
+        this.PC.set(0x0100);
     }
 
     private buildInstructionSet(defs: Array<Opcode | null>): InstructionSet {

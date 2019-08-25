@@ -8,7 +8,9 @@ export interface ClockConfig {
 
 export type ClockTaskResult = number | 'pause';
 
-export type ClockTask = (clockCycles: number, doStop: boolean) => ClockTaskResult;
+export interface ClockTask {
+    tick: (clockCycles: number, doStop: boolean) => ClockTaskResult
+}
 
 export default class Clock {
 
@@ -38,8 +40,8 @@ export default class Clock {
         this.intervalID = 0;
     }
 
-    public add(task: ClockTask) {
-        this.tasks.unshift(task);
+    public add(task: ClockTask[]) {
+        this.tasks.push(...task);
     }
 
     private tick() {
@@ -57,7 +59,7 @@ export default class Clock {
     public step(doStop = true) {
         let totalCyclesTaken = 0;
         for (const task of this.tasks) {
-            const cyclesTaken = task(totalCyclesTaken, doStop);
+            const cyclesTaken = task.tick(totalCyclesTaken, doStop);
             if (cyclesTaken === 'pause') {
                 this.pause();
                 break;

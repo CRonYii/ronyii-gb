@@ -1,12 +1,12 @@
 import { Memory } from "./Memory";
 import { Register8 } from "../cpu/Register";
-import Clock from "../cpu/Clock";
+import Clock, { ClockTask } from "../cpu/Clock";
 import { CPU_CLOCK_SPEED } from "../constants/index";
 import { InterruptFlagsEKey } from "./IORegisters";
 import FlagManager from "../utils/FlagManager";
 import Helper from "../utils/Helper";
 
-export class Timer implements Memory {
+export class Timer implements Memory, ClockTask {
 
     static DIV_INCREMENT_FREQ: number = CPU_CLOCK_SPEED / 16_384; // the cycles taken to increment DIV once
 
@@ -22,12 +22,11 @@ export class Timer implements Memory {
     private divCycles: number = 0;
     private timaCycles: number = 0;
 
-    constructor(clock: Clock, interruptManager: FlagManager<InterruptFlagsEKey>) {
+    constructor(interruptManager: FlagManager<InterruptFlagsEKey>) {
         this.interruptManager = interruptManager;
-        clock.add(this.next.bind(this));
     }
 
-    next(cycles: number): number {
+    tick(cycles: number): number {
         // incrementing div
         this.divCycles += cycles;
         if (this.divCycles >= Timer.DIV_INCREMENT_FREQ) {
