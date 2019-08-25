@@ -17,21 +17,26 @@ export interface EmulatorConfig {
 
 export default class Emulator {
 
-    private readonly interruptEnableManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
-    private readonly interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
+    private display: Display;
 
-    private readonly cpu: CPU;
-    private readonly mmu: MMU;
-    private readonly gpu: GPU;
-    private readonly apu: APU;
-    private readonly clock: Clock;
-    private readonly joypad: JoyPad;
-    private readonly timer: Timer;
+    private interruptEnableManager: FlagManager<InterruptFlagsEKey>;
+    private interruptFlagsManager: FlagManager<InterruptFlagsEKey>;
+
+    private cpu: CPU;
+    private mmu: MMU;
+    private gpu: GPU;
+    private apu: APU;
+    private clock: Clock;
+    private joypad: JoyPad;
+    private timer: Timer;
 
     constructor(configs: EmulatorConfig) {
         const { display } = configs;
+        this.display = display;
         this.clock = Z80Clock();
-        this.gpu = new GPU({ clock: this.clock, display, interruptFlagsManager: this.interruptFlagsManager });
+        this.interruptEnableManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
+        this.interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
+        this.gpu = new GPU({ clock: this.clock, display: this.display, interruptFlagsManager: this.interruptFlagsManager });
         this.apu = new APU();
         this.joypad = new JoyPad(this.interruptEnableManager);
         this.timer = new Timer(this.clock, this.interruptFlagsManager);
@@ -61,7 +66,28 @@ export default class Emulator {
     }
 
     reset() {
-        // TODO
+        this.clock.pause();
+        this.clock = Z80Clock();
+        this.interruptEnableManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
+        this.interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
+        this.gpu = new GPU({ clock: this.clock, display: this.display, interruptFlagsManager: this.interruptFlagsManager });
+        this.apu = new APU();
+        this.joypad = new JoyPad(this.interruptEnableManager);
+        this.timer = new Timer(this.clock, this.interruptFlagsManager);
+        this.mmu = new MMU({
+            gpu: this.gpu,
+            apu: this.apu,
+            joypad: this.joypad,
+            timer: this.timer,
+            interruptEnableManager: this.interruptEnableManager,
+            interruptFlagsManager: this.interruptFlagsManager
+        });
+        this.cpu = new CPU({
+            clock: this.clock,
+            mmu: this.mmu,
+            cpuDebuggerConfig: cpuDebugger,
+            memoryDebuggerConfig: memorydebuggerConfig
+        });
     }
 
     pause() {
