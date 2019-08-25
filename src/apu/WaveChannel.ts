@@ -1,9 +1,12 @@
-import { Memory, MemorySegment } from "../memory/Memory";
 import { Register8 } from "../cpu/Register";
+import { Memory, MemorySegment } from "../memory/Memory";
+import { SoundUnit } from "./APU";
 
-export default class WaveChannel implements Memory {
+export default class WaveChannel implements SoundUnit {
 
     private readonly audioCtx: AudioContext;
+
+    private trigger: boolean = false;
 
     private readonly soundEnabled: Register8 = new Register8(); // 0xff1a - NR30
     private readonly soundLength: Register8 = new Register8(); // 0xff1b - NR31
@@ -23,11 +26,14 @@ export default class WaveChannel implements Memory {
             return this.wavePattern.setByte(address, data);
         }
         switch (address) {
-            case 0xff1a: return this.soundEnabled.set(data);
+            case 0xff1a: return this.soundEnabled.set(data & 0x80);
             case 0xff1b: return this.soundLength.set(data);
             case 0xff1c: return this.outputLevel.set(data);
             case 0xff1d: return this.frequencyLow.set(data);
-            case 0xff1e: return this.frequencyHigh.set(data);
+            case 0xff1e:
+                this.frequencyHigh.set(data);
+                this.trigger = (data & 0x80) !== 0;
+                return;
         }
     }
 
@@ -43,6 +49,22 @@ export default class WaveChannel implements Memory {
             case 0xff1e: return this.frequencyHigh.get() | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
+    }
+
+    get power(): boolean {
+        return this.soundEnabled.get() !== 0;
+    }
+
+    powerOff() {
+        this.soundEnabled.set(0);
+        this.soundLength.set(0);
+        this.outputLevel.set(0);
+        this.frequencyLow.set(0);
+        this.frequencyHigh.set(0);
+    }
+
+    isOn(): boolean {
+        return this.trigger && this.power;
     }
 
     size() {

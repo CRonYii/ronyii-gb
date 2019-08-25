@@ -1,9 +1,11 @@
-import { Memory } from "../memory/Memory";
 import { Register8 } from "../cpu/Register";
+import { SoundUnit } from "./APU";
 
-export default class NoiseChannel implements Memory {
+export default class NoiseChannel implements SoundUnit {
 
     private readonly audioCtx: AudioContext;
+
+    private trigger: boolean = false;
 
     private readonly soundLength: Register8 = new Register8(); // 0xff20 - NR41
     private readonly volumeEnvelope: Register8 = new Register8(); // 0xff21 - NR42
@@ -19,7 +21,10 @@ export default class NoiseChannel implements Memory {
             case 0xff20: return this.soundLength.set(data);
             case 0xff21: return this.volumeEnvelope.set(data);
             case 0xff22: return this.polynomialCounter.set(data);
-            case 0xff23: return this.selectionRegister.set(data);
+            case 0xff23:
+                this.selectionRegister.set(data);
+                this.trigger = (data & 0x80) !== 0;
+                return;
         }
     }
 
@@ -31,6 +36,17 @@ export default class NoiseChannel implements Memory {
             case 0xff23: return this.selectionRegister.get() | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
+    }
+
+    powerOff() {
+        this.soundLength.set(0);
+        this.volumeEnvelope.set(0);
+        this.polynomialCounter.set(0);
+        this.selectionRegister.set(0);
+    }
+
+    isOn(): boolean {
+        return this.trigger;
     }
 
     size() {

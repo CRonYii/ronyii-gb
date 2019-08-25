@@ -5,7 +5,12 @@ import SquareChannel from "./SquareChannel";
 import SweepChannel from "./SweepChannel";
 import WaveChannel from "./WaveChannel";
 
-export default class APU implements Memory {
+export interface SoundUnit extends Memory {
+    powerOff(): void,
+    isOn(): boolean,
+}
+
+export default class APU implements SoundUnit {
 
     private readonly audioCtx: AudioContext;
 
@@ -45,7 +50,17 @@ export default class APU implements Memory {
             case 0xff10: return this.sweepChannel.setByte(address, data);
             case 0xff24: return this.channelControl.set(data);
             case 0xff25: return this.outputSelection.set(data);
-            case 0xff26: return this.soundEnabled.set(data & 0x8000);
+            case 0xff26:
+                this.soundEnabled.set(data & 0x80);
+                if (!this.isOn()) {
+                    this.sweepChannel.powerOff();
+                    this.toneChannel1.powerOff();
+                    this.toneChannel2.powerOff();
+                    this.waveChannel.powerOff();
+                    this.noiseChannel.powerOff();
+                    this.powerOff();
+                }
+                return;
         }
     }
 
@@ -70,9 +85,26 @@ export default class APU implements Memory {
             case 0xff10: return this.sweepChannel.getByte(address);
             case 0xff24: return this.channelControl.get();
             case 0xff25: return this.outputSelection.get();
-            case 0xff26: return this.soundEnabled.get() | 0x70;
+            case 0xff26:
+                return (
+                    (this.soundEnabled.get()) |
+                    (this.toneChannel1.isOn() ? 0x1 : 0) |
+                    (this.toneChannel2.isOn() ? 0x2 : 0) |
+                    (this.waveChannel.isOn() ? 0x4 : 0) |
+                    (this.noiseChannel.isOn() ? 0x8 : 0)
+                ) | 0x70;
         }
         return 0xff;
+    }
+
+    powerOff() {
+        this.channelControl.set(0);
+        this.outputSelection.set(0);
+        this.soundEnabled.set(0);
+    }
+
+    isOn(): boolean {
+        return (this.soundEnabled.get() & 0x80) !== 0;
     }
 
     size() {

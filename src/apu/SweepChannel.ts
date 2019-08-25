@@ -19,6 +19,10 @@ export default class SweepChannel implements Memory {
         return this.sweepRegister.get() | 0x80;
     }
 
+    powerOff() {
+        this.sweepRegister.set(0);
+    }
+
     size() {
         return 4;
     }
