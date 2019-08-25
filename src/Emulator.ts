@@ -1,10 +1,15 @@
+import APU from "./apu/APU";
 import Cartridge from "./cartridge/Cartridge";
 import Clock, { Z80Clock } from "./cpu/Clock";
 import CPU from "./cpu/CPU";
 import { Display } from "./gpu/Display";
 import GPU from "./gpu/GPU";
+import { InterruptFlagsEKey, InterruptsFlags } from "./memory/IORegisters";
+import { JoyPad } from "./memory/JoyPad";
 import MMU from "./memory/MMU";
+import { Timer } from "./memory/Timer";
 import { cpuDebugger, memorydebuggerConfig } from "./utils/Debuggers";
+import FlagManager from "./utils/FlagManager";
 
 export interface EmulatorConfig {
     display: Display
@@ -12,19 +17,38 @@ export interface EmulatorConfig {
 
 export default class Emulator {
 
-    private readonly mmu: MMU;
-    private readonly clock: Clock;
+    private readonly interruptEnableManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
+    private readonly interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(InterruptsFlags);
+
     private readonly cpu: CPU;
+    private readonly mmu: MMU;
+    private readonly gpu: GPU;
+    private readonly apu: APU;
+    private readonly clock: Clock;
+    private readonly joypad: JoyPad;
+    private readonly timer: Timer;
 
     constructor(configs: EmulatorConfig) {
+        const { display } = configs;
         this.clock = Z80Clock();
-        this.mmu = new MMU(this.clock, configs.display);
+        this.gpu = new GPU({ clock: this.clock, display, interruptFlagsManager: this.interruptFlagsManager });
+        this.apu = new APU();
+        this.joypad = new JoyPad(this.interruptEnableManager);
+        this.timer = new Timer(this.clock, this.interruptFlagsManager);
+        this.mmu = new MMU({
+            gpu: this.gpu,
+            apu: this.apu,
+            joypad: this.joypad,
+            timer: this.timer,
+            interruptEnableManager: this.interruptEnableManager,
+            interruptFlagsManager: this.interruptFlagsManager
+        });
         this.cpu = new CPU({
             clock: this.clock,
             mmu: this.mmu,
             cpuDebuggerConfig: cpuDebugger,
             memoryDebuggerConfig: memorydebuggerConfig
-        })
+        });
     }
 
     start(rom?: Cartridge) {
@@ -68,8 +92,8 @@ export default class Emulator {
     }
 
     getTile(tileIdx: number) {
-        const addr = this.mmu.GPU.getTileAddress(tileIdx);
-        return this.mmu.GPU.getTile(addr);
+        const addr = this.gpu.getTileAddress(tileIdx);
+        return this.gpu.getTile(addr);
     }
 
     getByteAt(address: number) {

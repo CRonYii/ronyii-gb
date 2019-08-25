@@ -1,66 +1,59 @@
+import APU from "../apu/APU";
 import Cartridge from "../cartridge/Cartridge";
+import GPU from "../gpu/GPU";
 import FlagManager from "../utils/FlagManager";
 import BIOS from "./BIOS";
-import { InterruptFlagsEKey, InterruptsFlags } from "./IORegisters";
-import { Memory, MemorySegment, EchoMemory } from "./Memory";
-import { Timer } from "./Timer";
-import Clock from "../cpu/Clock";
 import DMA from "./DMA";
-import GPU from "../gpu/GPU";
-import { Display } from "../gpu/Display";
+import { InterruptFlagsEKey } from "./IORegisters";
 import { JoyPad } from "./JoyPad";
-import APU from "../apu/APU";
+import { EchoMemory, Memory, MemorySegment } from "./Memory";
+import { Timer } from "./Timer";
 
 export interface MMUConfig {
-
+    gpu: GPU,
+    apu: APU,
+    joypad: JoyPad,
+    timer: Timer,
+    interruptEnableManager: FlagManager<InterruptFlagsEKey>,
+    interruptFlagsManager: FlagManager<InterruptFlagsEKey>,
 }
 
 // Memory Management Unit
 export default class MMU implements Memory {
 
-    private CARTRIDGE: Memory = new MemorySegment({ size: 0x0000 }); // The Cartridge, not loaded by default
+    private cartridge: Memory = new MemorySegment({ size: 0x0000 }); // The Cartridge, not loaded by default
 
-    private readonly BIOS: Memory = BIOS;
-    private readonly WRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0xC000, readable: true, writable: true }); // 8kB Working RAM
-    private readonly ECHO_RAM: Memory = new EchoMemory({ origin: this.WRAM, size: 0x1E00, offset: 0x2000 }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF
-    private readonly UNUSABLE: Memory = new MemorySegment({ size: 0x0060, readable: false, writable: false }); // 96 bytes of UNSABLE Memory (0xFEA0 ~ 0xFEFF)
-    private readonly TIMER: Memory; // Timer
-    private readonly DMA: DMA = new DMA(this); // DMA Transfer
-    private readonly IO_REGS: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF00, readable: true, writable: true }); // I/O Registers
-    private readonly HRAM: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF80, readable: true, writable: true }); // High RAM - Zero Page Memory
+    private readonly bios: Memory = BIOS;
+    private readonly wram: Memory = new MemorySegment({ size: 0x2000, offset: 0xC000, readable: true, writable: true }); // 8kB Working RAM
+    private readonly echoRam: Memory = new EchoMemory({ origin: this.wram, size: 0x1E00, offset: 0x2000 }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF
+    private readonly unusable: Memory = new MemorySegment({ size: 0x0060, readable: false, writable: false }); // 96 bytes of UNSABLE Memory (0xFEA0 ~ 0xFEFF)
+    private readonly dma: DMA = new DMA(this); // DMA Transfer
+    private readonly IORegisters: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF00, readable: true, writable: true }); // I/O Registers
+    private readonly highRam: Memory = new MemorySegment({ size: 0x0080, offset: 0xFF80, readable: true, writable: true }); // High RAM - Zero Page Memory
 
-    public readonly JOYPAD: JoyPad;
-    public readonly GPU: GPU;
-    public readonly APU: APU;
+    public readonly interruptEnableManager: FlagManager<InterruptFlagsEKey>;
+    public readonly interruptFlagsManager: FlagManager<InterruptFlagsEKey>;
 
-    private inBIOS: boolean = true;
+    private readonly joypad: JoyPad;
+    private readonly timer: Timer;
+    private readonly gpu: GPU;
+    private readonly apu: APU;
 
-    public readonly interruptEnableManager = new FlagManager<InterruptFlagsEKey>(
-        InterruptsFlags,
-        {
-            get: () => this.getByte(0xffff),
-            set: (byte) => this.setByte(0xffff, byte)
-        }
-    );
+    private inBios: boolean = true;
 
-    public readonly interruptFlagsManager = new FlagManager<InterruptFlagsEKey>(
-        InterruptsFlags,
-        {
-            get: () => this.getByte(0xff0f),
-            set: (byte) => this.setByte(0xff0f, byte)
-        }
-    );
-
-    constructor(clock: Clock, display: Display) {
-        this.TIMER = new Timer(clock, this.interruptFlagsManager);
-        this.GPU = new GPU({ clock, display, interruptFlagsManager: this.interruptFlagsManager });
-        this.APU = new APU();
-        this.JOYPAD = new JoyPad(this.interruptEnableManager);
+    constructor(configs: MMUConfig) {
+        const { gpu, apu, joypad, timer, interruptEnableManager, interruptFlagsManager } = configs;
+        this.gpu = gpu;
+        this.apu = apu;
+        this.joypad = joypad;
+        this.timer = timer;
+        this.interruptEnableManager = interruptEnableManager;
+        this.interruptFlagsManager = interruptFlagsManager;
         this.reset();
     }
 
     load(cartridge: Cartridge) {
-        this.CARTRIDGE = cartridge;
+        this.cartridge = cartridge;
         this.reset();
 
         console.log('Loaded Cartridge => ', cartridge);
@@ -98,51 +91,56 @@ export default class MMU implements Memory {
     getSegment(address: number): Memory {
         address &= 0xFFFF;
         if (address <= 0x7FFF) {
-            if (this.inBIOS && address < 0x0100) {
-                return this.BIOS;
+            if (this.inBios && address < 0x0100) {
+                return this.bios;
             }
-            return this.CARTRIDGE;
+            return this.cartridge;
         }
         switch (address & 0xF000) {
             case 0x8000: case 0x9000:
-                return this.GPU;
+                return this.gpu;
             case 0xA000: case 0xB000:
-                return this.CARTRIDGE;
+                return this.cartridge;
             case 0xC000: case 0xD000:
-                return this.WRAM;
+                return this.wram;
             case 0xE000:
-                return this.ECHO_RAM;
+                return this.echoRam;
             case 0xF000:
                 if ((address & 0x0FFF) <= 0xDFF) {
-                    return this.ECHO_RAM;
+                    return this.echoRam;
                 }
                 switch (address & 0x0F00) {
                     case 0xE00:
                         if ((address & 0x00FF) <= 0x9F) {
-                            return this.GPU;
+                            return this.gpu;
                         } else {
-                            return this.UNUSABLE;
+                            return this.unusable;
                         }
                     case 0xF00:
                         if ((address & 0x00FF) <= 0x7F) {
-                            if (address === 0xff00) {
-                                return this.JOYPAD;
-                            }
                             if (address >= 0xff10 && address <= 0xff3f) {
-                                return this.APU;
+                                return this.apu;
                             }
                             if (address >= 0xff04 && address <= 0xff07) {
-                                return this.TIMER;
+                                return this.timer;
                             }
                             if (address === 0xff46) {
-                                return this.DMA;
+                                return this.dma;
                             }
                             if (address >= 0xff40 && address <= 0xff4B) {
-                                return this.GPU;
+                                return this.gpu;
                             }
-                            return this.IO_REGS;
+                            switch (address) {
+                                case 0xff00: return this.joypad;
+                                case 0xff0f: return this.interruptFlagsManager;
+                                case 0xff46: return this.dma;
+                            }
+                            return this.IORegisters;
                         } else {
-                            return this.HRAM;
+                            switch (address) {
+                                case 0xffff: return this.interruptEnableManager;
+                            }
+                            return this.highRam;
                         }
                 }
         }
@@ -173,7 +171,7 @@ export default class MMU implements Memory {
     }
 
     detachBIOS() {
-        this.inBIOS = false;
+        this.inBios = false;
     }
 
     shouldInterrupt(key: InterruptFlagsEKey) {
