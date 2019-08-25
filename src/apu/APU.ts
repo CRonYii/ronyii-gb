@@ -1,4 +1,4 @@
-import { Memory } from "../memory/Memory";
+import { Memory, MemorySegment } from "../memory/Memory";
 import { Register8 } from "../cpu/Register";
 import SquareChannel from "./SquareChannel";
 import SweepChannel from "./SweepChannel";
@@ -13,6 +13,7 @@ export default class APU implements Memory {
     private readonly channelControl: Register8 = new Register8(); // 0xff24 - NR50
     private readonly outputSelection: Register8 = new Register8(); // 0xff25 - NR51
     private readonly soundEnabled: Register8 = new Register8(); // 0xff246- NR52
+    private readonly unused: Memory = new MemorySegment({ size: 0x30, offset: 0xff10 });
 
     private readonly sweepChannel: SweepChannel;
     private readonly toneChannel1: SquareChannel;
@@ -30,7 +31,6 @@ export default class APU implements Memory {
     }
 
     setByte(address: number, data: number) {
-        console.log(Helper.toHexText(address, 4), '=>', Helper.toHexText(data, 2));
         if ((address >= 0xff1a && address <= 0xff1e) || (address >= 0xff30 && address <= 0xff3f)) {
             return this.waveChannel.setByte(address, data);
         }
@@ -49,6 +49,7 @@ export default class APU implements Memory {
             case 0xff25: return this.outputSelection.set(data);
             case 0xff26: return this.soundEnabled.set(data & 0x8000);
         }
+        this.unused.setByte(address, data);
     }
 
     getByte(address: number): number {
@@ -70,11 +71,11 @@ export default class APU implements Memory {
             case 0xff25: return this.outputSelection.get();
             case 0xff26: return this.soundEnabled.get();
         }
-        return 0;
+        return this.unused.getByte(address);
     }
 
     size() {
-        return 21;
+        return 0x30;
     }
 
 }
