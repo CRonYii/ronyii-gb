@@ -49,6 +49,10 @@ export default class APU implements Memory {
         }
     }
 
+    /**
+     * Most of the APU registers will be ORed with value when read
+     * This is to mask the unused bits to read as 0b1
+     */
     getByte(address: number): number {
         if ((address >= 0xff1a && address <= 0xff1e) || (address >= 0xff30 && address <= 0xff3f)) {
             return this.waveChannel.getByte(address);
