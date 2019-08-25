@@ -34,6 +34,9 @@ export default class APU implements SoundUnit {
     }
 
     setByte(address: number, data: number) {
+        if (!this.isOn() && address !== 0xff26) {
+            return;
+        }
         if ((address >= 0xff1a && address <= 0xff1e) || (address >= 0xff30 && address <= 0xff3f)) {
             return this.waveChannel.setByte(address, data);
         }
