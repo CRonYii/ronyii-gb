@@ -18,7 +18,7 @@ export default class WaveChannel extends SoundUnit {
     private readonly wavePattern: Memory = new MemorySegment({ size: 0x10, offset: 0xff30, readable: true, writable: true });
 
     constructor(audioCtx: AudioContext) {
-        super();
+        super("Wave Channel");
         this.audioCtx = audioCtx;
     }
 

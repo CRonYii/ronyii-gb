@@ -11,7 +11,7 @@ export default class NoiseChannel extends SoundUnit {
     private readonly polynomialCounter: Register8 = new Register8(); // 0xff22 - NR43
 
     constructor(audioCtx: AudioContext) {
-        super();
+        super("Noise Channel");
         this.audioCtx = audioCtx;
     }
 

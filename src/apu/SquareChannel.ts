@@ -16,7 +16,7 @@ export default class SquareChannel extends SoundUnit {
     private readonly frequencyHigh: Register8 = new Register8(); // 0xff14 - NR14 / 0xff19 - NR24
 
     constructor(audioCtx: AudioContext, useSweep: boolean) {
-        super();
+        super(useSweep ? "Sound Channel 1" : "Sound Channel 2");
         this.audioCtx = audioCtx;
         this.useSweep = useSweep;
     }

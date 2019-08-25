@@ -2,11 +2,17 @@ import LengthCounter from "./LengthCounter";
 
 export default abstract class SoundUnit {
 
+    private readonly name: string;
+
     private trigger: boolean = false; // NRX4 bit 7
     private lengthCounterEnabled: boolean = false; // NRX4 bit 6
 
     public abstract lengthCounter: LengthCounter;
     public abstract powerOff(): void;
+
+    constructor(name: string) {
+        this.name = name;
+    }
 
     public setTriggerAndLengthCounter(data: number) {
         this.setTrigger((data & 0x80) !== 0);
