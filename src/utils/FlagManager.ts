@@ -1,3 +1,5 @@
+import { Memory } from "../memory/Memory";
+
 export interface FlagControl {
     set: (flag: number) => void,
     get: () => number
@@ -7,7 +9,7 @@ export type FlagAttributes<T extends string> = {
     [key in T]: number
 }
 
-export default class FlagManager<T extends string> {
+export default class FlagManager<T extends string> implements Memory {
 
     private data: number = 0;
     private readonly flagAttributes: FlagAttributes<T>;
@@ -47,6 +49,18 @@ export default class FlagManager<T extends string> {
 
     flag(): number {
         return this.flagControl.get();
+    }
+
+    setByte(address: number, value: number) {
+        this.setValue(value);
+    }
+
+    getByte(address: number) {
+        return this.flag();
+    }
+
+    size() {
+        return 1;
     }
 
 }
