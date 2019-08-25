@@ -18,15 +18,15 @@ export default class APU implements ClockTask {
     private readonly outputSelection: Register8 = new Register8(); // 0xff25 - NR51
     private readonly soundEnabled: Register8 = new Register8(); // 0xff246- NR52
 
-    private readonly toneChannel1: SquareChannel;
-    private readonly toneChannel2: SquareChannel;
+    private readonly soundChannel1: SquareChannel;
+    private readonly soundChannel2: SquareChannel;
     private readonly waveChannel: WaveChannel;
     private readonly noiseChannel: NoiseChannel;
 
     constructor() {
         this.audioCtx = new AudioContext();
-        this.toneChannel1 = new SquareChannel(this.audioCtx, true);
-        this.toneChannel2 = new SquareChannel(this.audioCtx, false);
+        this.soundChannel1 = new SquareChannel(this.audioCtx, true);
+        this.soundChannel2 = new SquareChannel(this.audioCtx, false);
         this.waveChannel = new WaveChannel(this.audioCtx);
         this.noiseChannel = new NoiseChannel(this.audioCtx);
     }
@@ -40,8 +40,8 @@ export default class APU implements ClockTask {
             this.step %= 8;
             switch (this.step) {
                 case 0: case 2: case 4: case 6:
-                    this.toneChannel1.lengthCounter.tick();
-                    this.toneChannel2.lengthCounter.tick();
+                    this.soundChannel1.lengthCounter.tick();
+                    this.soundChannel2.lengthCounter.tick();
                     this.waveChannel.lengthCounter.tick();
                     this.noiseChannel.lengthCounter.tick();
                     break;
@@ -58,10 +58,10 @@ export default class APU implements ClockTask {
             return this.waveChannel.setByte(address, data);
         }
         if (address >= 0xff10 && address <= 0xff14) {
-            return this.toneChannel1.setByte(address - 0xff10, data);
+            return this.soundChannel1.setByte(address - 0xff10, data);
         }
         if (address >= 0xff15 && address <= 0xff19) {
-            return this.toneChannel2.setByte(address - 0xff15, data);
+            return this.soundChannel2.setByte(address - 0xff15, data);
         }
         if (address >= 0xff20 && address <= 0xff23) {
             return this.noiseChannel.setByte(address, data);
@@ -72,8 +72,8 @@ export default class APU implements ClockTask {
             case 0xff26:
                 this.soundEnabled.set(data & 0x80);
                 if (!this.isOn()) {
-                    this.toneChannel1.powerOff();
-                    this.toneChannel2.powerOff();
+                    this.soundChannel1.powerOff();
+                    this.soundChannel2.powerOff();
                     this.waveChannel.powerOff();
                     this.noiseChannel.powerOff();
                     this.powerOff();
@@ -91,10 +91,10 @@ export default class APU implements ClockTask {
             return this.waveChannel.getByte(address);
         }
         if (address >= 0xff10 && address <= 0xff14) {
-            return this.toneChannel1.getByte(address - 0xff10);
+            return this.soundChannel1.getByte(address - 0xff10);
         }
         if (address >= 0xff15 && address <= 0xff19) {
-            return this.toneChannel2.getByte(address - 0xff15);
+            return this.soundChannel2.getByte(address - 0xff15);
         }
         if (address >= 0xff20 && address <= 0xff23) {
             return this.noiseChannel.getByte(address);
@@ -105,8 +105,8 @@ export default class APU implements ClockTask {
             case 0xff26:
                 return (
                     (this.soundEnabled.get()) |
-                    (this.toneChannel1.isOn() ? 0x1 : 0) |
-                    (this.toneChannel2.isOn() ? 0x2 : 0) |
+                    (this.soundChannel1.isOn() ? 0x1 : 0) |
+                    (this.soundChannel2.isOn() ? 0x2 : 0) |
                     (this.waveChannel.isOn() ? 0x4 : 0) |
                     (this.noiseChannel.isOn() ? 0x8 : 0)
                 ) | 0x70;
