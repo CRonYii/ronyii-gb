@@ -13,7 +13,6 @@ export default class APU implements Memory {
     private readonly channelControl: Register8 = new Register8(); // 0xff24 - NR50
     private readonly outputSelection: Register8 = new Register8(); // 0xff25 - NR51
     private readonly soundEnabled: Register8 = new Register8(); // 0xff246- NR52
-    private readonly unused: Memory = new MemorySegment({ size: 0x30, offset: 0xff10 });
 
     private readonly sweepChannel: SweepChannel;
     private readonly toneChannel1: SquareChannel;
@@ -49,7 +48,6 @@ export default class APU implements Memory {
             case 0xff25: return this.outputSelection.set(data);
             case 0xff26: return this.soundEnabled.set(data & 0x8000);
         }
-        this.unused.setByte(address, data);
     }
 
     getByte(address: number): number {
@@ -71,7 +69,7 @@ export default class APU implements Memory {
             case 0xff25: return this.outputSelection.get();
             case 0xff26: return this.soundEnabled.get();
         }
-        return this.unused.getByte(address);
+        return 0xff;
     }
 
     size() {
