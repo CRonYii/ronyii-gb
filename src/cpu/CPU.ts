@@ -264,8 +264,7 @@ export default class CPU {
     }
 
     private stop() {
-        console.warn('CPU STOP');
-        // TODO
+        // the emulator does not implement STOP
     }
 
     private setInterrupts(flag: boolean) {
@@ -930,7 +929,6 @@ export default class CPU {
         return () => {
             this.PC.set(this.popStack());
             this.setInterrupts(true);
-            // TODO: rrs() restore all the previous register values
             return {}
         };
     }
