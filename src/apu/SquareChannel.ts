@@ -25,10 +25,10 @@ export default class SquareChannel implements Memory {
 
     getByte(address: number): number {
         switch (address) {
-            case 0x0: return this.soundLengthWavePattern.get() & 0xC0;
+            case 0x0: return this.soundLengthWavePattern.get() | 0x3f;
             case 0x1: return this.volumeEnvelope.get();
-            case 0x2: return 0;
-            case 0x3: return this.frequencyHigh.get() & 0x40;
+            case 0x2: return 0xff;
+            case 0x3: return this.frequencyHigh.get() | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
     }

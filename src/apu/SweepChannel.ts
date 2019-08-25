@@ -16,7 +16,7 @@ export default class SweepChannel implements Memory {
     }
 
     getByte(address: number): number {
-        return this.sweepRegister.get() & 0x7f;
+        return this.sweepRegister.get() | 0x80;
     }
 
     size() {

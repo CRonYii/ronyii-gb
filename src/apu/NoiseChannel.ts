@@ -25,10 +25,10 @@ export default class NoiseChannel implements Memory {
 
     getByte(address: number): number {
         switch (address) {
-            case 0xff20: return this.soundLength.get() & 0x3f;
+            case 0xff20: return 0xff;
             case 0xff21: return this.volumeEnvelope.get();
             case 0xff22: return this.polynomialCounter.get();
-            case 0xff23: return this.selectionRegister.get() & 0x40;
+            case 0xff23: return this.selectionRegister.get() | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
     }

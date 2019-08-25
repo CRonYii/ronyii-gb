@@ -1,10 +1,9 @@
-import { Memory, MemorySegment } from "../memory/Memory";
 import { Register8 } from "../cpu/Register";
+import { Memory } from "../memory/Memory";
+import NoiseChannel from "./NoiseChannel";
 import SquareChannel from "./SquareChannel";
 import SweepChannel from "./SweepChannel";
 import WaveChannel from "./WaveChannel";
-import NoiseChannel from "./NoiseChannel";
-import Helper from "../utils/Helper";
 
 export default class APU implements Memory {
 
@@ -67,7 +66,7 @@ export default class APU implements Memory {
             case 0xff10: return this.sweepChannel.getByte(address);
             case 0xff24: return this.channelControl.get();
             case 0xff25: return this.outputSelection.get();
-            case 0xff26: return this.soundEnabled.get();
+            case 0xff26: return this.soundEnabled.get() | 0x70;
         }
         return 0xff;
     }

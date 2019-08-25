@@ -36,11 +36,11 @@ export default class WaveChannel implements Memory {
             return this.wavePattern.getByte(address);
         }
         switch (address) {
-            case 0xff1a: return this.soundEnabled.get();
-            case 0xff1b: return this.soundLength.get();
-            case 0xff1c: return this.outputLevel.get();
-            case 0xff1d: return 0;
-            case 0xff1e: return this.frequencyHigh.get() & 0x40;
+            case 0xff1a: return this.soundEnabled.get() | 0x7f;
+            case 0xff1b: return 0xff;
+            case 0xff1c: return this.outputLevel.get() | 0x9f;
+            case 0xff1d: return 0xff;
+            case 0xff1e: return this.frequencyHigh.get() | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
     }
