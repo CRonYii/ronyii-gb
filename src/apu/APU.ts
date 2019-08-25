@@ -4,15 +4,25 @@ import NoiseChannel from "./NoiseChannel";
 import SquareChannel from "./SquareChannel";
 import WaveChannel from "./WaveChannel";
 import { ClockTask } from "../cpu/Clock";
+import Timer from "../utils/Timer";
+import { CPU_CLOCK_SPEED } from "../constants/index";
+import LengthCounter from "./LengthCounter";
 
 export interface SoundUnit extends Memory {
+    lengthCounter: LengthCounter,
     powerOff(): void,
     isOn(): boolean,
+    isLengthCounterEnable(): boolean,
+    setTrigger(trigger: boolean): void,
 }
 
-export default class APU implements SoundUnit, ClockTask {
+export default class APU implements ClockTask {
 
     private readonly audioCtx: AudioContext;
+
+    // The frame sequencer generates low frequency clocks for the modulation units. It is clocked by a 512 Hz timer.
+    private readonly timer: Timer = new Timer(CPU_CLOCK_SPEED / 512);
+    private step: number = -1;
 
     private readonly channelControl: Register8 = new Register8(); // 0xff24 - NR50
     private readonly outputSelection: Register8 = new Register8(); // 0xff25 - NR51
@@ -32,7 +42,21 @@ export default class APU implements SoundUnit, ClockTask {
     }
 
     tick(cyclesTaken: number) {
-        // TODO: implement audio play here
+        if (!this.isOn()) {
+            return 0;
+        }
+        if (this.timer.tick(cyclesTaken) > 0) {
+            this.step += 1;
+            this.step %= 8;
+            switch (this.step) {
+                case 0: case 2: case 4: case 6:
+                    this.toneChannel1.lengthCounter.tick();
+                    this.toneChannel2.lengthCounter.tick();
+                    this.waveChannel.lengthCounter.tick();
+                    this.noiseChannel.lengthCounter.tick();
+                    break;
+            }
+        }
         return 0;
     }
 

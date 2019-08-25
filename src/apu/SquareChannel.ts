@@ -1,10 +1,13 @@
 import { Register8 } from "../cpu/Register";
 import { SoundUnit } from "./APU";
+import LengthCounter from "./LengthCounter";
 
 export default class SquareChannel implements SoundUnit {
 
     private readonly audioCtx: AudioContext;
     private readonly useSweep: boolean;
+
+    public readonly lengthCounter: LengthCounter = new LengthCounter(this);
 
     private trigger: boolean = false;
 
@@ -22,12 +25,20 @@ export default class SquareChannel implements SoundUnit {
     setByte(address: number, data: number) {
         switch (address) {
             case 0x0: return this.sweepRegister.set(data);
-            case 0x1: return this.soundLengthWavePattern.set(data);
+            case 0x1:
+                this.soundLengthWavePattern.set(data);
+                this.lengthCounter.reload((1 << 6) - (data & 0x3f));
+                return;
             case 0x2: return this.volumeEnvelope.set(data);
             case 0x3: return this.frequencyLow.set(data);
             case 0x4:
                 this.frequencyHigh.set(data);
                 this.trigger = (data & 0x80) !== 0;
+                if (this.isOn()) {
+                    if (this.lengthCounter.counter === 0 || !this.isLengthCounterEnable()) {
+                        this.lengthCounter.reload(1 << 6);
+                    }
+                }
                 return;
         }
     }
@@ -51,8 +62,16 @@ export default class SquareChannel implements SoundUnit {
         this.setByte(0x4, 0);
     }
 
+    setTrigger(trigger: boolean): void {
+        this.trigger = trigger;
+    }
+
     isOn(): boolean {
         return this.trigger;
+    }
+
+    isLengthCounterEnable(): boolean {
+        return (this.frequencyHigh.get() & 0x40) !== 0;
     }
 
     size() {
