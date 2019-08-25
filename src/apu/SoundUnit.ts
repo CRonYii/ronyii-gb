@@ -15,10 +15,12 @@ export default abstract class SoundUnit {
     }
 
     public setTriggerAndLengthCounter(data: number) {
-        this.setTrigger((data & 0x80) !== 0);
+        if (!this.isOn()) {
+            this.setTrigger((data & 0x80) !== 0);
+        }
         this.setLengthCounterEnable((data & 0x40) !== 0);
         if (this.isOn()) {
-            if (this.lengthCounter.counter === 0 || !this.isLengthCounterEnable()) {
+            if (this.lengthCounter.counter === 0) {
                 this.lengthCounter.reload();
             }
         }
