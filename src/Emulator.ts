@@ -7,7 +7,7 @@ import GPU from "./gpu/GPU";
 import { InterruptFlagsEKey, InterruptsFlags } from "./memory/IORegisters";
 import { JoyPad } from "./memory/JoyPad";
 import MMU from "./memory/MMU";
-import { Timer } from "./memory/Timer";
+import { GBTimer } from "./memory/GBTimer";
 import { cpuDebugger, memorydebuggerConfig } from "./utils/Debuggers";
 import FlagManager from "./utils/FlagManager";
 
@@ -28,7 +28,7 @@ export default class Emulator {
     private apu: APU;
     private clock: Clock;
     private joypad: JoyPad;
-    private timer: Timer;
+    private timer: GBTimer;
 
     constructor(configs: EmulatorConfig) {
         const { display } = configs;
@@ -39,7 +39,7 @@ export default class Emulator {
         this.gpu = new GPU({ display: this.display, interruptFlagsManager: this.interruptFlagsManager });
         this.apu = new APU();
         this.joypad = new JoyPad(this.interruptEnableManager);
-        this.timer = new Timer(this.interruptFlagsManager);
+        this.timer = new GBTimer(this.interruptFlagsManager);
         this.mmu = new MMU({
             gpu: this.gpu,
             apu: this.apu,
@@ -73,7 +73,7 @@ export default class Emulator {
         this.gpu = new GPU({ display: this.display, interruptFlagsManager: this.interruptFlagsManager });
         this.apu = new APU();
         this.joypad = new JoyPad(this.interruptEnableManager);
-        this.timer = new Timer(this.interruptFlagsManager);
+        this.timer = new GBTimer(this.interruptFlagsManager);
         this.mmu = new MMU({
             gpu: this.gpu,
             apu: this.apu,

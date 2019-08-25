@@ -7,13 +7,13 @@ import DMA from "./DMA";
 import { InterruptFlagsEKey } from "./IORegisters";
 import { JoyPad } from "./JoyPad";
 import { EchoMemory, Memory, MemorySegment } from "./Memory";
-import { Timer } from "./Timer";
+import { GBTimer } from "./GBTimer";
 
 export interface MMUConfig {
     gpu: GPU,
     apu: APU,
     joypad: JoyPad,
-    timer: Timer,
+    timer: GBTimer,
     interruptEnableManager: FlagManager<InterruptFlagsEKey>,
     interruptFlagsManager: FlagManager<InterruptFlagsEKey>,
 }
@@ -35,7 +35,7 @@ export default class MMU implements Memory {
     public readonly interruptFlagsManager: FlagManager<InterruptFlagsEKey>;
 
     private readonly joypad: JoyPad;
-    private readonly timer: Timer;
+    private readonly timer: GBTimer;
     private readonly gpu: GPU;
     private readonly apu: APU;
 

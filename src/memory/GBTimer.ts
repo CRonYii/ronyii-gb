@@ -1,12 +1,11 @@
-import { Memory } from "./Memory";
-import { Register8 } from "../cpu/Register";
-import Clock, { ClockTask } from "../cpu/Clock";
 import { CPU_CLOCK_SPEED } from "../constants/index";
-import { InterruptFlagsEKey } from "./IORegisters";
+import { ClockTask } from "../cpu/Clock";
+import { Register8 } from "../cpu/Register";
 import FlagManager from "../utils/FlagManager";
-import Helper from "../utils/Helper";
+import { InterruptFlagsEKey } from "./IORegisters";
+import { Memory } from "./Memory";
 
-export class Timer implements Memory, ClockTask {
+export class GBTimer implements Memory, ClockTask {
 
     static DIV_INCREMENT_FREQ: number = CPU_CLOCK_SPEED / 16_384; // the cycles taken to increment DIV once
 
@@ -29,9 +28,9 @@ export class Timer implements Memory, ClockTask {
     tick(cycles: number): number {
         // incrementing div
         this.divCycles += cycles;
-        if (this.divCycles >= Timer.DIV_INCREMENT_FREQ) {
+        if (this.divCycles >= GBTimer.DIV_INCREMENT_FREQ) {
             this.DIV.inc();
-            this.divCycles -= Timer.DIV_INCREMENT_FREQ;
+            this.divCycles -= GBTimer.DIV_INCREMENT_FREQ;
         }
         // increment tima
         if ((this.TAC.get() & 0b100) !== 0) {
