@@ -1,9 +1,9 @@
 import { Register8 } from "../cpu/Register";
 import { Memory, MemorySegment } from "../memory/Memory";
-import { SoundUnit } from "./APU";
 import LengthCounter from "./LengthCounter";
+import SoundUnit from "./SoundUnit";
 
-export default class WaveChannel implements SoundUnit {
+export default class WaveChannel extends SoundUnit {
 
     private readonly audioCtx: AudioContext;
 
@@ -20,6 +20,7 @@ export default class WaveChannel implements SoundUnit {
     private readonly wavePattern: Memory = new MemorySegment({ size: 0x10, offset: 0xff30, readable: true, writable: true });
 
     constructor(audioCtx: AudioContext) {
+        super();
         this.audioCtx = audioCtx;
     }
 

@@ -1,4 +1,4 @@
-import { SoundUnit } from "./APU";
+import SoundUnit from "./SoundUnit";
 
 export default class LengthCounter {
 

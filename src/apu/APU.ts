@@ -1,20 +1,10 @@
+import { CPU_CLOCK_SPEED } from "../constants/index";
+import { ClockTask } from "../cpu/Clock";
 import { Register8 } from "../cpu/Register";
-import { Memory } from "../memory/Memory";
+import Timer from "../utils/Timer";
 import NoiseChannel from "./NoiseChannel";
 import SquareChannel from "./SquareChannel";
 import WaveChannel from "./WaveChannel";
-import { ClockTask } from "../cpu/Clock";
-import Timer from "../utils/Timer";
-import { CPU_CLOCK_SPEED } from "../constants/index";
-import LengthCounter from "./LengthCounter";
-
-export interface SoundUnit extends Memory {
-    lengthCounter: LengthCounter,
-    powerOff(): void,
-    isOn(): boolean,
-    isLengthCounterEnable(): boolean,
-    setTrigger(trigger: boolean): void,
-}
 
 export default class APU implements ClockTask {
 

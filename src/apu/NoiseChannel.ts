@@ -1,8 +1,8 @@
 import { Register8 } from "../cpu/Register";
-import { SoundUnit } from "./APU";
 import LengthCounter from "./LengthCounter";
+import SoundUnit from "./SoundUnit";
 
-export default class NoiseChannel implements SoundUnit {
+export default class NoiseChannel extends SoundUnit {
 
     private readonly audioCtx: AudioContext;
 
@@ -14,6 +14,7 @@ export default class NoiseChannel implements SoundUnit {
     private readonly selectionRegister: Register8 = new Register8(); // 0xff23 - NR44
 
     constructor(audioCtx: AudioContext) {
+        super();
         this.audioCtx = audioCtx;
     }
 

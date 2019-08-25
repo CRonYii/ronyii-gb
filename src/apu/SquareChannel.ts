@@ -1,8 +1,8 @@
 import { Register8 } from "../cpu/Register";
-import { SoundUnit } from "./APU";
 import LengthCounter from "./LengthCounter";
+import SoundUnit from "./SoundUnit";
 
-export default class SquareChannel implements SoundUnit {
+export default class SquareChannel extends SoundUnit {
 
     private readonly audioCtx: AudioContext;
     private readonly useSweep: boolean;
@@ -18,6 +18,7 @@ export default class SquareChannel implements SoundUnit {
     private readonly frequencyHigh: Register8 = new Register8(); // 0xff14 - NR14 / 0xff19 - NR24
 
     constructor(audioCtx: AudioContext, useSweep: boolean) {
+        super();
         this.audioCtx = audioCtx;
         this.useSweep = useSweep;
     }
