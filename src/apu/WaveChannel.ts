@@ -32,8 +32,8 @@ export default class WaveChannel extends SoundUnit {
             case 0xff1c: return this.outputLevel.set(data);
             case 0xff1d: return this.frequencyLow.set(data);
             case 0xff1e:
-                    this.frequencyHigh.set(data & 0b111);
-                    this.setTriggerAndLengthCounter(data);
+                this.frequencyHigh.set(data & 0b111);
+                this.setTriggerAndLengthCounter(data);
                 return;
         }
     }
@@ -50,6 +50,10 @@ export default class WaveChannel extends SoundUnit {
             case 0xff1e: return (this.isLengthCounterEnable() ? 0x40 : 0) | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
+    }
+
+    public isOn(): boolean {
+        return super.isOn() && this.power;
     }
 
     get power(): boolean {
