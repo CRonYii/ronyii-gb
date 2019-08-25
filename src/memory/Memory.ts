@@ -56,3 +56,35 @@ export class MemorySegment implements Memory {
     }
 
 }
+
+export interface EchoMemoryOptions {
+    size: number,
+    origin: Memory,
+    offset?: number,
+}
+
+export class EchoMemory implements Memory {
+
+    private readonly origin: Memory;
+    private readonly _size: number;
+    private readonly offset: number;
+
+    constructor(configs: EchoMemoryOptions) {
+        const { size, offset = 0, origin } = configs;
+        this.origin = origin;
+        this._size = size;
+        this.offset = offset;
+    }
+
+    public setByte(address: number, data: number) {
+        this.origin.setByte(address - this.offset, data);
+    }
+
+    public getByte(address: number): number {
+        return this.origin.getByte(address - this.offset);
+    }
+
+    public size() {
+        return this._size;
+    }
+}

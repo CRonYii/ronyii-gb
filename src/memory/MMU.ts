@@ -2,7 +2,7 @@ import Cartridge from "../cartridge/Cartridge";
 import FlagManager from "../utils/FlagManager";
 import BIOS from "./BIOS";
 import { InterruptFlagsEKey, InterruptsFlags } from "./IORegisters";
-import { Memory, MemorySegment } from "./Memory";
+import { Memory, MemorySegment, EchoMemory } from "./Memory";
 import { Timer } from "./Timer";
 import Clock from "../cpu/Clock";
 import DMA from "./DMA";
@@ -21,7 +21,7 @@ export default class MMU implements Memory {
 
     private readonly BIOS: Memory = BIOS;
     private readonly WRAM: Memory = new MemorySegment({ size: 0x2000, offset: 0xC000, readable: true, writable: true }); // 8kB Working RAM
-    private readonly ECHO_RAM: Memory = new MemorySegment({ size: 0x1E00, offset: 0xE000, readable: true, writable: true }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF TODO: implement a ECHO_RAM class
+    private readonly ECHO_RAM: Memory = new EchoMemory({ origin: this.WRAM, size: 0x1E00, offset: 0x2000 }); // ECHO RAM Mirror of 0xC000 ~ 0xDDFF
     private readonly UNUSABLE: Memory = new MemorySegment({ size: 0x0060, readable: false, writable: false }); // 96 bytes of UNSABLE Memory (0xFEA0 ~ 0xFEFF)
     private readonly TIMER: Memory; // Timer
     private readonly DMA: DMA = new DMA(this); // DMA Transfer
