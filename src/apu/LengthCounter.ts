@@ -2,11 +2,13 @@ import SoundUnit from "./SoundUnit";
 
 export default class LengthCounter {
 
-    private soundUnit: SoundUnit;
+    private readonly soundUnit: SoundUnit;
+    private readonly initialValue: number;
     public counter: number = 0;
 
-    constructor(soundUint: SoundUnit) {
+    constructor(soundUint: SoundUnit, initialValue: number) {
         this.soundUnit = soundUint;
+        this.initialValue = initialValue;
     }
 
     tick() {
@@ -18,8 +20,8 @@ export default class LengthCounter {
         }
     }
 
-    reload(counter: number) {
-        this.counter = counter;
+    reload(counter = 0) {
+        this.counter = this.initialValue - counter;
     }
 
 }

@@ -7,7 +7,7 @@ export default class SquareChannel extends SoundUnit {
     private readonly audioCtx: AudioContext;
     private readonly useSweep: boolean;
 
-    public readonly lengthCounter: LengthCounter = new LengthCounter(this);
+    public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 6);
 
     private readonly sweepRegister: Register8 = new Register8(); // 0xff10 - NR10
     private readonly soundLengthWavePattern: Register8 = new Register8(); // 0xff11 - NR11 / 0xff16 - NR21
@@ -26,18 +26,13 @@ export default class SquareChannel extends SoundUnit {
             case 0x0: return this.sweepRegister.set(data);
             case 0x1:
                 this.soundLengthWavePattern.set(data);
-                this.lengthCounter.reload((1 << 6) - (data & 0x3f));
+                this.lengthCounter.reload(data & 0x3f);
                 return;
             case 0x2: return this.volumeEnvelope.set(data);
             case 0x3: return this.frequencyLow.set(data);
             case 0x4:
-                this.frequencyHigh.set(data);
-                this.setTrigger((data & 0x80) !== 0);
-                if (this.isOn()) {
-                    if (this.lengthCounter.counter === 0 || !this.isLengthCounterEnable()) {
-                        this.lengthCounter.reload(1 << 6);
-                    }
-                }
+                this.frequencyHigh.set(data & 0b111);
+                this.setTriggerAndLengthCounter(data);
                 return;
         }
     }
@@ -48,7 +43,7 @@ export default class SquareChannel extends SoundUnit {
             case 0x1: return this.soundLengthWavePattern.get() | 0x3f;
             case 0x2: return this.volumeEnvelope.get();
             case 0x3: return 0xff;
-            case 0x4: return this.frequencyHigh.get() | 0xbf;
+            case 0x4: return (this.isLengthCounterEnable() ? 0x40 : 0) | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
     }
@@ -59,10 +54,6 @@ export default class SquareChannel extends SoundUnit {
         this.setByte(0x2, 0);
         this.setByte(0x3, 0);
         this.setByte(0x4, 0);
-    }
-
-    isLengthCounterEnable(): boolean {
-        return (this.frequencyHigh.get() & 0x40) !== 0;
     }
 
     size() {
