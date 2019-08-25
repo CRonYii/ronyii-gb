@@ -4,6 +4,7 @@ export default abstract class SoundUnit {
 
     private readonly name: string;
 
+    private dacPower: boolean = false; 
     private trigger: boolean = false; // NRX4 bit 7
     private lengthCounterEnabled: boolean = false; // NRX4 bit 6
 
@@ -15,7 +16,7 @@ export default abstract class SoundUnit {
     }
 
     public setTriggerAndLengthCounter(data: number) {
-        if (!this.isOn()) {
+        if (!this.isOn() && this.isDACOn()) {
             this.setTrigger((data & 0x80) !== 0);
         }
         this.setLengthCounterEnable((data & 0x40) !== 0);
@@ -24,6 +25,17 @@ export default abstract class SoundUnit {
                 this.lengthCounter.reload();
             }
         }
+    }
+
+    public setPower(power: boolean): void {
+        if (power === false) {
+            this.setTrigger(false);
+        }
+        this.dacPower = power;
+    }
+
+    public isDACOn(): boolean {
+        return this.dacPower;
     }
 
     public setTrigger(trigger: boolean): void {

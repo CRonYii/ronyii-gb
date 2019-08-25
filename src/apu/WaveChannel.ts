@@ -9,7 +9,6 @@ export default class WaveChannel extends SoundUnit {
 
     public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 8);
 
-    private readonly soundEnabled: Register8 = new Register8(); // 0xff1a - NR30
     private readonly outputLevel: Register8 = new Register8(); // 0xff1c - NR32
     private readonly frequencyLow: Register8 = new Register8(); // 0xff1d - NR33
     private readonly frequencyHigh: Register8 = new Register8(); // 0xff1e - NR34
@@ -27,7 +26,7 @@ export default class WaveChannel extends SoundUnit {
             return this.wavePattern.setByte(address, data);
         }
         switch (address) {
-            case 0xff1a: return this.soundEnabled.set(data & 0x80);
+            case 0xff1a: return this.setPower((data & 0x80) !== 0);
             case 0xff1b: return this.lengthCounter.reload(data);
             case 0xff1c: return this.outputLevel.set(data);
             case 0xff1d: return this.frequencyLow.set(data);
@@ -43,21 +42,13 @@ export default class WaveChannel extends SoundUnit {
             return this.wavePattern.getByte(address);
         }
         switch (address) {
-            case 0xff1a: return this.soundEnabled.get() | 0x7f;
+            case 0xff1a: return (this.isDACOn() ? 0x80 : 0) | 0x7f;
             case 0xff1b: return 0xff;
             case 0xff1c: return this.outputLevel.get() | 0x9f;
             case 0xff1d: return 0xff;
             case 0xff1e: return (this.isLengthCounterEnable() ? 0x40 : 0) | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
-    }
-
-    public isOn(): boolean {
-        return super.isOn() && this.power;
-    }
-
-    get power(): boolean {
-        return this.soundEnabled.get() !== 0;
     }
 
     powerOff() {

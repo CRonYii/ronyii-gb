@@ -18,7 +18,10 @@ export default class NoiseChannel extends SoundUnit {
     setByte(address: number, data: number) {
         switch (address) {
             case 0xff20: return this.lengthCounter.reload(data & 0x3f);
-            case 0xff21: return this.volumeEnvelope.set(data);
+            case 0xff21:
+                this.volumeEnvelope.set(data);
+                this.setPower((data & 0xf8) !== 0);
+                return;
             case 0xff22: return this.polynomialCounter.set(data);
             case 0xff23:
                 this.setTriggerAndLengthCounter(data);

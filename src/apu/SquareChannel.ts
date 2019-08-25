@@ -28,7 +28,10 @@ export default class SquareChannel extends SoundUnit {
                 this.wavePattern.set(data & 0xc0);
                 this.lengthCounter.reload(data & 0x3f);
                 return;
-            case 0x2: return this.volumeEnvelope.set(data);
+            case 0x2:
+                this.volumeEnvelope.set(data);
+                this.setPower((data & 0xf8) !== 0);
+                return;
             case 0x3: return this.frequencyLow.set(data);
             case 0x4:
                 this.frequencyHigh.set(data & 0b111);
