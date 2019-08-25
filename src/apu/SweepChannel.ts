@@ -20,7 +20,7 @@ export default class SweepChannel implements Memory {
     }
 
     powerOff() {
-        this.sweepRegister.set(0);
+        this.setByte(0, 0);
     }
 
     size() {

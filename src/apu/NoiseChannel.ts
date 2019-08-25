@@ -39,10 +39,10 @@ export default class NoiseChannel implements SoundUnit {
     }
 
     powerOff() {
-        this.soundLength.set(0);
-        this.volumeEnvelope.set(0);
-        this.polynomialCounter.set(0);
-        this.selectionRegister.set(0);
+        this.setByte(0xff20, 0);
+        this.setByte(0xff21, 0);
+        this.setByte(0xff22, 0);
+        this.setByte(0xff23, 0);
     }
 
     isOn(): boolean {

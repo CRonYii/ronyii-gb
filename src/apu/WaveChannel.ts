@@ -56,11 +56,11 @@ export default class WaveChannel implements SoundUnit {
     }
 
     powerOff() {
-        this.soundEnabled.set(0);
-        this.soundLength.set(0);
-        this.outputLevel.set(0);
-        this.frequencyLow.set(0);
-        this.frequencyHigh.set(0);
+        this.setByte(0xff1a, 0);
+        this.setByte(0xff1b, 0);
+        this.setByte(0xff1c, 0);
+        this.setByte(0xff1d, 0);
+        this.setByte(0xff1e, 0);
     }
 
     isOn(): boolean {

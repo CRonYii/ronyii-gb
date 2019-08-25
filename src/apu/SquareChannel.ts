@@ -39,10 +39,10 @@ export default class SquareChannel implements SoundUnit {
     }
 
     powerOff() {
-        this.soundLengthWavePattern.set(0);
-        this.volumeEnvelope.set(0);
-        this.frequencyLow.set(0);
-        this.frequencyHigh.set(0);
+        this.setByte(0x0, 0);
+        this.setByte(0x1, 0);
+        this.setByte(0x2, 0);
+        this.setByte(0x3, 0);
     }
 
     isOn(): boolean {
