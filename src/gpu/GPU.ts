@@ -398,7 +398,8 @@ export default class GPU implements Memory {
     }
 
     set linemode(mode: number) {
-        const value = (this.stat.flag() & 0b00) | mode;
+        // keep the upper 6 bits unchanged (0xFC is the bitmask)
+        const value = (this.stat.flag() & 0xFC) | mode;
         this.stat.setValue(value);
     }
 
