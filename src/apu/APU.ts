@@ -32,10 +32,10 @@ export default class APU implements ClockTask {
     }
 
     tick(cyclesTaken: number) {
-        if (!this.isOn()) {
-            return 0;
-        }
         if (this.timer.tick(cyclesTaken) > 0) {
+            if (!this.isOn()) {
+                return 0;
+            }
             this.step += 1;
             this.step %= 8;
             switch (this.step) {
@@ -71,7 +71,17 @@ export default class APU implements ClockTask {
             case 0xff25: return this.outputSelection.set(data);
             case 0xff26:
                 this.soundEnabled.set(data & 0x80);
-                if (!this.isOn()) {
+                if (this.isOn()) {
+                    // When powered on, the frame sequencer is reset so that the next step will be 0, 
+                    this.step = -1;
+                    // the square duty units are reset to the first step of the waveform
+                    // TODO
+                    // the wave channel's sample buffer is reset to 0.
+                    for (let i = 0xff30; i <= 0xff3f; i++) {
+                        this.setByte(i, 0);
+                    }
+                } else {
+                    // When powered off, all registers (NR10-NR51) are instantly written with zero
                     this.soundChannel1.powerOff();
                     this.soundChannel2.powerOff();
                     this.waveChannel.powerOff();
