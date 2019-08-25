@@ -9,8 +9,6 @@ export default class SquareChannel extends SoundUnit {
 
     public readonly lengthCounter: LengthCounter = new LengthCounter(this);
 
-    private trigger: boolean = false;
-
     private readonly sweepRegister: Register8 = new Register8(); // 0xff10 - NR10
     private readonly soundLengthWavePattern: Register8 = new Register8(); // 0xff11 - NR11 / 0xff16 - NR21
     private readonly volumeEnvelope: Register8 = new Register8(); // 0xff12 - NR12 / 0xff17 - NR22
@@ -34,7 +32,7 @@ export default class SquareChannel extends SoundUnit {
             case 0x3: return this.frequencyLow.set(data);
             case 0x4:
                 this.frequencyHigh.set(data);
-                this.trigger = (data & 0x80) !== 0;
+                this.setTrigger((data & 0x80) !== 0);
                 if (this.isOn()) {
                     if (this.lengthCounter.counter === 0 || !this.isLengthCounterEnable()) {
                         this.lengthCounter.reload(1 << 6);
@@ -61,14 +59,6 @@ export default class SquareChannel extends SoundUnit {
         this.setByte(0x2, 0);
         this.setByte(0x3, 0);
         this.setByte(0x4, 0);
-    }
-
-    setTrigger(trigger: boolean): void {
-        this.trigger = trigger;
-    }
-
-    isOn(): boolean {
-        return this.trigger;
     }
 
     isLengthCounterEnable(): boolean {

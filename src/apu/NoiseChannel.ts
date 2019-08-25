@@ -6,8 +6,6 @@ export default class NoiseChannel extends SoundUnit {
 
     private readonly audioCtx: AudioContext;
 
-    private trigger: boolean = false;
-
     public readonly lengthCounter: LengthCounter = new LengthCounter(this); // 0xff20 - NR41
     private readonly volumeEnvelope: Register8 = new Register8(); // 0xff21 - NR42
     private readonly polynomialCounter: Register8 = new Register8(); // 0xff22 - NR43
@@ -25,7 +23,7 @@ export default class NoiseChannel extends SoundUnit {
             case 0xff22: return this.polynomialCounter.set(data);
             case 0xff23:
                 this.selectionRegister.set(data);
-                this.trigger = (data & 0x80) !== 0;
+                this.setTrigger((data & 0x80) !== 0);
                 if (this.isOn()) {
                     if (this.lengthCounter.counter === 0 || !this.isLengthCounterEnable()) {
                         this.lengthCounter.reload(1 << 6);
@@ -50,14 +48,6 @@ export default class NoiseChannel extends SoundUnit {
         this.setByte(0xff21, 0);
         this.setByte(0xff22, 0);
         this.setByte(0xff23, 0);
-    }
-
-    setTrigger(trigger: boolean): void {
-        this.trigger = trigger;
-    }
-
-    isOn(): boolean {
-        return this.trigger;
     }
 
     isLengthCounterEnable(): boolean {

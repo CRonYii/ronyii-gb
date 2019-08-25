@@ -9,8 +9,6 @@ export default class WaveChannel extends SoundUnit {
 
     public readonly lengthCounter: LengthCounter = new LengthCounter(this);
 
-    private trigger: boolean = false;
-
     private readonly soundEnabled: Register8 = new Register8(); // 0xff1a - NR30
     private readonly outputLevel: Register8 = new Register8(); // 0xff1c - NR32
     private readonly frequencyLow: Register8 = new Register8(); // 0xff1d - NR33
@@ -35,7 +33,7 @@ export default class WaveChannel extends SoundUnit {
             case 0xff1d: return this.frequencyLow.set(data);
             case 0xff1e:
                 this.frequencyHigh.set(data);
-                this.trigger = (data & 0x80) !== 0;
+                this.setTrigger((data & 0x80) !== 0);
                 if (this.isOn()) {
                     if (this.lengthCounter.counter === 0 || !this.isLengthCounterEnable()) {
                         this.lengthCounter.reload(1 << 8);
@@ -69,14 +67,6 @@ export default class WaveChannel extends SoundUnit {
         this.setByte(0xff1c, 0);
         this.setByte(0xff1d, 0);
         this.setByte(0xff1e, 0);
-    }
-
-    setTrigger(trigger: boolean): void {
-        this.trigger = trigger;
-    }
-
-    isOn(): boolean {
-        return this.trigger && this.power;
     }
 
     isLengthCounterEnable(): boolean {
