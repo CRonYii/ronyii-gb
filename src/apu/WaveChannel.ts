@@ -15,7 +15,7 @@ export default class WaveChannel implements SoundUnit {
     private readonly frequencyHigh: Register8 = new Register8(); // 0xff1e - NR34
 
     // 0xff30 ~ 0xff3f (16 bytes / 32 * 4 bits)
-    private readonly wavePattern: Memory = new MemorySegment({ size: 0xf, offset: 0xff30, readable: true, writable: true });
+    private readonly wavePattern: Memory = new MemorySegment({ size: 0x10, offset: 0xff30, readable: true, writable: true });
 
     constructor(audioCtx: AudioContext) {
         this.audioCtx = audioCtx;
