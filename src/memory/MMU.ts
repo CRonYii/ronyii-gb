@@ -9,6 +9,7 @@ import DMA from "./DMA";
 import GPU from "../gpu/GPU";
 import { Display } from "../gpu/Display";
 import { JoyPad } from "./JoyPad";
+import APU from "../apu/APU";
 
 export interface MMUConfig {
 
@@ -30,6 +31,7 @@ export default class MMU implements Memory {
 
     public readonly JOYPAD: JoyPad;
     public readonly GPU: GPU;
+    public readonly APU: APU;
 
     private inBIOS: boolean = true;
 
@@ -52,6 +54,7 @@ export default class MMU implements Memory {
     constructor(clock: Clock, display: Display) {
         this.TIMER = new Timer(clock, this.interruptFlagsManager);
         this.GPU = new GPU({ clock, display, interruptFlagsManager: this.interruptFlagsManager });
+        this.APU = new APU();
         this.JOYPAD = new JoyPad(this.interruptEnableManager);
         this.reset();
     }
@@ -125,7 +128,10 @@ export default class MMU implements Memory {
                             if (address === 0xff00) {
                                 return this.JOYPAD;
                             }
-                            if ((address & 0x00FF) >= 0x04 && (address & 0x00FF) <= 0x07) {
+                            if (address >= 0xff10 && address <= 0xff3f) {
+                                return this.APU;
+                            }
+                            if (address >= 0xff04 && address <= 0xff07) {
                                 return this.TIMER;
                             }
                             if (address === 0xff46) {
