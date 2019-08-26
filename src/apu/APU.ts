@@ -33,17 +33,23 @@ export default class APU implements ClockTask {
 
     tick(cyclesTaken: number) {
         if (this.timer.tick(cyclesTaken) > 0) {
+            // Power state does not affect the 512 Hz timer that feeds the frame sequencer.
             if (!this.isOn()) {
                 return 0;
             }
             this.step += 1;
             this.step %= 8;
             switch (this.step) {
-                case 0: case 2: case 4: case 6:
+                case 2: case 6:
+                    this.soundChannel1.sweep.tick();
+                case 0: case 4:
                     this.soundChannel1.lengthCounter.tick();
                     this.soundChannel2.lengthCounter.tick();
                     this.waveChannel.lengthCounter.tick();
                     this.noiseChannel.lengthCounter.tick();
+                    break;
+                case 7:
+                    // TODO: Volume Envelope
                     break;
             }
         }
