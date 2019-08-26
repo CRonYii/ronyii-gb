@@ -1,4 +1,3 @@
-import { Register8 } from "../cpu/Register";
 import { Memory, MemorySegment } from "../memory/Memory";
 import LengthCounter from "./LengthCounter";
 import SoundUnit from "./SoundUnit";
@@ -9,9 +8,8 @@ export default class WaveChannel extends SoundUnit {
 
     public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 8);
 
-    private readonly outputLevel: Register8 = new Register8(); // 0xff1c - NR32
-    private readonly frequencyLow: Register8 = new Register8(); // 0xff1d - NR33
-    private readonly frequencyHigh: Register8 = new Register8(); // 0xff1e - NR34
+    private outputLevel: number = 0; // 0xff1c - NR32
+    private frequency: number = 0;
 
     // 0xff30 ~ 0xff3f (16 bytes / 32 * 4 bits)
     private readonly wavePattern: Memory = new MemorySegment({ size: 0x10, offset: 0xff30, readable: true, writable: true });
@@ -28,10 +26,10 @@ export default class WaveChannel extends SoundUnit {
         switch (address) {
             case 0xff1a: return this.setPower((data & 0x80) !== 0);
             case 0xff1b: return this.lengthCounter.reload(data);
-            case 0xff1c: return this.outputLevel.set(data);
-            case 0xff1d: return this.frequencyLow.set(data);
+            case 0xff1c: return this.outputLevel = (data & 0x60) >> 5;
+            case 0xff1d: return this.frequency = (this.frequency & 0x700) | data;
             case 0xff1e:
-                this.frequencyHigh.set(data & 0b111);
+                this.frequency = (this.frequency & 0xff) | ((data & 0b111) << 8);
                 this.setTriggerAndLengthCounter(data);
                 return;
         }
@@ -44,7 +42,7 @@ export default class WaveChannel extends SoundUnit {
         switch (address) {
             case 0xff1a: return (this.isDACOn() ? 0x80 : 0) | 0x7f;
             case 0xff1b: return 0xff;
-            case 0xff1c: return this.outputLevel.get() | 0x9f;
+            case 0xff1c: return (this.outputLevel << 5) | 0x9f;
             case 0xff1d: return 0xff;
             case 0xff1e: return (this.isLengthCounterEnable() ? 0x40 : 0) | 0xbf;
         }

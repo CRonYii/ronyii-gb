@@ -1,4 +1,3 @@
-import { Register8 } from "../cpu/Register";
 import LengthCounter from "./LengthCounter";
 import SoundUnit from "./SoundUnit";
 import Sweep from "./Sweep";
@@ -15,8 +14,8 @@ export default class SquareChannel extends SoundUnit {
     public readonly volumeEnvelope: VolumeEnvelope = new VolumeEnvelope(); // 0xff12 - NR12 / 0xff17 - NR22
     public readonly sweep = new Sweep(this); // 0xff10 - NR10
 
-    private readonly wavePattern: Register8 = new Register8(); // 0xff11 - NR11 / 0xff16 - NR21
-    private frequency: number = 0;
+    private wavePattern: number = 0;
+    private frequency: number = 0; 
 
     constructor(audioCtx: AudioContext, useSweep: boolean) {
         super(useSweep ? "Sound Channel 1" : "Sound Channel 2");
@@ -34,7 +33,7 @@ export default class SquareChannel extends SoundUnit {
         switch (address) {
             case 0x0: return this.sweep.set(data);
             case 0x1:
-                this.wavePattern.set(data & 0xc0);
+                this.wavePattern = (data & 0xc0) >> 6;
                 this.lengthCounter.reload(data & 0x3f);
                 return;
             case 0x2:
@@ -52,7 +51,7 @@ export default class SquareChannel extends SoundUnit {
     getByte(address: number): number {
         switch (address) {
             case 0x0: return this.useSweep ? this.sweep.get() | 0x80 : 0xff;
-            case 0x1: return this.wavePattern.get() | 0x3f;
+            case 0x1: return (this.wavePattern << 6) | 0x3f;
             case 0x2: return this.volumeEnvelope.get();
             case 0x3: return 0xff;
             case 0x4: return (this.isLengthCounterEnable() ? 0x40 : 0) | 0xbf;
