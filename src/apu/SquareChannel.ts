@@ -6,6 +6,8 @@ import Sweep from "./Sweep";
 export default class SquareChannel extends SoundUnit {
 
     private readonly audioCtx: AudioContext;
+    private readonly osc: OscillatorNode;
+    private readonly gainNode: GainNode;
     private readonly useSweep: boolean;
 
     public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 6);
@@ -17,8 +19,14 @@ export default class SquareChannel extends SoundUnit {
 
     constructor(audioCtx: AudioContext, useSweep: boolean) {
         super(useSweep ? "Sound Channel 1" : "Sound Channel 2");
-        this.audioCtx = audioCtx;
         this.useSweep = useSweep;
+        this.audioCtx = audioCtx;
+        this.osc = audioCtx.createOscillator();
+        this.osc.type = 'square';
+        this.gainNode = audioCtx.createGain();
+        this.gainNode.gain.value = 0;
+        this.osc.connect(this.gainNode);
+        this.osc.start();
     }
 
     setByte(address: number, data: number) {
@@ -70,6 +78,10 @@ export default class SquareChannel extends SoundUnit {
 
     getFrequency() {
         return this.frequency;
+    }
+
+    getOuputNode(): AudioNode {
+        return this.gainNode;
     }
 
     size() {

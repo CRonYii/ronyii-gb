@@ -9,6 +9,7 @@ import WaveChannel from "./WaveChannel";
 export default class APU implements ClockTask {
 
     private readonly audioCtx: AudioContext;
+    private readonly masterGain: GainNode;
 
     // The frame sequencer generates low frequency clocks for the modulation units. It is clocked by a 512 Hz timer.
     private readonly timer: Timer = new Timer(CPU_CLOCK_SPEED / 512);
@@ -25,10 +26,16 @@ export default class APU implements ClockTask {
 
     constructor() {
         this.audioCtx = new AudioContext();
+        this.masterGain = this.audioCtx.createGain();
+        this.masterGain.gain.value = 0;
+        this.masterGain.connect(this.audioCtx.destination);
+
         this.soundChannel1 = new SquareChannel(this.audioCtx, true);
         this.soundChannel2 = new SquareChannel(this.audioCtx, false);
         this.waveChannel = new WaveChannel(this.audioCtx);
         this.noiseChannel = new NoiseChannel(this.audioCtx);
+
+        this.connect(this.soundChannel1.getOuputNode());
     }
 
     tick(cyclesTaken: number) {
@@ -37,6 +44,9 @@ export default class APU implements ClockTask {
             if (!this.isOn()) {
                 return 0;
             }
+            // TODO: real channel handling
+            this.masterGain.gain.value = this.SO1Volume;
+
             this.step += 1;
             this.step %= 8;
             switch (this.step) {
@@ -54,6 +64,10 @@ export default class APU implements ClockTask {
             }
         }
         return 0;
+    }
+
+    connect(node: AudioNode) {
+        node.connect(this.masterGain);
     }
 
     setByte(address: number, data: number) {
@@ -130,10 +144,19 @@ export default class APU implements ClockTask {
         return 0xff;
     }
 
+    get SO1Volume() {
+        return ((this.channelControl.get() & 0x7) / 7);
+    }
+
+    get SO2Volume() {
+        return ((this.channelControl.get() & 0x70) >> 4) / 7;
+    }
+
     powerOff() {
         this.channelControl.set(0);
         this.outputSelection.set(0);
         this.soundEnabled.set(0);
+        this.masterGain.gain.value = 0;
     }
 
     isOn(): boolean {
