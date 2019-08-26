@@ -15,9 +15,21 @@ export default class APU implements ClockTask {
     private readonly timer: Timer = new Timer(CPU_CLOCK_SPEED / 512); // 8192 cycles
     private step: number = -1;
 
-    private readonly channelControl: Register8 = new Register8(); // 0xff24 - NR50
-    private readonly outputSelection: Register8 = new Register8(); // 0xff25 - NR51
-    private readonly soundEnabled: Register8 = new Register8(); // 0xff246- NR52
+    private SO1VolumeLevel: number = 0;
+    private SO2VolumeLevel: number = 0;
+    private vinSO1Enabled: boolean = false;
+    private vinSO2Enabled: boolean = false;
+
+    private sound1ToSO1: boolean = false;
+    private sound1ToSO2: boolean = false;
+    private sound2ToSO1: boolean = false;
+    private sound2ToSO2: boolean = false;
+    private sound3ToSO1: boolean = false;
+    private sound3ToSO2: boolean = false;
+    private sound4ToSO1: boolean = false;
+    private sound4ToSO2: boolean = false;
+
+    private soundEnabled: boolean = false;
 
     private readonly soundChannel1: SquareChannel;
     private readonly soundChannel2: SquareChannel;
@@ -94,25 +106,34 @@ export default class APU implements ClockTask {
             return this.noiseChannel.setByte(address, data);
         }
         switch (address) {
-            case 0xff24: return this.channelControl.set(data);
-            case 0xff25: return this.outputSelection.set(data);
+            case 0xff24:
+                this.SO1VolumeLevel = data & 0x7;
+                this.SO2VolumeLevel = (data & 0x70) >> 4;
+                this.vinSO1Enabled = (data & 0x8) !== 0;
+                this.vinSO2Enabled = (data & 0x80) !== 0;
+                return;
+            case 0xff25:
+                this.sound4ToSO2 = (data & (1 << 7)) !== 0;
+                this.sound3ToSO2 = (data & (1 << 6)) !== 0;
+                this.sound2ToSO2 = (data & (1 << 5)) !== 0;
+                this.sound1ToSO2 = (data & (1 << 4)) !== 0;
+                this.sound4ToSO1 = (data & (1 << 3)) !== 0;
+                this.sound3ToSO1 = (data & (1 << 2)) !== 0;
+                this.sound2ToSO1 = (data & (1 << 1)) !== 0;
+                this.sound1ToSO1 = (data & (1 << 0)) !== 0;
+                return;
             case 0xff26:
-                this.soundEnabled.set(data & 0x80);
+                this.soundEnabled = (data & 0x80) !== 0;
                 if (this.isOn()) {
                     // When powered on, the frame sequencer is reset so that the next step will be 0, 
                     this.step = -1;
-                    // the square duty units are reset to the first step of the waveform
-                    // TODO
+                    // TODO: the square duty units are reset to the first step of the waveform
+
                     // the wave channel's sample buffer is reset to 0.
                     for (let i = 0xff30; i <= 0xff3f; i++) {
                         this.setByte(i, 0);
                     }
                 } else {
-                    // When powered off, all registers (NR10-NR51) are instantly written with zero
-                    this.soundChannel1.powerOff();
-                    this.soundChannel2.powerOff();
-                    this.waveChannel.powerOff();
-                    this.noiseChannel.powerOff();
                     this.powerOff();
                 }
                 return;
@@ -137,11 +158,25 @@ export default class APU implements ClockTask {
             return this.noiseChannel.getByte(address);
         }
         switch (address) {
-            case 0xff24: return this.channelControl.get();
-            case 0xff25: return this.outputSelection.get();
+            case 0xff24: return (
+                (this.vinSO2Enabled ? 0x80 : 0) |
+                (this.SO2VolumeLevel << 4) |
+                (this.vinSO1Enabled ? 0x8 : 0) |
+                (this.SO1VolumeLevel)
+            );
+            case 0xff25: return (
+                (this.sound4ToSO2 ? 0x80 : 0) |
+                (this.sound3ToSO2 ? 0x40 : 0) |
+                (this.sound2ToSO2 ? 0x20 : 0) |
+                (this.sound1ToSO2 ? 0x10 : 0) |
+                (this.sound4ToSO1 ? 0x8 : 0) |
+                (this.sound3ToSO1 ? 0x4 : 0) |
+                (this.sound2ToSO1 ? 0x2 : 0) |
+                (this.sound1ToSO1 ? 0x1 : 0)
+            );
             case 0xff26:
                 return (
-                    (this.soundEnabled.get()) |
+                    (this.soundEnabled ? 0x80 : 0) |
                     (this.soundChannel1.isOn() ? 0x1 : 0) |
                     (this.soundChannel2.isOn() ? 0x2 : 0) |
                     (this.waveChannel.isOn() ? 0x4 : 0) |
@@ -152,22 +187,40 @@ export default class APU implements ClockTask {
     }
 
     get SO1Volume() {
-        return ((this.channelControl.get() & 0x7) / 7);
+        return this.SO1VolumeLevel / 7;
     }
 
     get SO2Volume() {
-        return ((this.channelControl.get() & 0x70) >> 4) / 7;
+        return this.SO2VolumeLevel / 7;
     }
 
+    // When powered off, all registers (NR10-NR51) are instantly written with zero
     powerOff() {
-        this.channelControl.set(0);
-        this.outputSelection.set(0);
-        this.soundEnabled.set(0);
+        this.SO1VolumeLevel = 0;
+        this.SO2VolumeLevel = 0;
+        this.vinSO1Enabled = false;
+        this.vinSO2Enabled = false;
+
+        this.sound1ToSO1 = false;
+        this.sound1ToSO2 = false;
+        this.sound2ToSO1 = false;
+        this.sound2ToSO2 = false;
+        this.sound3ToSO1 = false;
+        this.sound3ToSO2 = false;
+        this.sound4ToSO1 = false;
+        this.sound4ToSO2 = false;
+
+        this.soundEnabled = false;
         this.masterGain.gain.value = 0;
+
+        this.soundChannel1.powerOff();
+        this.soundChannel2.powerOff();
+        this.waveChannel.powerOff();
+        this.noiseChannel.powerOff();
     }
 
     isOn(): boolean {
-        return (this.soundEnabled.get() & 0x80) !== 0;
+        return this.soundEnabled;
     }
 
     size() {
