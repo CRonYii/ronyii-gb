@@ -12,7 +12,7 @@ export default class APU implements ClockTask {
     private readonly masterGain: GainNode;
 
     // The frame sequencer generates low frequency clocks for the modulation units. It is clocked by a 512 Hz timer.
-    private readonly timer: Timer = new Timer(CPU_CLOCK_SPEED / 512);
+    private readonly timer: Timer = new Timer(CPU_CLOCK_SPEED / 512); // 8192 cycles
     private step: number = -1;
 
     private readonly channelControl: Register8 = new Register8(); // 0xff24 - NR50
@@ -47,6 +47,11 @@ export default class APU implements ClockTask {
             // TODO: real channel handling
             this.masterGain.gain.value = this.SO1Volume;
 
+            /**
+             * Length Counter is clocked at 256Hz freq
+             * Sweep is clocked at 128Hz freq
+             * Volume Envelope is clocked at 64Hz freq
+             */
             this.step += 1;
             this.step %= 8;
             switch (this.step) {
@@ -59,7 +64,9 @@ export default class APU implements ClockTask {
                     this.noiseChannel.lengthCounter.tick();
                     break;
                 case 7:
-                    // TODO: Volume Envelope
+                    this.soundChannel1.volumeEnvelope.tick();
+                    this.soundChannel2.volumeEnvelope.tick();
+                    this.noiseChannel.volumeEnvelope.tick();
                     break;
             }
         }

@@ -1,13 +1,14 @@
 import { Register8 } from "../cpu/Register";
 import LengthCounter from "./LengthCounter";
 import SoundUnit from "./SoundUnit";
+import VolumeEnvelope from "./VolumeEnvelope";
 
 export default class NoiseChannel extends SoundUnit {
 
     private readonly audioCtx: AudioContext;
 
     public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 6); // 0xff20 - NR41
-    private readonly volumeEnvelope: Register8 = new Register8(); // 0xff21 - NR42
+    public readonly volumeEnvelope: VolumeEnvelope = new VolumeEnvelope(); // 0xff21 - NR42
     private readonly polynomialCounter: Register8 = new Register8(); // 0xff22 - NR43
 
     constructor(audioCtx: AudioContext) {
@@ -37,6 +38,11 @@ export default class NoiseChannel extends SoundUnit {
             case 0xff23: return (this.isLengthCounterEnable() ? 0x40 : 0) | 0xbf;
         }
         throw new Error('Unsupported SquareChannel register');
+    }
+
+    public reload() {
+        super.reload();
+        this.volumeEnvelope.reload();
     }
 
     powerOff() {
