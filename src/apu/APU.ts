@@ -57,7 +57,7 @@ export default class APU implements ClockTask {
     }
 
     setByte(address: number, data: number) {
-        if (!this.isOn() && address !== 0xff26) {
+        if (!this.isOn() && address !== 0xff26 && address !== 0xff20) {
             return;
         }
         if ((address >= 0xff1a && address <= 0xff1e) || (address >= 0xff30 && address <= 0xff3f)) {
