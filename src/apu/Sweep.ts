@@ -20,19 +20,25 @@ export default class Sweep {
     }
 
     tick() {
-        if (!this.power) {
-            return;
-        }
-        if (this.timer.tick(1) === 0) {
-            return;
+        // When it generates a clock and 
+        // the sweep's internal enabled flag is set and 
+        // the sweep period is not zero, 
+        // a new frequency is calculated and the overflow check is performed.
+        if (this.timer.tick(1) !== 0 && this.power && this.period !== 0) {
+            this.calculateFrequency();
+            /**
+             * If the new frequency is 2047 or less and the sweep shift is not zero,
+             * this new frequency is written back to the shadow frequency and square 1's frequency in NR13 and NR14,
+             * then frequency calculation and overflow check are run AGAIN immediately using this new value,
+             * but this second new frequency is not written back.
+             */
+            if (this.frequency < 2048 && this.shift !== 0) {
+                this.soundUnit.setFrequency(this.frequency);
+                this.shadow = this.frequency;
+                this.calculateFrequency();
+            }
         }
 
-        this.calculateFrequency();
-        if (this.frequency < 2048 && this.shift !== 0 && this.period !== 0) {
-            this.soundUnit.setFrequency(this.frequency);
-            this.shadow = this.frequency;
-            this.calculateFrequency();
-        }
     }
 
     /**
@@ -48,7 +54,7 @@ export default class Sweep {
         } else if (this.mode === 0) { // addition
             this.frequency = ALU.add16(this.shadow, offset).result;
         }
-        // overflow check
+        // The overflow check simply calculates the new frequency and if this is greater than 2047, square 1 is disabled.
         if (this.frequency > 2047) {
             this.soundUnit.setTrigger(false);
         }
