@@ -8,8 +8,11 @@ import WaveChannel from "./WaveChannel";
 
 export default class APU implements ClockTask {
 
-    private readonly audioCtx: AudioContext;
-    private readonly masterGain: GainNode;
+    private readonly audioCtx: AudioContext = new AudioContext();
+    private readonly masterVolume: GainNode = this.audioCtx.createGain();
+    private readonly merger: ChannelMergerNode = this.audioCtx.createChannelMerger(2);
+    private readonly SO1: GainNode = this.audioCtx.createGain();
+    private readonly SO2: GainNode = this.audioCtx.createGain();
 
     // The frame sequencer generates low frequency clocks for the modulation units. It is clocked by a 512 Hz timer.
     private readonly timer: Timer = new Timer(CPU_CLOCK_SPEED / 512); // 8192 cycles
@@ -31,23 +34,19 @@ export default class APU implements ClockTask {
 
     private soundEnabled: boolean = false;
 
-    private readonly soundChannel1: SquareChannel;
-    private readonly soundChannel2: SquareChannel;
-    private readonly waveChannel: WaveChannel;
-    private readonly noiseChannel: NoiseChannel;
+    private readonly soundChannel1: SquareChannel = new SquareChannel(this.audioCtx, true);;
+    private readonly soundChannel2: SquareChannel = new SquareChannel(this.audioCtx, false);;
+    private readonly waveChannel: WaveChannel = new WaveChannel(this.audioCtx);;
+    private readonly noiseChannel: NoiseChannel = new NoiseChannel(this.audioCtx);;
 
     constructor() {
-        this.audioCtx = new AudioContext();
-        this.masterGain = this.audioCtx.createGain();
-        this.masterGain.gain.value = 0;
-        this.masterGain.connect(this.audioCtx.destination);
+        this.SO1.connect(this.merger, 0, 0);
+        this.SO2.connect(this.merger, 0, 1);
 
-        this.soundChannel1 = new SquareChannel(this.audioCtx, true);
-        this.soundChannel2 = new SquareChannel(this.audioCtx, false);
-        this.waveChannel = new WaveChannel(this.audioCtx);
-        this.noiseChannel = new NoiseChannel(this.audioCtx);
+        this.merger.connect(this.masterVolume);
 
-        this.connect(this.soundChannel1.getOuputNode());
+        this.masterVolume.gain.value = 0;
+        this.masterVolume.connect(this.audioCtx.destination);
     }
 
     tick(cyclesTaken: number) {
@@ -56,9 +55,6 @@ export default class APU implements ClockTask {
             if (!this.isOn()) {
                 return 0;
             }
-            // TODO: real channel handling
-            this.masterGain.gain.value = this.SO1Volume;
-
             /**
              * Length Counter is clocked at 256Hz freq
              * Sweep is clocked at 128Hz freq
@@ -81,12 +77,29 @@ export default class APU implements ClockTask {
                     this.noiseChannel.volumeEnvelope.tick();
                     break;
             }
+            this.mix();
         }
         return 0;
     }
 
-    connect(node: AudioNode) {
-        node.connect(this.masterGain);
+    mix() {
+        // Adjust the output terminal volume accoring to NR50
+        this.SO1.gain.value = this.SO1Volume;
+        this.SO2.gain.value = this.SO2Volume;
+
+        // TODO: connect the remaining nodes
+        this.connectOutputTerminal(this.soundChannel1.getOuputNode(), this.sound1ToSO1, this.sound1ToSO2);
+    }
+
+    connectOutputTerminal(outputNode: AudioNode, connectToSO1: boolean, connectToSO2: boolean) {
+        // disconnect from all previous node
+        outputNode.disconnect();
+        if (connectToSO1) {
+            outputNode.connect(this.SO1);
+        }
+        if (connectToSO2) {
+            outputNode.connect(this.SO2);
+        }
     }
 
     setByte(address: number, data: number) {
@@ -125,6 +138,7 @@ export default class APU implements ClockTask {
             case 0xff26:
                 this.soundEnabled = (data & 0x80) !== 0;
                 if (this.isOn()) {
+                    this.masterVolume.gain.value = 1;
                     // When powered on, the frame sequencer is reset so that the next step will be 0, 
                     this.step = -1;
                     // TODO: the square duty units are reset to the first step of the waveform
@@ -196,6 +210,8 @@ export default class APU implements ClockTask {
 
     // When powered off, all registers (NR10-NR51) are instantly written with zero
     powerOff() {
+        this.masterVolume.gain.value = 0;
+
         this.SO1VolumeLevel = 0;
         this.SO2VolumeLevel = 0;
         this.vinSO1Enabled = false;
@@ -209,9 +225,6 @@ export default class APU implements ClockTask {
         this.sound3ToSO2 = false;
         this.sound4ToSO1 = false;
         this.sound4ToSO2 = false;
-
-        this.soundEnabled = false;
-        this.masterGain.gain.value = 0;
 
         this.soundChannel1.powerOff();
         this.soundChannel2.powerOff();
