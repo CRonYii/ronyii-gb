@@ -1,8 +1,9 @@
 import LengthCounter from "./LengthCounter";
 import { CPU_CLOCK_SPEED } from "../constants/index";
+import { Memory } from "../memory/Memory";
 
-export default abstract class SoundUnit {
-
+export default abstract class SoundUnit implements Memory {
+    
     public readonly name: string;
 
     private readonly audioCtx: AudioContext;
@@ -15,9 +16,6 @@ export default abstract class SoundUnit {
     private dacPower: boolean = false;
     private trigger: boolean = false; // NRX4 bit 7
     private lengthCounterEnabled: boolean = false; // NRX4 bit 6
-
-    public abstract lengthCounter: LengthCounter;
-    public abstract powerOff(): void;
 
     public constructor(name: string, audioCtx: AudioContext) {
         this.name = name;
@@ -115,5 +113,11 @@ export default abstract class SoundUnit {
     public getOuputNode(): AudioNode {
         return this.outputAudioNode;
     }
+
+    public abstract lengthCounter: LengthCounter;
+    public abstract powerOff(): void;
+    public abstract setByte(address: number, data: number): void;
+    public abstract getByte(address: number): number;
+    public abstract size(): number;
 
 }
