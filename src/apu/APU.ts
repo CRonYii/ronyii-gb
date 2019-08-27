@@ -50,11 +50,8 @@ export default class APU implements ClockTask {
     }
 
     tick(cyclesTaken: number) {
-        if (this.timer.tick(cyclesTaken) > 0) {
-            // Power state does not affect the 512 Hz timer that feeds the frame sequencer.
-            if (!this.isOn()) {
-                return 0;
-            }
+        // Power state does not affect the 512 Hz timer that feeds the frame sequencer.
+        if (this.timer.tick(cyclesTaken) > 0 && this.isOn()) {
             /**
              * Length Counter is clocked at 256Hz freq
              * Sweep is clocked at 128Hz freq
@@ -79,6 +76,8 @@ export default class APU implements ClockTask {
             }
             this.mix();
         }
+        this.soundChannel1.tick(cyclesTaken);
+        this.soundChannel2.tick(cyclesTaken);
         return 0;
     }
 
@@ -89,6 +88,7 @@ export default class APU implements ClockTask {
 
         // TODO: connect the remaining nodes
         this.connectOutputTerminal(this.soundChannel1.getOuputNode(), this.sound1ToSO1, this.sound1ToSO2);
+        this.connectOutputTerminal(this.soundChannel2.getOuputNode(), this.sound2ToSO1, this.sound2ToSO2);
     }
 
     connectOutputTerminal(outputNode: AudioNode, connectToSO1: boolean, connectToSO2: boolean) {

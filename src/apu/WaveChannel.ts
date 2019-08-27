@@ -4,8 +4,6 @@ import SoundUnit from "./SoundUnit";
 
 export default class WaveChannel extends SoundUnit {
 
-    private readonly audioCtx: AudioContext;
-
     public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 8);
 
     private outputLevel: number = 0; // 0xff1c - NR32
@@ -15,8 +13,7 @@ export default class WaveChannel extends SoundUnit {
     private readonly wavePattern: Memory = new MemorySegment({ size: 0x10, offset: 0xff30, readable: true, writable: true });
 
     constructor(audioCtx: AudioContext) {
-        super("Wave Channel");
-        this.audioCtx = audioCtx;
+        super("Wave Channel", audioCtx);
     }
 
     setByte(address: number, data: number) {

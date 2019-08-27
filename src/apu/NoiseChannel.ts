@@ -5,15 +5,12 @@ import VolumeEnvelope from "./VolumeEnvelope";
 
 export default class NoiseChannel extends SoundUnit {
 
-    private readonly audioCtx: AudioContext;
-
     public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 6); // 0xff20 - NR41
     public readonly volumeEnvelope: VolumeEnvelope = new VolumeEnvelope(); // 0xff21 - NR42
     private readonly polynomialCounter: Register8 = new Register8(); // 0xff22 - NR43
 
     constructor(audioCtx: AudioContext) {
-        super("Noise Channel");
-        this.audioCtx = audioCtx;
+        super("Noise Channel", audioCtx);
     }
 
     setByte(address: number, data: number) {

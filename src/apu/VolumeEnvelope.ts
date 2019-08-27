@@ -4,10 +4,10 @@ import Timer from "../utils/Timer";
 export default class VolumeEnvelope {
 
     private timer: Timer = new Timer(8);
-    public volume: number = 0;
-    public initialVolume: number = 0;
-    public direction: number = 0;
-    public period: number = 0;
+    private volume: number = 0;
+    private initialVolume: number = 0;
+    private direction: number = 0;
+    private period: number = 0;
 
     /**
      * A volume envelope has a volume counter and an internal timer clocked at 64 Hz by the frame sequencer.
@@ -41,6 +41,10 @@ export default class VolumeEnvelope {
         // timer treats 0 as 8
         this.timer.period = this.period !== 0 ? this.period : 8;
         this.volume = this.initialVolume;
+    }
+
+    getVolume() {
+        return this.volume * (1 / 15) * 0.25;
     }
 
     /**

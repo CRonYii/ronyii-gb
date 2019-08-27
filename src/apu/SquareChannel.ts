@@ -2,12 +2,19 @@ import LengthCounter from "./LengthCounter";
 import SoundUnit from "./SoundUnit";
 import Sweep from "./Sweep";
 import VolumeEnvelope from "./VolumeEnvelope";
+import Timer from "../utils/Timer";
 
 export default class SquareChannel extends SoundUnit {
 
-    private readonly audioCtx: AudioContext;
-    private readonly osc: OscillatorNode;
-    private readonly gainNode: GainNode;
+    static WAVEFORMS = [
+        0b0000_0001,
+        0b1000_0001,
+        0b1000_0111,
+        0b0111_1110,
+    ];
+
+    private readonly timer: Timer = new Timer(8192);
+
     private readonly useSweep: boolean;
 
     public readonly lengthCounter: LengthCounter = new LengthCounter(this, 1 << 6);
@@ -15,18 +22,30 @@ export default class SquareChannel extends SoundUnit {
     public readonly sweep = new Sweep(this); // 0xff10 - NR10
 
     private wavePattern: number = 0;
-    private frequency: number = 0; 
+    private frequency: number = 0;
+    private waveIndex: number = 0;
 
     constructor(audioCtx: AudioContext, useSweep: boolean) {
-        super(useSweep ? "Sound Channel 1" : "Sound Channel 2");
+        super(useSweep ? "Sound Channel 1" : "Sound Channel 2", audioCtx);
         this.useSweep = useSweep;
-        this.audioCtx = audioCtx;
-        this.osc = audioCtx.createOscillator();
-        this.osc.type = 'square';
-        this.gainNode = audioCtx.createGain();
-        this.gainNode.gain.value = 0;
-        this.osc.connect(this.gainNode);
-        this.osc.start();
+    }
+
+    tick(cycles: number) {
+        const times = this.timer.tick(cycles);
+        const waveForm = SquareChannel.WAVEFORMS[this.wavePattern];
+        const volume = this.volumeEnvelope.getVolume();
+        for (let i = 0; i < times; i++) {
+            let amplitude = 0;
+            if (this.isOn() && volume != 0) {
+                amplitude = volume;
+            }
+            // 1 for positive amplitude, 0 for negative amplitude
+            if (((waveForm >> this.waveIndex) & 0b1) === 0) {
+                amplitude *= -1;
+            }
+            this.setAudioBuffer(this.timer.period, amplitude);
+            this.waveIndex = (this.waveIndex + 1) % 8;
+        }
     }
 
     setByte(address: number, data: number) {
@@ -40,9 +59,9 @@ export default class SquareChannel extends SoundUnit {
                 this.volumeEnvelope.set(data);
                 this.setPower((data & 0xf8) !== 0);
                 return;
-            case 0x3: return this.frequency = (this.frequency & 0x700) | data;
+            case 0x3: return this.setFrequency((this.frequency & 0x700) | data);
             case 0x4:
-                this.frequency = (this.frequency & 0xff) | ((data & 0b111) << 8);
+                this.setFrequency((this.frequency & 0xff) | ((data & 0b111) << 8));
                 this.setTriggerAndLengthCounter(data);
                 return;
         }
@@ -65,6 +84,10 @@ export default class SquareChannel extends SoundUnit {
         this.sweep.reload();
     }
 
+    private adjustTimerPeriod() {
+        this.timer.period = 4 * (2048 - this.frequency);
+    }
+
     powerOff() {
         this.setByte(0x0, 0);
         this.setByte(0x1, 0);
@@ -75,14 +98,11 @@ export default class SquareChannel extends SoundUnit {
 
     setFrequency(frequency: number) {
         this.frequency = frequency;
+        this.adjustTimerPeriod();
     }
 
     getFrequency() {
         return this.frequency;
-    }
-
-    getOuputNode(): AudioNode {
-        return this.gainNode;
     }
 
     size() {

@@ -1,8 +1,16 @@
 import LengthCounter from "./LengthCounter";
+import { CPU_CLOCK_SPEED } from "../constants/index";
 
 export default abstract class SoundUnit {
 
-    private readonly name: string;
+    public readonly name: string;
+
+    private readonly audioCtx: AudioContext;
+    private outputAudioNode: AudioBufferSourceNode;
+    protected readonly buffer: AudioBuffer;
+    private readonly rateRatio: number;
+    private bufferOffset: number = 0;
+    private started: boolean = false;
 
     private dacPower: boolean = false;
     private trigger: boolean = false; // NRX4 bit 7
@@ -11,8 +19,54 @@ export default abstract class SoundUnit {
     public abstract lengthCounter: LengthCounter;
     public abstract powerOff(): void;
 
-    constructor(name: string) {
+    public constructor(name: string, audioCtx: AudioContext) {
         this.name = name;
+        this.audioCtx = audioCtx;
+        this.outputAudioNode = this.audioCtx.createBufferSource();
+        // 1 output channel, 1 seconds duration
+        this.buffer = this.audioCtx.createBuffer(1, this.audioCtx.sampleRate, this.audioCtx.sampleRate);
+        this.rateRatio = this.audioCtx.sampleRate / CPU_CLOCK_SPEED;
+    }
+
+    protected setAudioBuffer(duration: number, amplitude: number) {
+        this.start();
+        const buffer = this.buffer.getChannelData(0);
+        if (this.bufferOffset >= buffer.length) {
+            return;
+        }
+        duration = Math.floor(duration * this.rateRatio);
+        const spaceLeft = buffer.length - this.bufferOffset;
+        if (duration > spaceLeft) {
+            duration = spaceLeft;
+        }
+        buffer.set(new Array(duration).fill(amplitude), this.bufferOffset);
+        this.bufferOffset += duration;
+    }
+
+    private refreshBuffer() {
+        console.log(this.name, 'contains', this.bufferOffset, 'samples when finished');
+
+        // clear the buffer
+        this.buffer.getChannelData(0).fill(0);
+        this.bufferOffset = 0;
+        // create a new buffer source to play audio for 1 seconds
+        this.outputAudioNode = this.audioCtx.createBufferSource();
+        this.outputAudioNode.buffer = this.buffer;
+        this.outputAudioNode.onended = () => {
+            // when the whole buffer has been played (1 seconds long),
+            // disconnect and refresh the buffer to store audio data for the next seconds
+            this.outputAudioNode.disconnect();
+            this.refreshBuffer();
+        };
+        // connect the output audio node and start playing
+        this.outputAudioNode.start();
+    }
+
+    public start() {
+        if (!this.started) {
+            this.refreshBuffer();
+            this.started = true;
+        }
     }
 
     public setTriggerAndLengthCounter(data: number) {
@@ -56,6 +110,10 @@ export default abstract class SoundUnit {
 
     public isLengthCounterEnable(): boolean {
         return this.lengthCounterEnabled;
+    }
+
+    public getOuputNode(): AudioNode {
+        return this.outputAudioNode;
     }
 
 }
