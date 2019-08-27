@@ -13,6 +13,11 @@ export default class NoiseChannel extends SoundUnit {
         super("Noise Channel", audioCtx);
     }
 
+    sample() {
+        // TODO
+        return 0;
+    }
+
     setByte(address: number, data: number) {
         switch (address) {
             case 0xff20: return this.lengthCounter.reload(data & 0x3f);
@@ -34,7 +39,7 @@ export default class NoiseChannel extends SoundUnit {
             case 0xff22: return this.polynomialCounter.get();
             case 0xff23: return (this.isLengthCounterEnable() ? 0x40 : 0) | 0xbf;
         }
-        throw new Error('Unsupported SquareChannel register');
+        throw new Error('Unsupported NoiseChannel register');
     }
 
     public reload() {

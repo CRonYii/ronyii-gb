@@ -16,6 +16,10 @@ export default class WaveChannel extends SoundUnit {
         super("Wave Channel", audioCtx);
     }
 
+    sample() {
+        return 0;
+    }
+
     setByte(address: number, data: number) {
         if (address >= 0xff30 && address <= 0xff3f) {
             return this.wavePattern.setByte(address, data);

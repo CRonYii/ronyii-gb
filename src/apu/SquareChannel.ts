@@ -13,7 +13,7 @@ export default class SquareChannel extends SoundUnit {
         0b0111_1110,
     ];
 
-    private readonly timer: Timer = new Timer(8192);
+    private readonly squareWaveTimer: Timer = new Timer(8192);
 
     private readonly useSweep: boolean;
 
@@ -31,21 +31,23 @@ export default class SquareChannel extends SoundUnit {
     }
 
     tick(cycles: number) {
-        const times = this.timer.tick(cycles);
+        super.tick(cycles);
+        const times = this.squareWaveTimer.tick(cycles);
+        this.waveIndex = (this.waveIndex + times) % 8;
+    }
+
+    sample() {
         const waveForm = SquareChannel.WAVEFORMS[this.wavePattern];
         const volume = this.volumeEnvelope.getVolume();
-        for (let i = 0; i < times; i++) {
-            let amplitude = 0;
-            if (this.isOn() && volume != 0) {
-                amplitude = volume;
-            }
+        let amplitude = 0;
+        if (this.isOn() && volume != 0) {
+            amplitude = volume;
             // 1 for positive amplitude, 0 for negative amplitude
             if (((waveForm >> this.waveIndex) & 0b1) === 0) {
                 amplitude *= -1;
             }
-            this.setAudioBuffer(this.timer.period, amplitude);
-            this.waveIndex = (this.waveIndex + 1) % 8;
         }
+        return amplitude;
     }
 
     setByte(address: number, data: number) {
@@ -85,7 +87,7 @@ export default class SquareChannel extends SoundUnit {
     }
 
     private adjustTimerPeriod() {
-        this.timer.period = 4 * (2048 - this.frequency);
+        this.squareWaveTimer.period = 4 * (2048 - this.frequency);
     }
 
     powerOff() {

@@ -1,17 +1,20 @@
 import LengthCounter from "./LengthCounter";
 import { CPU_CLOCK_SPEED } from "../constants/index";
 import { Memory } from "../memory/Memory";
+import Timer from "../utils/Timer";
 
 export default abstract class SoundUnit implements Memory {
     
     public readonly name: string;
-
+    
     private readonly audioCtx: AudioContext;
-    private outputAudioNode: AudioBufferSourceNode;
     protected readonly buffer: AudioBuffer;
-    private readonly rateRatio: number;
+    private outputAudioNode: AudioBufferSourceNode;
+
     private bufferOffset: number = 0;
     private started: boolean = false;
+    
+    private readonly sampleTimer: Timer;
 
     private dacPower: boolean = false;
     private trigger: boolean = false; // NRX4 bit 7
@@ -23,7 +26,16 @@ export default abstract class SoundUnit implements Memory {
         this.outputAudioNode = this.audioCtx.createBufferSource();
         // 1 output channel, 1 seconds duration
         this.buffer = this.audioCtx.createBuffer(1, this.audioCtx.sampleRate, this.audioCtx.sampleRate);
-        this.rateRatio = this.audioCtx.sampleRate / CPU_CLOCK_SPEED;
+
+        this.sampleTimer = new Timer(Math.floor(CPU_CLOCK_SPEED /  this.audioCtx.sampleRate));
+    }
+
+    public tick(cycles: number) {
+        const times = this.sampleTimer.tick(cycles);
+        if (times > 0) {
+            const amp = this.sample();
+            this.setAudioBuffer(times, amp);
+        }
     }
 
     protected setAudioBuffer(duration: number, amplitude: number) {
@@ -32,7 +44,6 @@ export default abstract class SoundUnit implements Memory {
         if (this.bufferOffset >= buffer.length) {
             return;
         }
-        duration = Math.floor(duration * this.rateRatio);
         const spaceLeft = buffer.length - this.bufferOffset;
         if (duration > spaceLeft) {
             duration = spaceLeft;
@@ -42,8 +53,6 @@ export default abstract class SoundUnit implements Memory {
     }
 
     private refreshBuffer() {
-        console.log(this.name, 'contains', this.bufferOffset, 'samples when finished');
-
         // clear the buffer
         this.buffer.getChannelData(0).fill(0);
         this.bufferOffset = 0;
@@ -115,6 +124,7 @@ export default abstract class SoundUnit implements Memory {
     }
 
     public abstract lengthCounter: LengthCounter;
+    public abstract sample(): number;
     public abstract powerOff(): void;
     public abstract setByte(address: number, data: number): void;
     public abstract getByte(address: number): number;
