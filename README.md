@@ -8,8 +8,9 @@ It only supports ROM ONLY / MBC1 Cartridge game currently (usually the smaller g
 
 All the joypad control are hardcoded to keyboard
 
-| A          | Z          |
+| Joypad          | Keyboard   |
 |------------|------------|
+| A          | Z          |
 | B          | X          |
 | START      | ENTER      |
 | SELECT     | SPACE      |
