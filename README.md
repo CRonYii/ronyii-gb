@@ -7,12 +7,14 @@ The emulator is currently playable with graphics, sound and joypad implemented.
 It only supports ROM ONLY / MBC1 Cartridge game currently (usually the smaller games < 128KB)
 
 All the joypad control are hardcoded to keyboard
+
 | A          | Z          |
 |------------|------------|
 | B          | X          |
 | START      | ENTER      |
 | SELECT     | SPACE      |
 | ARROW KEYS | ARROW KEYS |
+
 # Demo
 The application is hosted on https://cronyii.github.io/gameboy/
 
